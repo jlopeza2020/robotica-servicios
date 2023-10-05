@@ -1,93 +1,58 @@
-#from GUI import GUI
-#from HAL import HAL
 import cv2
-
-#import numpy as np
-#import requests
-#from io import BytesIO
-
-#UNIBOTICS = 1
-
-#from PIL import Image
-# Enter sequential code!
-
-#array = "https://github.com/JdeRobot/RoboticsAcademy/raw/master/exercises/static/exercises/vacuum_cleaner_loc_newmanager/resources/mapgrannyannie.png"
-#response = requests.get(array)
-
-#if response.status_code == 200:
-#image_stream.write(connection.read(image_len))
-#image_stream.seek(0)
-#  image_stream  = BytesIO(response.content)
-#  file_bytes = np.asarray(bytearray(image_stream.read()), dtype=np.uint8)
-#  image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-
-#if UNIBOTICS: 
-#map_img = cv2.imread('mapgrannyannie.png') 
-#else: 
+import numpy as np
 
 
-shape = map_img.shape
-width = shape[0]
-height = shape[1]
+def read_image(image):
+    # unibotics
+    #map_img = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/vacuum_cleaner_loc_newmanager/resources/mapgrannyannie.png')
+    # Load the image
+    map_img = cv2.imread(image)
+
+    # Check if the image is loaded successfully
+    if map_img is None:
+        print('Error: Unable to load image.')
+        exit()
+
+    return map_img
+
+def resize_image(image, new_width, new_height):
+
+    resized_image = cv2.resize(image, (new_width, new_height))
+
+    return resized_image
+
+def draw_rectangles(image, rect_width, rect_height):  
+
+#nueva_anchura = 300  # Cambia esto a la anchura deseada en píxeles
+#nueva_altura = 200   # Cambia esto a la altura deseada en píxeles
+
+# Redimensionar la imagen
+#imagen_redimensionada = cv2.resize(map_img, (nueva_anchura, nueva_altura))
 
 
-white  = np.array([255, 255, 255])
-black = np.array([0, 0, 0])
-#print(image)
-for i in range (width):
-      for j in range (height):
-        if np.array_equal(white,map_img[i][j]):
-        
-        #print(map_img[i][j])
-          #map_img[i][j] = 50
+# Get the dimensions of the image
+# original size (1012,1013)
+    height, width, _ = image.shape
 
-#print(image)
+# Define the rectangle width and height
+#rect_width = 16
+#rect_height = 16
+
+# Iterate through the image and draw rectangles
+    for i in range(0, width, rect_width):
+        for j in range(0, height, rect_height):
+            # Define the top-left and bottom-right corners of the rectangle
+            pt1 = (i, j)
+            pt2 = (i + rect_width, j + rect_height)
+            # Draw the rectangle
+            cv2.rectangle(image, pt1, pt2, (0, 255, 0), 2)
 
 
 
+map = read_image('mapgrannyannie.png')
+resized_map = resize_image(map, 800, 800)
+draw_rectangles(resized_map, 16, 16)
 
-
-
-#while True:
-    # Enter iterative code!
-
-    #GUI.showNumpy(image)
-cv2.imshow('Logo OpenCV',map_img)
-
+cv2.imshow('Image with Rectangles', resized_map)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
-    
-    
-     # Escalar y convertir a enteros en el rango [0, 255]
-    #scaled_image = np.clip(image, 0, 255).astype(np.uint8)
-
-    # Convertir el arreglo numpy en una imagen PIL
-    #image_pil = Image.fromarray(scaled_image)
-
-
-    #print(array)
-    #shape = map_img.shape
-    #width = shape[0]
-    #height = shape[1]
-    
-    #print(width)
-    
-    # white color 
-    #black = [255, 255, 255]
-    # black color 
-    #black = [0, 0, 0]
-    
-    
-    #white  = np.array([255, 255, 255])
-    #black = np.array([0, 0, 0])
-#print(np.array_equal(a1,a1))
-#print(np.array_equal(a1,a2))
-    
-    #for i in range (width):
-    #  for j in range (height):
-    #    if np.array_equal(white,map_img[i][j]):
-        
-        #print(map_img[i][j])
-    #      map_img[i][j] = 50
