@@ -41,14 +41,46 @@ def draw_rectangles(image, rect_width, rect_height):
             cv2.rectangle(image, pt1, pt2, (0, 255, 0), 2)
 
 
+def dilate_image(image):
+    # dilata la zona negra 
+    #kernel=np.zeros((5,5),np.uint8)
+    #dilation_op= cv2.dilate(image,kernel,iterations=-3)
+    #return dilation_op
+
+
+    # Invertir la imagen (para que los obstáculos sean blancos)
+    #imagen_invertida = cv2.bitwise_not(image)
+
+    # Definir un kernel para la operación de erosión
+    kernel = np.ones((5, 5), np.uint8)  # Kernel de 15x15 con todos los elementos como 1
+
+    # Aplicar la erosión
+    imagen_engordada = cv2.erode(image, kernel, iterations=1)
+
+    # Invertir nuevamente para obtener los obstáculos engordados (negros)
+    #imagen_engordada = cv2.bitwise_not(imagen_engordada)
+
+    return imagen_engordada
+
+
 
 map = read_image('mapgrannyannie.png')
+map2 = read_image('mapgrannyannie.png')
 # 800x800 is the new dimension
-resized_map = resize_image(map, 800, 800)
+###resized_map = resize_image(map, 800, 800)
 # 16x16 is the dimension of the cell 
 # MAS PROBABLE QUE SE DIBUJE AL FINAL 
-draw_rectangles(resized_map, 16, 16)
+#draw_rectangles(resized_map, 16, 16)
+
+##resized_map2 = resize_image(map2, 800, 800)
+##draw_rectangles(resized_map2, 16, 16)
+
 #dilatar la imagen 
+
+dilated_image = dilate_image(map2)
+
+#draw_rectangles(dilated_image, 16, 16)
+
 
 # pintar las celdas 
 
@@ -92,6 +124,7 @@ draw_rectangles(resized_map, 16, 16)
 #draw_rectangles(resized_map, 16, 16)
 
 # in unibotics is showNumpy
-cv2.imshow('Image with Rectangles', resized_map)
+cv2.imshow('dilated map', dilated_image)
+cv2.imshow('original map', map)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
