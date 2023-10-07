@@ -37,7 +37,7 @@ def resize_image(image, new_width, new_height):
 
 def draw_rectangles(image, rect_width, rect_height):  
 
-    height, width, _ = image.shape
+    height, width = image.shape
 
     # Iterate through the image and draw rectangles
     for i in range(0, width, rect_width):
@@ -46,8 +46,7 @@ def draw_rectangles(image, rect_width, rect_height):
             pt1 = (i, j)
             pt2 = (i + rect_width, j + rect_height)
             # Draw green rectangle
-            cv2.rectangle(image, pt1, pt2, (0, 255, 0), 2)
-
+            cv2.rectangle(image, pt1, pt2, (129, 129, 129), 2)
 
 # dilate = erode since we want to expand black cells
 def dilate_black_pixels(image):
@@ -72,20 +71,15 @@ def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
                   #print(image[x][y])
 
                     # chack if any pixel in the cell is black 
-                    #if np.array_equal(black,image[x][y]):
                     if(image[x][y] == 0):
-                
                         is_black = True
-                        #print("es negro")
 
            
             # if exits one: paint in black the whole cell
             if is_black:
                 for x in range(i, i + cell_height):
                     for y in range(j, j + cell_width):
-                        #print("soy negroo")
 
-                        #image[x][y] = black
                         image[x][y] = 0
                         
 
@@ -93,55 +87,13 @@ def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
     return image
 
         
-
-# in unibotics
-#map_img = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/vacuum_cleaner_loc_newmanager/resources/mapgrannyannie.png')
-#map = read_image('mapgrannyannie.png')
-
-print("yo6")
+print("yo7")
 map = get_unibotics_map()
 
 dilated_image = dilate_black_pixels(map)
 resized_map = resize_image(dilated_image, NEW_IMG_WIDTH, NEW_IMG_HEIGHT)
 filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
+
+draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
+
 GUI.showNumpy(filled_map)
-#draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
-
-#while True:
-    # Enter iterative code!
-    #GUI.showNumpy(filled_map)
-    #print("yo 5")
-    
-    
-    
-    # Escalar y convertir a enteros en el rango [0, 255]
-    #scaled_image = np.clip(image, 0, 255).astype(np.uint8)
-
-    # Convertir el arreglo numpy en una imagen PIL
-    #image_pil = Image.fromarray(scaled_image)
-
-
-    #print(array)
-    #shape = map_img.shape
-    #width = shape[0]
-    #height = shape[1]
-    
-    #print(width)
-    
-    # white color 
-    #black = [255, 255, 255]
-    # black color 
-    #black = [0, 0, 0]
-    
-    
-    #white  = np.array([255, 255, 255])
-    #black = np.array([0, 0, 0])
-#print(np.array_equal(a1,a1))
-#print(np.array_equal(a1,a2))
-    
-    #for i in range (width):
-    #  for j in range (height):
-    #    if np.array_equal(white,map_img[i][j]):
-        
-        #print(map_img[i][j])
-    #      map_img[i][j] = 50
