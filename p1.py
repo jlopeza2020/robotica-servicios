@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-NEW_WIDTH = 512
-NEW_HEIGHT = 512
+NEW_IMG_WIDTH = 512
+NEW_IMG_HEIGHT = 512
 
 CELL_WIDTH = 16
 CELL_HEIGHT = 16
@@ -37,99 +37,51 @@ def draw_rectangles(image, rect_width, rect_height):
 
 
 # dilate = erode since we want to expand black cells
-def dilate_image(image):
+def dilate_black_pixels(image):
 
     kernel = np.ones((5, 5), np.uint8) 
 
     expanded_image = cv2.erode(image, kernel, iterations=1)
     return expanded_image
 
+
+# Fill cells in the image with black color if any pixel in the cell is black.
 def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
-    # pintar las celdas 
 
-# Dimensiones de la imagen
-#ancho_imagen = 512
-#alto_imagen = 512
-
-# Tamaño de los bloques
-#tamano_bloque = 16
-
-    color_negro = np.array([0, 0, 0])
+    black = np.array([0, 0, 0])
 
     is_black = False
     for i in range(0, image_height, cell_height):
         for j in range(0, image_width, cell_width):
-        # Reiniciar la bandera para cada bloque
-        #hay_pixel_negro = False
         
-        # Comprobar si hay algún píxel en negro dentro del bloque actual
             for x in range(i, i + cell_height):
                 for y in range(j, j + cell_width):
 
-                    if np.array_equal(color_negro,image[x][y]):
+                    # chack if any pixel in the cell is black 
+                    if np.array_equal(black,image[x][y]):
                         is_black = True
 
+           
+            # if exits one: paint in black the whole cell
             if is_black:
                 for x in range(i, i + cell_height):
                     for y in range(j, j + cell_width):
 
-                        image[x][y] = color_negro
+                        image[x][y] = black
+
                 is_black = False
     return image
 
         
 
-
-
-
 # in unibotics
 #map_img = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/vacuum_cleaner_loc_newmanager/resources/mapgrannyannie.png')
 map = read_image('mapgrannyannie.png')
-dilated_image = dilate_image(map)
-# 800x800 is the new dimension
-resized_map = resize_image(dilated_image, 512, 512)
+dilated_image = dilate_black_pixels(map)
+resized_map = resize_image(dilated_image, NEW_IMG_WIDTH, NEW_IMG_HEIGHT)
+filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
 
-filled_map = fill_black_cells(resized_map, 512, 512, 16, 16)
-
-
-# pintar las celdas 
-
-# Dimensiones de la imagen
-#ancho_imagen = 512
-#alto_imagen = 512
-
-# Tamaño de los bloques
-#tamano_bloque = 16
-
-#color_negro = np.array([0, 0, 0])
-
-#is_black = False
-#for i in range(0, alto_imagen, tamano_bloque):
-#    for j in range(0, ancho_imagen, tamano_bloque):
-        # Reiniciar la bandera para cada bloque
-        #hay_pixel_negro = False
-        
-        # Comprobar si hay algún píxel en negro dentro del bloque actual
-#        for x in range(i, i + tamano_bloque):
-#            for y in range(j, j + tamano_bloque):
-
-#                if np.array_equal(color_negro,resized_map[x][y]):
-#                    is_black = True
-
-#        if is_black:
-#            for x in range(i, i + tamano_bloque):
-#                for y in range(j, j + tamano_bloque):
-
-#                    resized_map[x][y] = color_negro
-#            is_black = False
-
-        
-
-
-
-# 16x16 is the dimension of the cell 
-# MAS PROBABLE QUE SE DIBUJE AL FINAL 
-draw_rectangles(filled_map, 16, 16)
+draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
 # in unibotics is showNumpy
 cv2.imshow('dilated map', filled_map)
