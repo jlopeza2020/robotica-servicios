@@ -1,5 +1,5 @@
 from GUI import GUI
-#from HAL import HAL
+from HAL import HAL
 import cv2
 import numpy as np
 
@@ -48,6 +48,7 @@ def draw_rectangles(image, rect_width, rect_height):
             # Draw green rectangle
             cv2.rectangle(image, pt1, pt2, (129, 129, 129), 2)
 
+
 # dilate = erode since we want to expand black cells
 def dilate_black_pixels(image):
 
@@ -86,8 +87,26 @@ def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
                 is_black = False
     return image
 
+def get_2d_x(): 
+  
+    x_3d = HAL.getPose3d().x
+  
+    x_2d = 17.963 - 2.915*x_3d
+    
+    return x_2d
+  
+
+def get_2d_y(): 
+  
+  y_3d = HAL.getPose3d().y
+  
+  y_2d = 13.959 + 3.092*y_3d
+  
+  return y_2d
+
+
         
-print("yo7")
+print("yo8")
 map = get_unibotics_map()
 
 dilated_image = dilate_black_pixels(map)
@@ -97,3 +116,8 @@ filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_W
 draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
 GUI.showNumpy(filled_map)
+
+
+
+while True:
+    print(get_2d_x(), get_2d_y())
