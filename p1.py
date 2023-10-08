@@ -73,7 +73,23 @@ def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
     return image
 
         
+def paint_cell(imagen, x,y):
+    tamano_matriz = 512
+    tamano_rejilla = 32
+    tamano_celda_pixeles = 16
+    fila = 3
+    columna = 4
 
+    # Calcular las coordenadas en píxeles de la esquina inferior izquierda de la celda
+    esquina_inferior_izquierda_x = columna * tamano_rejilla * tamano_celda_pixeles
+    esquina_inferior_izquierda_y = (tamano_matriz - (fila + 1) * tamano_rejilla) * tamano_celda_pixeles
+
+
+    # Pintar la celda (3, 4)
+    imagen[esquina_inferior_izquierda_y:esquina_inferior_izquierda_y + tamano_rejilla * tamano_celda_pixeles,
+      esquina_inferior_izquierda_x:esquina_inferior_izquierda_x + tamano_rejilla * tamano_celda_pixeles] = [255, 0, 0]
+
+    
 # in unibotics
 #map_img = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/vacuum_cleaner_loc_newmanager/resources/mapgrannyannie.png')
 map = read_image('mapgrannyannie.png')
@@ -81,7 +97,20 @@ dilated_image = dilate_black_pixels(map)
 resized_map = resize_image(dilated_image, NEW_IMG_WIDTH, NEW_IMG_HEIGHT)
 filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
 
+
+red = np.array([255, 0, 0])
+
+get_3d_x = 3
+get_3d_y = 4
+
+for aux_y in range(get_3d_y*16 -16, get_3d_y*16):
+    for aux_x in range(get_3d_x*16 -16, get_3d_x*16):
+        filled_map[aux_y][aux_x] = red
+
+
 draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
+
+#paint_cell(get_3d_x, get_3d_y)
 
 # in unibotics is showNumpy
 cv2.imshow('dilated map', filled_map)

@@ -98,11 +98,11 @@ def get_2d_x():
 
 def get_2d_y(): 
   
-  y_3d = HAL.getPose3d().y
+    y_3d = HAL.getPose3d().y
   
-  y_2d = 13.959 + 3.092*y_3d
+    y_2d = 13.959 + 3.092*y_3d
   
-  return y_2d
+    return y_2d
 
 
         
@@ -115,9 +115,59 @@ filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_W
 
 draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
-GUI.showNumpy(filled_map)
+#GUI.showNumpy(filled_map)
 
 
+# Assuming you have defined filled_map and GUI previously
+
+previous_x = None
+previous_y = None
 
 while True:
-    print(get_2d_x(), get_2d_y())
+    # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position
+    current_x = int(round(get_2d_x()))
+    current_y = int(round(get_2d_y()))
+    
+
+    # Clear the previous cell if the position has changed
+    if current_x != previous_x or current_y != previous_y:
+        if previous_x is not None and previous_y is not None:
+            for aux_y in range((previous_y * 16) - 16, previous_y * 16):
+                for aux_x in range((previous_x * 16) - 16, previous_x * 16):
+                    filled_map[aux_y][aux_x] = 127  # Clear the previous cell
+
+    # Update the current cell
+    for aux_y in range((current_y * 16) - 16, current_y * 16):
+        for aux_x in range((current_x * 16) - 16, current_x * 16):
+            filled_map[aux_y][aux_x] = 128
+
+    # Show the updated map
+    GUI.showNumpy(filled_map)
+
+    # Update the previous position
+    previous_x = current_x
+    previous_y = current_y
+
+
+#while True:
+    #print(HAL.getPose3d().x, int(round(get_2d_x())), int(round(get_2d_y())), HAL.getPose3d().y)
+    
+#    get_x = int(round(get_2d_x()))
+#    get_y = int(round(get_2d_y()))
+    
+    #get_2d_x = 3
+    #get_2d_y = 4
+
+
+#    for aux_y in range(get_y*16 -16, get_y*16):
+#      for aux_x in range(get_x*16 -16, get_x*16):
+#        filled_map[aux_y][aux_x] = 128
+    
+#    GUI.showNumpy(filled_map)
+
+
+
+
+    # Enter iterative code!
+    
+  
