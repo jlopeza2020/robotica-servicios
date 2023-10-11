@@ -110,6 +110,12 @@ def get_2d_y():
     return y_2d
 
 
+def paint_cell(cell_map, x, y, cell_width, cell_height, color):
+  
+    for aux_y in range((y * cell_height) - cell_height, y * cell_height):
+      for aux_x in range((x * cell_width) - cell_width, x * cell_width):
+          cell_map[aux_y][aux_x] = color
+    
 
 map = get_unibotics_map()
 
@@ -124,8 +130,8 @@ draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
 # Assuming you have defined filled_map and GUI previously
 
-previous_x = None
-previous_y = None
+#previous_x = None
+#previous_y = None
 
 while True:
     # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position
@@ -134,23 +140,25 @@ while True:
     
 
     # Clear the previous cell if the position has changed
-    if current_x != previous_x or current_y != previous_y:
-        if previous_x is not None and previous_y is not None:
-            for aux_y in range((previous_y * CELL_HEIGHT) - CELL_HEIGHT, previous_y * CELL_HEIGHT):
-                for aux_x in range((previous_x * CELL_WIDTH) - CELL_WIDTH, previous_x * CELL_WIDTH):
-                    filled_map[aux_y][aux_x] = WHITE  # Clear the previous cell
+    #if current_x != previous_x or current_y != previous_y:
+    #    if previous_x is not None and previous_y is not None:
+    #        for aux_y in range((previous_y * CELL_HEIGHT) - CELL_HEIGHT, previous_y * CELL_HEIGHT):
+    #            for aux_x in range((previous_x * CELL_WIDTH) - CELL_WIDTH, previous_x * CELL_WIDTH):
+    #                filled_map[aux_y][aux_x] = WHITE  # Clear the previous cell
 
     # Update the current cell in red
-    for aux_y in range((current_y * CELL_HEIGHT) - CELL_HEIGHT, current_y * CELL_HEIGHT):
-        for aux_x in range((current_x * CELL_WIDTH) - CELL_WIDTH, current_x * CELL_WIDTH):
-            filled_map[aux_y][aux_x] = RED
+    #for aux_y in range((current_y * CELL_HEIGHT) - CELL_HEIGHT, current_y * CELL_HEIGHT):
+    #    for aux_x in range((current_x * CELL_WIDTH) - CELL_WIDTH, current_x * CELL_WIDTH):
+    #        filled_map[aux_y][aux_x] = RED
 
     # Show the updated map
+    paint_cell(filled_map, current_x, current_y, CELL_WIDTH, CELL_HEIGHT, RED)
+    
     GUI.showNumpy(filled_map)
 
     # Update the previous position
-    previous_x = current_x
-    previous_y = current_y
+    #previous_x = current_x
+    #previous_y = current_y
 
 
 #while True:
