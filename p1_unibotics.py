@@ -2,6 +2,8 @@ from GUI import GUI
 from HAL import HAL
 import cv2
 import numpy as np
+from enum import Enum
+
 
 NEW_IMG_WIDTH = 512
 NEW_IMG_HEIGHT = 512
@@ -18,9 +20,17 @@ WHITE = 127
 RED = 128
 ORANGE = 129
 
+class Direction(Enum):
+    NORTE = "Norte"
+    SUR = "Sur"
+    ESTE = "Este"
+    OESTE = "Oeste"
+    
+    def __str__(self):
+        return self.value
 
 class Cell:
-    def __init__(self, x_map, y_map, x_gazebo=0, y_gazebo=0, occupied=False, cleaned=False):
+    def __init__(self, x_map, y_map, x_gazebo=0, y_gazebo=0, occupied=False, cleaned=False,  direction=None):
     #def __init__(self, x_map, y_map, occupied=False, cleaned=False):
         self.x_map = x_map
         self.y_map = y_map
@@ -28,6 +38,8 @@ class Cell:
         self.y_gazebo = y_gazebo
         self.occupied = occupied  # True si está ocupada, False si no
         self.cleaned = cleaned  # True si ya ha sido barrida, False si no
+        self.direction = direction  # Dirección cardinal (NORTE, SUR, ESTE, OESTE)
+
 
 
 def get_unibotics_map():
@@ -80,21 +92,16 @@ def dilate_black_pixels(image):
 
 # Fill cells in the image with black color if any pixel in the cell is black.
 # Fill class cell
-def fill_black_cells(image, arr_cells, image_width, image_height, cell_width, cell_height):
-#def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
+def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height):
 
-    #black = np.array([0, 0, 0])
-    
     arr_cells_x = 0
     arr_cells_y = 0
     
     is_black = False
     for i in range(0, image_height, cell_height):
-        #arr_cells_x += 1
-        
+
         for j in range(0, image_width, cell_width):
-            #arr_cells_x += 1
-            #arr_cells_y += 1
+
         
             cell = arr_cells[arr_cells_x][arr_cells_y]
             cell.x_map = arr_cells_y
@@ -107,18 +114,11 @@ def fill_black_cells(image, arr_cells, image_width, image_height, cell_width, ce
               
             for x in range(i, i + cell_height):
                 for y in range(j, j + cell_width):
-                  #print(image[x][y])
 
-                    # chack if any pixel in the cell is black 
+                    # check if any pixel in the cell is black 
                     if(image[x][y] == BLACK):
                         is_black = True
-                        #arr_cells[]
-            
-        
 
-            
-            
-            #print(arr_cells_x, arr_cells_y)
             # if exits one: paint in black the whole cell
             if is_black:
                 for x in range(i, i + cell_height):
@@ -164,44 +164,24 @@ def paint_cell(cell_map, x, y, cell_width, cell_height, color):
     
 
 map = get_unibotics_map()
+# create cell array that has the same dimension of the grid (32x32)
+# to acces each position goes from 0 to 31  
 cells = [[Cell(x_map, y_map) for x_map in range(COLS)] for y_map in range(ROWS)]
 
 dilated_image = dilate_black_pixels(map)
 resized_map = resize_image(dilated_image, NEW_IMG_WIDTH, NEW_IMG_HEIGHT)
-filled_map = fill_black_cells(resized_map,cells, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
-#filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
+filled_map = set_scenario(resized_map,cells, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
 
-
-# Fill class cell  
-
-# check if are occupied 
-#arr_cells_x = 0
-#arr_cells_y = 0
-
-
-#for i in range(0, 512, 16):
-
-#    for j in range(0, 512, 16):
-
-#        celda = cells[arr_cells_x][arr_cells_y]
-#        celda.x_map = arr_cells_y
-#        celda.y_map = arr_cells_x
-#        celda.x_gazebo = j
-#        celda.y_gazebo = i
-#        if (filled_map[i][j] == BLACK):
-#          celda.occupied = True
-          
-#        arr_cells_y += 1
-
-#    arr_cells_x += 1
-#    arr_cells_y = 0
 
 # PRINTS: van del 0 al 31
- #y primero, x después 
+ # y primero, x después 
 celda1 = cells[4-1][3-1]
+#celda1.direction=Direction.NORTE
 print("x mapa: " + str(celda1.x_map) + "y mapa: " + str(celda1.y_map))
 print("x gazebo: " + str(celda1.x_gazebo) + "y gazebo: " + str(celda1.y_gazebo))
 print("ocupada: " + str(celda1.occupied))
+print("direccion: " + str(celda1.direction))
+
 print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 celda2 = cells[3-1][3-1]
 print("x mapa: " + str(celda2.x_map) + "y mapa: " + str(celda2.y_map))
@@ -212,15 +192,32 @@ print("ocupada: " + str(celda2.occupied))
 # Always before iterative code
 draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
+init_vel = abs(HAL.getPose3d().x)
+print(init_vel)
 while True:
-    # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position
-    current_x = int(round(get_2d_x()))
-    current_y = int(round(get_2d_y()))
+    # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position in the map
+    #print(abs(HAL.getPose3d().x), abs(HAL.getPose3d().y))
     
-
+    # avanza 2 casillas
+    vel = abs(HAL.getPose3d().x)
+    if(vel > (init_vel - 0.32*2) ):
+      
+      HAL.setV(1)
+      HAL.setW(0)
+    else: 
+      HAL.setV(0)
+      HAL.setW(0)
+    
+    #HAL.setV(1)
+    print(init_vel, vel)
+    
+    ###
+    
+    current_2d_x = int(round(get_2d_x()))
+    current_2d_y = int(round(get_2d_y()))
+    #print(current_2d_x, current_2d_y)
+    
     # Show the updated map
-    paint_cell(filled_map, current_x, current_y, CELL_WIDTH, CELL_HEIGHT, RED)
+    paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, RED)
     
     GUI.showNumpy(filled_map)
-
-    
