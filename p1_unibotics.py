@@ -79,13 +79,14 @@ def dilate_black_pixels(image):
 
 
 # Fill cells in the image with black color if any pixel in the cell is black.
-#def fill_black_cells(image, arr_cells, image_width, image_height, cell_width, cell_height):
-def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
+# Fill class cell
+def fill_black_cells(image, arr_cells, image_width, image_height, cell_width, cell_height):
+#def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
 
     #black = np.array([0, 0, 0])
     
-    #arr_cells_x = 0
-    #arr_cells_y = 0
+    arr_cells_x = 0
+    arr_cells_y = 0
     
     is_black = False
     for i in range(0, image_height, cell_height):
@@ -95,6 +96,15 @@ def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
             #arr_cells_x += 1
             #arr_cells_y += 1
         
+            cell = arr_cells[arr_cells_x][arr_cells_y]
+            cell.x_map = arr_cells_y
+            cell.y_map = arr_cells_x
+            cell.x_gazebo = j 
+            cell.y_gazebo = i
+            
+            if (image[i][j] == BLACK):
+              cell.occupied = True
+              
             for x in range(i, i + cell_height):
                 for y in range(j, j + cell_width):
                   #print(image[x][y])
@@ -103,6 +113,8 @@ def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
                     if(image[x][y] == BLACK):
                         is_black = True
                         #arr_cells[]
+            
+        
 
             
             
@@ -117,6 +129,14 @@ def fill_black_cells(image, image_width, image_height, cell_width, cell_height):
 
                 # set that it is occupied
                 is_black = False
+                
+            # update value for filling class cell, y axis
+            arr_cells_y += 1
+
+        # update value for filling class cell, y axis and x axis
+        arr_cells_x += 1
+        arr_cells_y = 0
+        
     return image
 
 # equation obtained by linear regresion
@@ -148,85 +168,34 @@ cells = [[Cell(x_map, y_map) for x_map in range(COLS)] for y_map in range(ROWS)]
 
 dilated_image = dilate_black_pixels(map)
 resized_map = resize_image(dilated_image, NEW_IMG_WIDTH, NEW_IMG_HEIGHT)
-#filled_map = fill_black_cells(resized_map,cells, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
-filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
-
-
-####draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
-
-#check_
-
-#GUI.showNumpy(filled_map)
-#cell1 = Cell(0,0, occupied=True, =True)
-# Crear un array de 32x32 celdas inicializadas con valores predeterminados
-#filas = 32
-#columnas = 32
-
-# Crear el array de celdas
-#cells = [[Cell(x_map, y_map) for x_map in range(COLS)] for y_map in range(ROWS)]
-
-# Acceso a una celda en la posición (x_map, y_map)
-#x_map = 32  # Ejemplo de posición en el mapa en el eje x
-#y_map = 3 # Ejemplo de posición en el mapa en el eje y
-
-# Accedemos a la celda en la posición (x_map, y_map)
-#celda = cells[y_map][x_map]
-
-#celda.x_gazebo = 23
-#celda.y_gazebo = 45
-# Modificamos los atributos de la celda
-#celda.ocupada = True
-#celda.barrida = True
-
-#print(celda.x_gazebo)
-
-
+filled_map = fill_black_cells(resized_map,cells, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
+#filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
 
 
 # Fill class cell  
 
 # check if are occupied 
-arr_cells_x = 0
-arr_cells_y = 0
+#arr_cells_x = 0
+#arr_cells_y = 0
 
 
-for i in range(0, 512, 16):
-    #print(arr_cells_x, arr_cells_y)
-    #arr_cells_x += 1
-    #arr_cells_y += 1
-    
-    #print(arr_cells_x, arr_cells_y)
-    
-    for j in range(0, 512, 16):
-        #arr_cells_x += 1
-        #arr_cells_y += 1
-        #arr_cells_y += 1
-        celda = cells[arr_cells_x][arr_cells_y]
-        celda.x_map = arr_cells_y
-        celda.y_map = arr_cells_x
-        celda.x_gazebo = j
-        celda.y_gazebo = i
-        if (filled_map[i][j] == BLACK):
-          celda.occupied = True
+#for i in range(0, 512, 16):
+
+#    for j in range(0, 512, 16):
+
+#        celda = cells[arr_cells_x][arr_cells_y]
+#        celda.x_map = arr_cells_y
+#        celda.y_map = arr_cells_x
+#        celda.x_gazebo = j
+#        celda.y_gazebo = i
+#        if (filled_map[i][j] == BLACK):
+#          celda.occupied = True
           
-          #print("negro")
-        #else:
-         # print("blanco")
-          
-        arr_cells_y += 1
-        
-        #print(arr_cells_x, arr_cells_y)
-    arr_cells_x += 1
-    arr_cells_y = 0
+#        arr_cells_y += 1
 
+#    arr_cells_x += 1
+#    arr_cells_y = 0
 
-
-#  prints 
-#for i in range(0, ROWS):
-#    for j in range(0, COLS):
-#        celda = cells[i][j]
-#        print(celda.ocupada)
-        
 # PRINTS: van del 0 al 31
  #y primero, x después 
 celda1 = cells[4-1][3-1]
@@ -238,19 +207,9 @@ celda2 = cells[3-1][3-1]
 print("x mapa: " + str(celda2.x_map) + "y mapa: " + str(celda2.y_map))
 print("x gazebo: " + str(celda2.x_gazebo) + "y gazebo: " + str(celda2.y_gazebo))
 print("ocupada: " + str(celda2.occupied))
-#celda2 = cells[3-1][3-1]
-#print("Está ocupada?" + str(celda2.ocupada))
-#celda3 = cells[5-1][3-1]
-#print("Está ocupada?" + str(celda3.ocupada))
-
-#celda4 = cells[32-1][32-1]
-#print("Está ocupada?" + str(celda4.ocupada))
-
-#celda2 = cells[3-1][4-1]
-#print("Está ocupada?" + str(celda2.ocupada))
 
 
-
+# Always before iterative code
 draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
 while True:
@@ -263,3 +222,5 @@ while True:
     paint_cell(filled_map, current_x, current_y, CELL_WIDTH, CELL_HEIGHT, RED)
     
     GUI.showNumpy(filled_map)
+
+    
