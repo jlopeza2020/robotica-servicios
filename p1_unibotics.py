@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from enum import Enum
 import math
+import time
 
 NEW_IMG_WIDTH = 512
 NEW_IMG_HEIGHT = 512
@@ -19,6 +20,10 @@ BLACK = 0
 WHITE = 127
 RED = 128
 ORANGE = 129
+YELLOW = 130
+GREEN = 131
+BLUE = 132
+VIOLET = 134
 
 class Direction(Enum):
     NORTE = "Norte"
@@ -194,7 +199,10 @@ draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
 #init_vel = abs(HAL.getPose3d().x)
 #print(init_vel)
+x = 21 
+y = 19
 while True:
+    #paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, RED)
     # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position in the map
     #print(abs(HAL.getPose3d().x), abs(HAL.getPose3d().y))
     
@@ -218,13 +226,52 @@ while True:
     
     ###
     
-    current_2d_x = int(round(get_2d_x()))
-    current_2d_y = int(round(get_2d_y()))
+    
+    #current_2d_x = int(round(get_2d_x()))
+    #current_2d_y = int(round(get_2d_y()))
     #print(current_2d_x, current_2d_y)
+    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, RED)
+
+    #x = 21 
+    #y = 19
+    
+    # first check WEST
+    #print(x, cells[y-1][x-1-1].occupied, cells[y-1][x-1-1].cleaned)
+    if (cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
+      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
+      cells[y-1][x-1-1].cleaned = True
+      #time.sleep(1)
+      x = x-1
+    # NORTH
+    elif(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
+      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
+      cells[y-1-1][x-1].cleaned = True
+      #time.sleep(1)
+      y = y-1
+    # EAST
+    elif(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
+      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
+      cells[y-1][x+1-1].cleaned = True
+      #time.sleep(1)
+      x = x + 1
+    #SOUTH
+    elif(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
+      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
+      cells[y+1-1][x-1].cleaned = True
+      
+      #time.sleep(1)
+      #x = x + 1
+    
+    #else:
+    #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLACK)
+      
+    draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
+
+      
+    
+    
     
     # Show the updated map
-    paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, RED)
+    #paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, RED)
     
     GUI.showNumpy(filled_map)
-
-    
