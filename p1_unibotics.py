@@ -25,6 +25,8 @@ GREEN = 131
 BLUE = 132
 VIOLET = 134
 
+#total_white_cells = 1024
+
 class Direction(Enum):
     NORTE = "Norte"
     SUR = "Sur"
@@ -97,10 +99,11 @@ def dilate_black_pixels(image):
 
 # Fill cells in the image with black color if any pixel in the cell is black.
 # Fill class cell
-def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height):
+def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height, ):
 
     arr_cells_x = 0
     arr_cells_y = 0
+     
     
     is_black = False
     for i in range(0, image_height, cell_height):
@@ -123,6 +126,7 @@ def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_h
                     # check if any pixel in the cell is black 
                     if(image[x][y] == BLACK):
                         is_black = True
+                        # = white_cells - 1
 
             # if exits one: paint in black the whole cell
             if is_black:
@@ -201,7 +205,26 @@ draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 #print(init_vel)
 x = 21 
 y = 19
+
+print(cells[9][19].occupied, cells[9][20].occupied)
+print(cells[10][19].occupied, cells[10][20].occupied)
+print(cells[11][19].occupied, cells[11][20].occupied)
+
+goes_west = True
+goes_north = False
+goes_east = False
+goes_south = False 
+
+
+total_white_cells = 0
+for i in range(0,32):
+  for j in range(0,32):
+    if(cells[i][j].occupied == False):
+      total_white_cells = total_white_cells + 1 
+      
 while True:
+  
+    #print(total_white_cells)
     #paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, RED)
     # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position in the map
     #print(abs(HAL.getPose3d().x), abs(HAL.getPose3d().y))
@@ -235,40 +258,146 @@ while True:
     #x = 21 
     #y = 19
     
+    # MMEJORAR ESTOO!!!!
     # first check WEST
     #print(x, cells[y-1][x-1-1].occupied, cells[y-1][x-1-1].cleaned)
-    if (cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
-      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
-      cells[y-1][x-1-1].cleaned = True
+    # si la celda contigua es blanca y no ha sido barrida
+    
+    ## WEST PRIMERO !!!!!
+    
+    
+    if (goes_west):
+      
+      if (cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
+        cells[y-1][x-1].cleaned = True
+        #time.sleep(1)
+        x = x-1
+    
+      # si la celda contigua es negra y la actual no ha sido barrida
+      if(cells[y-1][x-1-1].occupied is True and cells[y-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_west = False
+        goes_north = True
+        
+    if (goes_north): 
+      
+      if (cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
+        cells[y-1][x-1].cleaned = True
+        #time.sleep(1)
+        y = y-1
+    
+      # si la celda contigua es negra y la actual no ha sido barrida
+      if(cells[y-1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_north = False
+        goes_east = True
+        
+    if (goes_east):
+      
+      if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
+        cells[y-1][x+1-1].cleaned = True
+        
       #time.sleep(1)
-      x = x-1
-    # NORTH
-    elif(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
-      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
-      cells[y-1-1][x-1].cleaned = True
-      #time.sleep(1)
-      y = y-1
-    # EAST
-    elif(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
-      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
-      cells[y-1][x+1-1].cleaned = True
-      #time.sleep(1)
-      x = x + 1
-    #SOUTH
-    elif(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
-      paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
-      cells[y+1-1][x-1].cleaned = True
+        x = x + 1
+        
+      if(cells[y-1][x+1-1].occupied is True and cells[y-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_east = False
+        goes_south = True
+        
+    if (goes_south):
+      
+      #(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
+      #x = x-1
+    #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
+    #  cells[y+1-1][x-1].cleaned = True
+      
       
       #time.sleep(1)
-      #x = x + 1
+    #  y = y + 1
+      
+      
+      
+      
+      if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
+        cells[y+1-1][x-1].cleaned = True
+        
+      #time.sleep(1)
+        y = y + 1
+        
+      if(cells[y+1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_south = False
+        
+        
     
+        
+    #  print("si")
+    #  print(x, y)
+      
+        
+    print(y,x)
+      
+      
+      
+    #print(x,y )
+    #print(cells[y-1][x-1].occupied)
+    # y x
+    #print(cells[18][15].cleaned, cells[18][16].cleaned, cells[18][17].cleaned, cells[18][18].cleaned,cells[18][19].cleaned, cells[18][20].cleaned)
+    #print(cells[19][15].cleaned, cells[19][16].cleaned, cells[19][17].cleaned, cells[19][18].cleaned,cells[19][19].cleaned, cells[19][20].cleaned)
+
+
+      
+    # NORTH
+    #elif(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
+    #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
+    #  cells[y-1-1][x-1].cleaned = True
+      #time.sleep(1)
+    #  y = y-1
+    # EAST
+    #elif(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
+    #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
+    #  cells[y-1][x+1-1].cleaned = True
+      #time.sleep(1)
+    #  x = x + 1
+    #  print("si")
+    #  print(x, y)
+      
+    #elif(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False and cells[y-1][x+1-1+ 1-1].occupied is True):
+    #  print("si")
+    #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
+    #  cells[y-1-1][x+1-1].cleaned = True  
+    #SOUTH
+    #elif(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
+      #x = x-1
+    #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
+    #  cells[y+1-1][x-1].cleaned = True
+      
+      
+      #time.sleep(1)
+    #  y = y + 1
+    
+    
+    #print(x, y)
     #else:
     #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLACK)
       
     draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
       
-    
+    #print()
     
     
     # Show the updated map
