@@ -3,7 +3,7 @@ from HAL import HAL
 import cv2
 import numpy as np
 from enum import Enum
-
+import math
 
 NEW_IMG_WIDTH = 512
 NEW_IMG_HEIGHT = 512
@@ -192,24 +192,29 @@ print("ocupada: " + str(celda2.occupied))
 # Always before iterative code
 draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
-init_vel = abs(HAL.getPose3d().x)
-print(init_vel)
+#init_vel = abs(HAL.getPose3d().x)
+#print(init_vel)
 while True:
     # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position in the map
     #print(abs(HAL.getPose3d().x), abs(HAL.getPose3d().y))
     
+    #Turn
+    #grados = HAL.getPose3d().yaw * (180 / math.pi)
+    #print(round(abs(grados)))
+    #HAL.setW(0.1)
+    
     # avanza 2 casillas
-    vel = abs(HAL.getPose3d().x)
-    if(vel > (init_vel - 0.32*2) ):
+    #vel = abs(HAL.getPose3d().x)
+    #if(vel > (init_vel - 0.32*2) ):
       
-      HAL.setV(1)
-      HAL.setW(0)
-    else: 
-      HAL.setV(0)
-      HAL.setW(0)
+    #  HAL.setV(1)
+    #  HAL.setW(0)
+    #else: 
+    #  HAL.setV(0)
+    #  HAL.setW(0)
     
     #HAL.setV(1)
-    print(init_vel, vel)
+    #print(init_vel, vel)
     
     ###
     
@@ -221,3 +226,5 @@ while True:
     paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, RED)
     
     GUI.showNumpy(filled_map)
+
+    
