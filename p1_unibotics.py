@@ -26,8 +26,8 @@ class Cell:
         self.y_map = y_map
         self.x_gazebo = x_gazebo
         self.y_gazebo = y_gazebo
-        self.ocupada = occupied  # True si está ocupada, False si no
-        self.barrida = cleaned  # True si ya ha sido barrida, False si no
+        self.occupied = occupied  # True si está ocupada, False si no
+        self.cleaned = cleaned  # True si ya ha sido barrida, False si no
 
 
 def get_unibotics_map():
@@ -180,6 +180,12 @@ filled_map = fill_black_cells(resized_map, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_W
 
 #print(celda.x_gazebo)
 
+
+
+
+# Fill class cell  
+
+# check if are occupied 
 arr_cells_x = 0
 arr_cells_y = 0
 
@@ -195,12 +201,17 @@ for i in range(0, 512, 16):
         #arr_cells_x += 1
         #arr_cells_y += 1
         #arr_cells_y += 1
+        celda = cells[arr_cells_x][arr_cells_y]
+        celda.x_map = arr_cells_y
+        celda.y_map = arr_cells_x
+        celda.x_gazebo = j
+        celda.y_gazebo = i
         if (filled_map[i][j] == BLACK):
-          celda = cells[arr_cells_x][arr_cells_y]
-          celda.ocupada = True
-          print("negro")
-        else:
-          print("blanco")
+          celda.occupied = True
+          
+          #print("negro")
+        #else:
+         # print("blanco")
           
         arr_cells_y += 1
         
@@ -208,6 +219,39 @@ for i in range(0, 512, 16):
     arr_cells_x += 1
     arr_cells_y = 0
 
+
+
+#  prints 
+#for i in range(0, ROWS):
+#    for j in range(0, COLS):
+#        celda = cells[i][j]
+#        print(celda.ocupada)
+        
+# PRINTS: van del 0 al 31
+ #y primero, x después 
+celda1 = cells[4-1][3-1]
+print("x mapa: " + str(celda1.x_map) + "y mapa: " + str(celda1.y_map))
+print("x gazebo: " + str(celda1.x_gazebo) + "y gazebo: " + str(celda1.y_gazebo))
+print("ocupada: " + str(celda1.occupied))
+print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+celda2 = cells[3-1][3-1]
+print("x mapa: " + str(celda2.x_map) + "y mapa: " + str(celda2.y_map))
+print("x gazebo: " + str(celda2.x_gazebo) + "y gazebo: " + str(celda2.y_gazebo))
+print("ocupada: " + str(celda2.occupied))
+#celda2 = cells[3-1][3-1]
+#print("Está ocupada?" + str(celda2.ocupada))
+#celda3 = cells[5-1][3-1]
+#print("Está ocupada?" + str(celda3.ocupada))
+
+#celda4 = cells[32-1][32-1]
+#print("Está ocupada?" + str(celda4.ocupada))
+
+#celda2 = cells[3-1][4-1]
+#print("Está ocupada?" + str(celda2.ocupada))
+
+
+
+draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
 while True:
     # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position
@@ -219,5 +263,3 @@ while True:
     paint_cell(filled_map, current_x, current_y, CELL_WIDTH, CELL_HEIGHT, RED)
     
     GUI.showNumpy(filled_map)
-
-    
