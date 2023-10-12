@@ -265,17 +265,27 @@ while True:
     
     ## WEST PRIMERO !!!!!
     
-    
+    # primero va hacia el oeste
     if (goes_west):
       
+      # si la celda a su izq es blanca y está sucia: limpia la actual y avanza hacia la izq 
       if (cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
         #time.sleep(1)
         x = x-1
     
-      # si la celda contigua es negra y la actual no ha sido barrida
+      # si la celda a su izq es negra y la actual está sucia: limpia la actual y cambia de dirección 
       if(cells[y-1][x-1-1].occupied is True and cells[y-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_west = False
+        goes_north = True
+        
+        
+      # si la celda a su izq es blanca pero ya está limpia: limpia la actual y cambia de dirección
+      if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
       
@@ -284,14 +294,23 @@ while True:
         
     if (goes_north): 
       
+      # si la celda encima de ella es blanca y está sucia: limpia la actual y avanza hacia arriba
       if (cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
         #time.sleep(1)
         y = y-1
     
-      # si la celda contigua es negra y la actual no ha sido barrida
+      # si la celda encima de ella es negra y la actual está sucia: limpia y cambia de dirección
       if(cells[y-1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_north = False
+        goes_east = True
+        
+      # si la celda encima de ella es blanca pero está limpia: limpia la actual y cambias de dirección
+      if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
       
@@ -300,14 +319,24 @@ while True:
         
     if (goes_east):
       
+      # si la celda de su derecha es blanca y está limpia: limpia la actual y avanza de dirección 
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
-        cells[y-1][x+1-1].cleaned = True
-        
+        cells[y-1][x-1].cleaned = True
+
       #time.sleep(1)
         x = x + 1
         
+      # si la celda de su derecha está ocupada pero la actual está sucia: limpia la actual y cambia de dirección
       if(cells[y-1][x+1-1].occupied is True and cells[y-1][x-1].cleaned is False):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_east = False
+        goes_south = True
+      
+      # si la celda de su dereca es blanca y estaña limpia: limpia la actual y cambia de dirección
+      if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
       
@@ -316,30 +345,30 @@ while True:
         
     if (goes_south):
       
-      #(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
-      #x = x-1
-    #  paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
-    #  cells[y+1-1][x-1].cleaned = True
-      
-      
-      #time.sleep(1)
-    #  y = y + 1
-      
-      
-      
-      
+      # si la celda  que tiene por debajo es blanca y no está limpia: limpia la actual y avanzas 
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
-        cells[y+1-1][x-1].cleaned = True
+        cells[y-1][x-1].cleaned = True
         
       #time.sleep(1)
         y = y + 1
         
+      # si la celda por debajo es negra y la actual está sucia: limpias la actual y cambias de dirección
       if(cells[y+1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
       
         goes_south = False
+        goes_west = True
+        
+        
+      # si la celda por debajo es blanca y está limpia: limpias la actual y cambias de dirección
+      if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is True):
+        paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
+        cells[y-1][x-1].cleaned = True
+      
+        goes_south = False
+        goes_west = True
         
         
     
@@ -348,7 +377,7 @@ while True:
     #  print(x, y)
       
         
-    print(y,x)
+    #print(y,x)
       
       
       
