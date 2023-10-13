@@ -270,35 +270,36 @@ for i in range (0,50):
   # oeste
   if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
     paint_cell(filled_map, x-1, y, CELL_WIDTH, CELL_HEIGHT, RED)
-    return_points.append([y-1, x-1-1])
+    return_points.append([y, x-1])
   
   # norte 
   if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
      paint_cell(filled_map, x, y-1, CELL_WIDTH, CELL_HEIGHT, RED)
-     return_points.append([y-1, x-1-1])
+     return_points.append([y-1, x])
   # norte 
  # cells[y-1-1][x-1]
   # este
   if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
     paint_cell(filled_map, x+1, y, CELL_WIDTH, CELL_HEIGHT, RED)
-    return_points.append([y-1, x+1-1])
+    return_points.append([y, x+1])
     
   # sur 
   if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
     paint_cell(filled_map, x, y+1, CELL_WIDTH, CELL_HEIGHT, RED)
-    return_points.append([y-1+1, x-1])
+    return_points.append([y+1, x])
   
   #cells[y-1][x+1-1]
   # sur 
   #cells[y+1-1][x-1]
   
+  ## MAKE SPIRAL 
   if (goes_west):
       
       # si la celda a su izq es blanca y está sucia: limpia la actual y avanza hacia la izq 
       if (cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
         #time.sleep(1)
         x = x-1
     
@@ -306,7 +307,7 @@ for i in range (0,50):
       if(cells[y-1][x-1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
       
         goes_west = False
         goes_north = True
@@ -316,7 +317,7 @@ for i in range (0,50):
       if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
       
         goes_west = False
         goes_north = True
@@ -327,7 +328,7 @@ for i in range (0,50):
       if (cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
         #time.sleep(1)
         y = y-1
     
@@ -335,7 +336,7 @@ for i in range (0,50):
       if(cells[y-1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
       
         goes_north = False
         goes_east = True
@@ -344,7 +345,7 @@ for i in range (0,50):
       if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
       
         goes_north = False
         goes_east = True
@@ -355,7 +356,7 @@ for i in range (0,50):
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
 
       #time.sleep(1)
         x = x + 1
@@ -364,7 +365,7 @@ for i in range (0,50):
       if(cells[y-1][x+1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x ])
       
         goes_east = False
         goes_south = True
@@ -373,7 +374,7 @@ for i in range (0,50):
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
       
         goes_east = False
         goes_south = True
@@ -384,7 +385,7 @@ for i in range (0,50):
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
         
       #time.sleep(1)
         y = y + 1
@@ -393,7 +394,7 @@ for i in range (0,50):
       if(cells[y+1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y, x])
       
         goes_south = False
         goes_west = True
@@ -403,14 +404,15 @@ for i in range (0,50):
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y-1, x -1])
+        move_points.append([y,  x ])
         
         goes_south = False
         goes_west = True
         
         
         
-print(move_points)
+print("Move"+ str(move_points))
+print("Return"+ str(return_points))
 # eliminate duplicates
 #print(return_points)
 #unique_array = remove_duplicates_2d_array(return_points)
@@ -420,6 +422,7 @@ unique_coordinates = remove_duplicate_coordinates(return_points)
 #array1 = [(1, 2), (3, 4), (5, 6), (7, 8)]
 #array2 = [(3, 4), (7, 8), (5, 6), (8, 9), (1, 2)]
 
+#print(return_points)
 # Remove coordinates from array1 that are in array2
 unique_array1 = remove_du_coordinates(unique_coordinates, move_points)
 
