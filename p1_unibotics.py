@@ -183,7 +183,7 @@ def remove_duplicate_coordinates(coords):
 
     return result_coords
     
-def remove_duplicate_coordinates(array1, array2):
+def remove_du_coordinates(array1, array2):
     # Create a set to store unique coordinates
     unique_coordinates = set()
 
@@ -421,7 +421,7 @@ unique_coordinates = remove_duplicate_coordinates(return_points)
 #array2 = [(3, 4), (7, 8), (5, 6), (8, 9), (1, 2)]
 
 # Remove coordinates from array1 that are in array2
-unique_array1 = remove_duplicate_coordinates(unique_coordinates, move_points)
+unique_array1 = remove_du_coordinates(unique_coordinates, move_points)
 
 
 print(unique_array1)   
