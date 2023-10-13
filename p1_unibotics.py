@@ -198,9 +198,11 @@ def remove_duplicates_from_arrays(array1, array2):
 
 
 
-def make_spiral(cells, move_points, y, x, west, north, east, south, cell_width, cell_height, violet, yellow, green, blue):
+def make_spiral(cells, move_points, yaux, xaux, west, north, east, south, cell_width, cell_height, violet, yellow, green, blue):
   ## MAKE SPIRAL 
   
+  y = yaux
+  x  = xaux
   
   if (west):
       
@@ -318,10 +320,12 @@ def make_spiral(cells, move_points, y, x, west, north, east, south, cell_width, 
         south = False
         west = True
 
-  #return y, x
+  return y, x
 
 def store_return_points(cells, return_points, y, x, cell_width, cell_height, color):
   # oeste
+  
+  #print("in" +str(x)+ str(y))
   if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
     paint_cell(filled_map, x-1, y, cell_width, cell_height, RED)
     return_points.append([y, x-1])
@@ -407,10 +411,16 @@ return_points = []
 # while total_white_cells != 0 
 for i in range (0,50):
   
+  
   store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
+
+  #nuevay_2, nuevax_2 = make_spiral(cells, move_points, y, x, goes_west, goes_north, goes_east, goes_south, CELL_WIDTH, CELL_HEIGHT, VIOLET, YELLOW, GREEN, BLUE)
+  
+  #store_return_points(cells, return_points, nuevay, nuevax, CELL_WIDTH, CELL_HEIGHT, RED)
   #y, x = make_spiral(cells, move_points, y, x, goes_west, goes_north, goes_east, goes_south, CELL_WIDTH, CELL_HEIGHT, VIOLET, YELLOW, GREEN, BLUE)
 
-
+  #y = nuevay_2
+  #x = nuevax_2
   
   
   # guardar los puntos de retornos
@@ -439,7 +449,8 @@ for i in range (0,50):
   # sur 
   #cells[y+1-1][x-1]
   
-  ## MAKE SPIRAL 
+  ## MAKE SPIRAL
+  
   if (goes_west):
       
       # si la celda a su izq es blanca y está sucia: limpia la actual y avanza hacia la izq 
@@ -555,8 +566,8 @@ for i in range (0,50):
         
         goes_south = False
         goes_west = True
-        
-        
+       
+       
         
 #print("Move"+ str(move_points))
 #print("Return"+ str(return_points))
