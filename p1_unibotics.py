@@ -7,7 +7,6 @@ import math
 import time
 from queue import PriorityQueue
 
-
 NEW_IMG_WIDTH = 512
 NEW_IMG_HEIGHT = 512
 
@@ -16,7 +15,6 @@ CELL_HEIGHT = 16
 
 ROWS = 32
 COLS = 32
-
 
 BLACK = 0
 WHITE = 127
@@ -27,7 +25,6 @@ GREEN = 131
 BLUE = 132
 VIOLET = 134
 
-#total_white_cells = 1024
 
 class Direction(Enum):
     NORTE = "Norte"
@@ -48,7 +45,6 @@ class Cell:
         self.occupied = occupied  # True si está ocupada, False si no
         self.cleaned = cleaned  # True si ya ha sido barrida, False si no
         self.direction = direction  # Dirección cardinal (NORTE, SUR, ESTE, OESTE)
-
 
 
 def get_unibotics_map():
@@ -101,65 +97,6 @@ def dilate_black_pixels(image):
 
 # Fill cells in the image with black color if any pixel in the cell is black.
 # Fill class cell
-"""
-def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height, ):
-
-    arr_cells_x = 0
-    arr_cells_y = 0
-     
-    
-    #is_black = False
-    for i in range(0, image_height, cell_height):
-
-        for j in range(0, image_width, cell_width):
-
-        
-            cell = arr_cells[arr_cells_x][arr_cells_y]
-            cell.x_map = arr_cells_y
-            cell.y_map = arr_cells_x
-            cell.x_gazebo = j 
-            cell.y_gazebo = i
-            
-            if (image[i][j] == BLACK):
-              cell.occupied = True
-              
-            is_black = False
-            for x in range(i, i + cell_height):
-                for y in range(j, j + cell_width):
-
-                    # check if any pixel in the cell is black 
-                    if(image[x][y] == BLACK):
-                        is_black = True
-                        break
-                        # = white_cells - 1
-
-            # if exits one: paint in black the whole cell
-            if is_black:
-                for x in range(i, i + cell_height):
-                    for y in range(j, j + cell_width):
-
-                        image[x][y] = BLACK
-                        
-
-                # set that it is occupied
-                #is_black = False
-                
-            # update value for filling class cell, y axis
-            arr_cells_y += 1
-
-        # update value for filling class cell, y axis and x axis
-        arr_cells_x += 1
-        arr_cells_y = 0
-        
-    return image
-"""
-
-# Fill cells in the image with black color if any pixel in the cell is black.
-# Fill class cell
-
-#BLACK = 0  # Constante para representar el color negro
-#WHITE = 255  # Constante para representar el color blanco
-
 
 def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height, ):
 
@@ -179,8 +116,7 @@ def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_h
             cell.x_gazebo = j 
             cell.y_gazebo = i
             
-            #if (image[i][j] == BLACK):
-            #  cell.occupied = True
+            
               
             for x in range(i, i + cell_height):
                 for y in range(j, j + cell_width):
@@ -189,7 +125,6 @@ def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_h
                     if(image[x][y] == BLACK):
                         is_black = True
                         cell.occupied = True
-                        # = white_cells - 1
 
             # if exits one: paint in black the whole cell
             if is_black:
@@ -262,25 +197,21 @@ def remove_duplicates_from_arrays(array1, array2):
 
 def store_return_points(cells, return_points, y, x, cell_width, cell_height, color):
   
-  #print(cells[y-1][x-1-1].occupied)
   # oeste
   if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
     paint_cell(filled_map, x-1, y, cell_width, cell_height, RED)
     return_points.append([y, x-1])
   
-  #print(cells[y-1-1][x-1].occupied)
   # norte 
   if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
      paint_cell(filled_map, x, y-1, cell_width, cell_height, RED)
      return_points.append([y-1, x])
    
- # print(cells[y-1][x+1-1].occupied)
   # este
   if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
     paint_cell(filled_map, x+1, y, cell_width, cell_height, RED)
     return_points.append([y, x+1])
     
-  #print(cells[y+1-1][x-1].occupied)
   # sur 
   if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
     paint_cell(filled_map, x, y+1, cell_width, cell_height, RED)
@@ -323,67 +254,7 @@ resized_map = resize_image(dilated_image, NEW_IMG_WIDTH, NEW_IMG_HEIGHT)
 filled_map = set_scenario(resized_map,cells, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
 
 
-# PRINTS: van del 0 al 31
- # y primero, x después 
- 
- #[y-1][x+1-1]
-
-"""
-x = 20
-y = 11
-celda1 = cells[y-1][x-1]
-#celda1.direction=Direction.NORTE
-print("x mapa: " + str(celda1.x_map) + "y mapa: " + str(celda1.y_map))
-print("x gazebo: " + str(celda1.x_gazebo) + "y gazebo: " + str(celda1.y_gazebo))
-print("ocupada: " + str(celda1.occupied))
-
-
-celda2 = cells[y-1][x-1-1]
-#celda2.direction=Direction.NORTE
-print("x mapa: " + str(celda2.x_map) + "y mapa: " + str(celda2.y_map))
-print("x gazebo: " + str(celda2.x_gazebo) + "y gazebo: " + str(celda2.y_gazebo))
-print("ocupada: " + str(celda2.occupied))
-
-
-celda3 = cells[y-1-1][x-1]
-#celda1.direction=Direction.NORTE
-print("x mapa: " + str(celda3.x_map) + "y mapa: " + str(celda3.y_map))
-print("x gazebo: " + str(celda3.x_gazebo) + "y gazebo: " + str(celda3.y_gazebo))
-print("ocupada: " + str(celda3.occupied))
-
-
-celda4 = cells[y-1][x-1+1]
-#celda1.direction=Direction.NORTE
-print("x mapa: " + str(celda4.x_map) + "y mapa: " + str(celda4.y_map))
-print("x gazebo: " + str(celda4.x_gazebo) + "y gazebo: " + str(celda4.y_gazebo))
-print("ocupada: " + str(celda4.occupied))
-
-
-celda5 = cells[y-1+1][x-1]
-#celda1.direction=Direction.NORTE
-print("x mapa: " + str(celda5.x_map) + "y mapa: " + str(celda5.y_map))
-print("x gazebo: " + str(celda5.x_gazebo) + "y gazebo: " + str(celda5.y_gazebo))
-print("ocupada: " + str(celda5.occupied))
-
-#print("direccion: " + str(celda1.direction))
-#paint_cell(filled_map, 20, 11, CELL_WIDTH, CELL_HEIGHT, YELLOW)
-"""
-
 print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-
-#for i in range(0,32):
-#  for j in range(0,32):
-#    if(cells[j][i].occupied == True):
-#      paint_cell(filled_map, i+1, j+1, CELL_WIDTH, CELL_HEIGHT, BLUE)
-      #total_white_cells = total_white_cells + 1 
-# Always before iterative code
-#draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
-
-#init_vel = abs(HAL.getPose3d().x)
-#print(init_vel)
-
-
 
 goes_west = True
 goes_north = False
@@ -391,47 +262,20 @@ goes_east = False
 goes_south = False 
 
 
-# calculate all white cells in the map
-#total_white_cells = 0
-#for i in range(0,32):
-#  for j in range(0,32):
-#    if(cells[j][i].occupied == False):
-#      total_white_cells = total_white_cells + 1 
-     
-    
-    
 move_points = []
 return_points = []
 
-
-# guardar aparte puntos de retorno: e ir comprobando si ya lo tengo, quitarlo
-# doble bucle for entreel array de puntos de movimiento y el de puntos de retorno 
-# guardar puntos movimiento 
-
-# while total_white_cells != 0 
-
-
-
-
 is_no_return_point = False
-
-
 
 x = 21
 y = 19
 
-#store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
 
-#print(total_white_cells)
-#while (total_white_cells > -36): 
-  
-  
 total_white_cells = 418
 
 while(total_white_cells > 0):
 
-#for i in range (0,100):
-  
+
   store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
 
   ## MAKE SPIRAL
@@ -443,7 +287,6 @@ while(total_white_cells > 0):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
         move_points.append([y, x])
-        #time.sleep(1)
         x = x-1
         
         #total_white_cells = total_white_cells - 1
@@ -478,11 +321,9 @@ while(total_white_cells > 0):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
         move_points.append([y, x])
-        #time.sleep(1)
         y = y-1
         
-        #total_white_cells = total_white_cells - 1
-    
+
       # si la celda encima de ella es negra y la actual está sucia: limpia y cambia de dirección
       if(cells[y-1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
@@ -492,7 +333,7 @@ while(total_white_cells > 0):
         goes_north = False
         goes_east = True
         
-        #total_white_cells = total_white_cells - 1
+    
         
       # si la celda encima de ella es blanca pero está limpia: limpia la actual y cambias de dirección
       if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is True):
@@ -513,11 +354,9 @@ while(total_white_cells > 0):
         cells[y-1][x-1].cleaned = True
         move_points.append([y, x])
 
-      #time.sleep(1)
         x = x + 1
         
-        #total_white_cells = total_white_cells - 1
-        
+
       # si la celda de su derecha está ocupada pero la actual está sucia: limpia la actual y cambia de dirección
       if(cells[y-1][x+1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
@@ -527,8 +366,7 @@ while(total_white_cells > 0):
         goes_east = False
         goes_south = True
         
-        #total_white_cells = total_white_cells - 1
-      
+
       # si la celda de su dereca es blanca y estaña limpia: limpia la actual y cambia de dirección
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
@@ -548,11 +386,9 @@ while(total_white_cells > 0):
         cells[y-1][x-1].cleaned = True
         move_points.append([y, x])
         
-      #time.sleep(1)
         y = y + 1
         
-        #total_white_cells = total_white_cells - 1
-        
+
       # si la celda por debajo es negra y la actual está sucia: limpias la actual y cambias de dirección
       if(cells[y+1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
@@ -562,8 +398,7 @@ while(total_white_cells > 0):
         goes_south = False
         goes_west = True
         
-        #total_white_cells = total_white_cells - 1
-        
+
         
       # si la celda por debajo es blanca y está limpia: limpias la actual y cambias de dirección
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is True):
@@ -577,50 +412,29 @@ while(total_white_cells > 0):
         
       total_white_cells = total_white_cells - 1
 
-  print(total_white_cells)
+
   # Means you have reached to a no return point
   if (cells[y-1][x-1].cleaned):
       is_no_return_point = True
-      #print(y,x)
-      
+
   if (is_no_return_point):
       
-#print("Move"+ str(move_points))
-#print("Return"+ str(return_points))
-
-# add condition if it is stuck
-
-      #print(y, x)
 
       unique_coordinates = remove_duplicates_from_list_of_coordinates(return_points)
       finally_return_points = remove_duplicates_from_arrays(unique_coordinates, move_points)
 
-      #print(finally_return_points)
-
-
-
       current_cell = np.array([y, x])
-#possible_solutions = np.array([[18, 21], [19, 22], [20, 21], [20, 20], [20, 19], [20, 18], [20, 17], [17, 21]])
-
       best_coordinate = best_first_search(current_cell, finally_return_points)
 
-      #print(best_coordinate)
-      
-      #print(best_coordinate[0])
       
       y = best_coordinate[0]
-      
       x = best_coordinate[1]
       
       is_no_return_point = False
       
-  #total_white_cells = total_white_cells - 1
-      
+
   
       
-
- # print(total_white_cells)
-#paint_cell(filled_map, 21, 17, CELL_WIDTH, CELL_HEIGHT, ORANGE)
 
 
 while True:
