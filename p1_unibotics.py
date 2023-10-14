@@ -262,25 +262,25 @@ def remove_duplicates_from_arrays(array1, array2):
 
 def store_return_points(cells, return_points, y, x, cell_width, cell_height, color):
   
-  print(cells[y-1][x-1-1].occupied)
+  #print(cells[y-1][x-1-1].occupied)
   # oeste
   if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
     paint_cell(filled_map, x-1, y, cell_width, cell_height, RED)
     return_points.append([y, x-1])
   
-  print(cells[y-1-1][x-1].occupied)
+  #print(cells[y-1-1][x-1].occupied)
   # norte 
   if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
      paint_cell(filled_map, x, y-1, cell_width, cell_height, RED)
      return_points.append([y-1, x])
    
-  print(cells[y-1][x+1-1].occupied)
+ # print(cells[y-1][x+1-1].occupied)
   # este
   if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
     paint_cell(filled_map, x+1, y, cell_width, cell_height, RED)
     return_points.append([y, x+1])
     
-  print(cells[y+1-1][x-1].occupied)
+  #print(cells[y+1-1][x-1].occupied)
   # sur 
   if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
     paint_cell(filled_map, x, y+1, cell_width, cell_height, RED)
@@ -392,11 +392,11 @@ goes_south = False
 
 
 # calculate all white cells in the map
-total_white_cells = 0
-for i in range(0,32):
-  for j in range(0,32):
-    if(cells[i][j].occupied == False):
-      total_white_cells = total_white_cells + 1 
+#total_white_cells = 0
+#for i in range(0,32):
+#  for j in range(0,32):
+#    if(cells[j][i].occupied == False):
+#      total_white_cells = total_white_cells + 1 
      
     
     
@@ -417,15 +417,20 @@ is_no_return_point = False
 
 
 
-x = 20
-y = 11
+x = 21
+y = 19
 
 #store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
 
+#print(total_white_cells)
+#while (total_white_cells > -36): 
+  
+  
+total_white_cells = 418
 
-#while (total_white_cells > 5): 
+while(total_white_cells > 0):
 
-for i in range (0,100):
+#for i in range (0,100):
   
   store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
 
@@ -440,6 +445,8 @@ for i in range (0,100):
         move_points.append([y, x])
         #time.sleep(1)
         x = x-1
+        
+        #total_white_cells = total_white_cells - 1
     
       # si la celda a su izq es negra y la actual está sucia: limpia la actual y cambia de dirección 
       if(cells[y-1][x-1-1].occupied is True and cells[y-1][x-1].cleaned is False):
@@ -449,6 +456,8 @@ for i in range (0,100):
       
         goes_west = False
         goes_north = True
+        
+        #total_white_cells = total_white_cells - 1
         
         
       # si la celda a su izq es blanca pero ya está limpia: limpia la actual y cambia de dirección
@@ -471,6 +480,8 @@ for i in range (0,100):
         move_points.append([y, x])
         #time.sleep(1)
         y = y-1
+        
+        #total_white_cells = total_white_cells - 1
     
       # si la celda encima de ella es negra y la actual está sucia: limpia y cambia de dirección
       if(cells[y-1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
@@ -480,6 +491,8 @@ for i in range (0,100):
       
         goes_north = False
         goes_east = True
+        
+        #total_white_cells = total_white_cells - 1
         
       # si la celda encima de ella es blanca pero está limpia: limpia la actual y cambias de dirección
       if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is True):
@@ -503,6 +516,8 @@ for i in range (0,100):
       #time.sleep(1)
         x = x + 1
         
+        #total_white_cells = total_white_cells - 1
+        
       # si la celda de su derecha está ocupada pero la actual está sucia: limpia la actual y cambia de dirección
       if(cells[y-1][x+1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
@@ -511,6 +526,8 @@ for i in range (0,100):
       
         goes_east = False
         goes_south = True
+        
+        #total_white_cells = total_white_cells - 1
       
       # si la celda de su dereca es blanca y estaña limpia: limpia la actual y cambia de dirección
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is True):
@@ -534,6 +551,8 @@ for i in range (0,100):
       #time.sleep(1)
         y = y + 1
         
+        #total_white_cells = total_white_cells - 1
+        
       # si la celda por debajo es negra y la actual está sucia: limpias la actual y cambias de dirección
       if(cells[y+1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
@@ -542,6 +561,8 @@ for i in range (0,100):
       
         goes_south = False
         goes_west = True
+        
+        #total_white_cells = total_white_cells - 1
         
         
       # si la celda por debajo es blanca y está limpia: limpias la actual y cambias de dirección
@@ -552,10 +573,11 @@ for i in range (0,100):
         
         goes_south = False
         goes_west = True
+   
         
       total_white_cells = total_white_cells - 1
-       
-       
+
+  print(total_white_cells)
   # Means you have reached to a no return point
   if (cells[y-1][x-1].cleaned):
       is_no_return_point = True
@@ -591,6 +613,8 @@ for i in range (0,100):
       x = best_coordinate[1]
       
       is_no_return_point = False
+      
+  #total_white_cells = total_white_cells - 1
       
   
       
