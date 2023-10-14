@@ -302,6 +302,9 @@ return_points = []
 # guardar puntos movimiento 
 
 # while total_white_cells != 0 
+
+is_no_return_point = False
+
 for i in range (0,50):
   
   
@@ -420,31 +423,49 @@ for i in range (0,50):
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
-        move_points.append([y,  x ])
+        move_points.append([y,  x])
         
         goes_south = False
         goes_west = True
        
        
-        
+  if (cells[y-1][x-1].cleaned is True):
+      is_no_return_point = True
+      #print(y,x)
+      
+  if (is_no_return_point):
+      
 #print("Move"+ str(move_points))
 #print("Return"+ str(return_points))
 
-print(y, x)
+# add condition if it is stuck
 
-unique_coordinates = remove_duplicates_from_list_of_coordinates(return_points)
-finally_return_points = remove_duplicates_from_arrays(unique_coordinates, move_points)
+      print(y, x)
 
-print(finally_return_points)
+      unique_coordinates = remove_duplicates_from_list_of_coordinates(return_points)
+      finally_return_points = remove_duplicates_from_arrays(unique_coordinates, move_points)
+
+      print(finally_return_points)
 
 
 
-current_cell = np.array([y, x])
+      current_cell = np.array([y, x])
 #possible_solutions = np.array([[18, 21], [19, 22], [20, 21], [20, 20], [20, 19], [20, 18], [20, 17], [17, 21]])
 
-best_coordinate = best_first_search(current_cell, finally_return_points)
+      best_coordinate = best_first_search(current_cell, finally_return_points)
 
-print(best_coordinate)
+      print(best_coordinate)
+      
+      #print(best_coordinate[0])
+      
+      y = best_coordinate[0]
+      
+      x = best_coordinate[1]
+      
+      is_no_return_point = False
+      
+  
+      
 
 #paint_cell(filled_map, 21, 17, CELL_WIDTH, CELL_HEIGHT, ORANGE)
 
