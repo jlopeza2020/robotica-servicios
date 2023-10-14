@@ -27,16 +27,16 @@ VIOLET = 134
 
 
 class Direction(Enum):
-    NORTE = "Norte"
-    SUR = "Sur"
-    ESTE = "Este"
-    OESTE = "Oeste"
+    NORTH = "North"
+    SOUTH = "South"
+    EAST = "East"
+    WEST = "West"
     
     def __str__(self):
         return self.value
 
 class Cell:
-    def __init__(self, x_map, y_map, x_gazebo=0, y_gazebo=0, occupied=False, cleaned=False, return_point=True, direction=None):
+    def __init__(self, x_map, y_map, x_gazebo=0, y_gazebo=0, occupied=False, cleaned=False, direction=None):
     #def __init__(self, x_map, y_map, occupied=False, cleaned=False):
         self.x_map = x_map
         self.y_map = y_map
@@ -286,27 +286,26 @@ while(total_white_cells > 0):
       if (cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.WEST
+        #print(cells[y-1][x-1].direction)
         move_points.append([y, x])
         x = x-1
         
-        #total_white_cells = total_white_cells - 1
-    
       # si la celda a su izq es negra y la actual está sucia: limpia la actual y cambia de dirección 
       if(cells[y-1][x-1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.WEST
         move_points.append([y, x])
       
         goes_west = False
         goes_north = True
         
-        #total_white_cells = total_white_cells - 1
-        
-        
       # si la celda a su izq es blanca pero ya está limpia: limpia la actual y cambia de dirección
       if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.WEST
         move_points.append([y, x])
       
         goes_west = False
@@ -320,6 +319,7 @@ while(total_white_cells > 0):
       if (cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.NORTH
         move_points.append([y, x])
         y = y-1
         
@@ -328,6 +328,8 @@ while(total_white_cells > 0):
       if(cells[y-1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.NORTH
+
         move_points.append([y, x])
       
         goes_north = False
@@ -339,6 +341,7 @@ while(total_white_cells > 0):
       if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.NORTH
         move_points.append([y, x])
       
         goes_north = False
@@ -352,6 +355,8 @@ while(total_white_cells > 0):
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.EAST
+
         move_points.append([y, x])
 
         x = x + 1
@@ -361,6 +366,8 @@ while(total_white_cells > 0):
       if(cells[y-1][x+1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.EAST
+
         move_points.append([y, x ])
       
         goes_east = False
@@ -371,6 +378,8 @@ while(total_white_cells > 0):
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.EAST
+
         move_points.append([y, x])
       
         goes_east = False
@@ -384,6 +393,7 @@ while(total_white_cells > 0):
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.SOUTH
         move_points.append([y, x])
         
         y = y + 1
@@ -393,6 +403,7 @@ while(total_white_cells > 0):
       if(cells[y+1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.SOUTH
         move_points.append([y, x])
       
         goes_south = False
@@ -404,6 +415,7 @@ while(total_white_cells > 0):
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
+        cells[y-1][x-1].direction = Direction.SOUTH
         move_points.append([y,  x])
         
         goes_south = False
@@ -420,8 +432,8 @@ while(total_white_cells > 0):
   if (is_no_return_point):
       
 
-      unique_coordinates = remove_duplicates_from_list_of_coordinates(return_points)
-      finally_return_points = remove_duplicates_from_arrays(unique_coordinates, move_points)
+      unique_return_coordinates = remove_duplicates_from_list_of_coordinates(return_points)
+      finally_return_points = remove_duplicates_from_arrays(unique_return_coordinates, move_points)
 
       current_cell = np.array([y, x])
       best_coordinate = best_first_search(current_cell, finally_return_points)
@@ -433,9 +445,10 @@ while(total_white_cells > 0):
       is_no_return_point = False
       
 
-  
-      
+unique_move_coordinates = remove_duplicates_from_list_of_coordinates(move_points)  
+print(unique_move_coordinates)
 
+#print(cells[x-1][y-1].direction)
 
 while True:
   
