@@ -101,6 +101,66 @@ def dilate_black_pixels(image):
 
 # Fill cells in the image with black color if any pixel in the cell is black.
 # Fill class cell
+"""
+def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height, ):
+
+    arr_cells_x = 0
+    arr_cells_y = 0
+     
+    
+    #is_black = False
+    for i in range(0, image_height, cell_height):
+
+        for j in range(0, image_width, cell_width):
+
+        
+            cell = arr_cells[arr_cells_x][arr_cells_y]
+            cell.x_map = arr_cells_y
+            cell.y_map = arr_cells_x
+            cell.x_gazebo = j 
+            cell.y_gazebo = i
+            
+            if (image[i][j] == BLACK):
+              cell.occupied = True
+              
+            is_black = False
+            for x in range(i, i + cell_height):
+                for y in range(j, j + cell_width):
+
+                    # check if any pixel in the cell is black 
+                    if(image[x][y] == BLACK):
+                        is_black = True
+                        break
+                        # = white_cells - 1
+
+            # if exits one: paint in black the whole cell
+            if is_black:
+                for x in range(i, i + cell_height):
+                    for y in range(j, j + cell_width):
+
+                        image[x][y] = BLACK
+                        
+
+                # set that it is occupied
+                #is_black = False
+                
+            # update value for filling class cell, y axis
+            arr_cells_y += 1
+
+        # update value for filling class cell, y axis and x axis
+        arr_cells_x += 1
+        arr_cells_y = 0
+        
+    return image
+"""
+
+# Fill cells in the image with black color if any pixel in the cell is black.
+# Fill class cell
+
+#BLACK = 0  # Constante para representar el color negro
+#WHITE = 255  # Constante para representar el color blanco
+
+
 def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height, ):
 
     arr_cells_x = 0
@@ -119,8 +179,8 @@ def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_h
             cell.x_gazebo = j 
             cell.y_gazebo = i
             
-            if (image[i][j] == BLACK):
-              cell.occupied = True
+            #if (image[i][j] == BLACK):
+            #  cell.occupied = True
               
             for x in range(i, i + cell_height):
                 for y in range(j, j + cell_width):
@@ -128,6 +188,7 @@ def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_h
                     # check if any pixel in the cell is black 
                     if(image[x][y] == BLACK):
                         is_black = True
+                        cell.occupied = True
                         # = white_cells - 1
 
             # if exits one: paint in black the whole cell
@@ -200,30 +261,32 @@ def remove_duplicates_from_arrays(array1, array2):
 
 
 def store_return_points(cells, return_points, y, x, cell_width, cell_height, color):
-  # oeste
   
-  #print("in" +str(x)+ str(y))
+  print(cells[y-1][x-1-1].occupied)
+  # oeste
   if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
     paint_cell(filled_map, x-1, y, cell_width, cell_height, RED)
     return_points.append([y, x-1])
   
+  print(cells[y-1-1][x-1].occupied)
   # norte 
   if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
      paint_cell(filled_map, x, y-1, cell_width, cell_height, RED)
      return_points.append([y-1, x])
-  # norte 
- # cells[y-1-1][x-1]
+   
+  print(cells[y-1][x+1-1].occupied)
   # este
   if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
     paint_cell(filled_map, x+1, y, cell_width, cell_height, RED)
     return_points.append([y, x+1])
     
+  print(cells[y+1-1][x-1].occupied)
   # sur 
   if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
     paint_cell(filled_map, x, y+1, cell_width, cell_height, RED)
     return_points.append([y+1, x])
     
-  #return y, x
+
 
 # Función para calcular la distancia euclidiana entre dos puntos
 def euclidean_distance(point1, point2):
@@ -262,22 +325,64 @@ filled_map = set_scenario(resized_map,cells, NEW_IMG_WIDTH, NEW_IMG_HEIGHT, CELL
 
 # PRINTS: van del 0 al 31
  # y primero, x después 
-#celda1 = cells[4-1][3-1]
+ 
+ #[y-1][x+1-1]
+
+"""
+x = 20
+y = 11
+celda1 = cells[y-1][x-1]
 #celda1.direction=Direction.NORTE
-#print("x mapa: " + str(celda1.x_map) + "y mapa: " + str(celda1.y_map))
-#print("x gazebo: " + str(celda1.x_gazebo) + "y gazebo: " + str(celda1.y_gazebo))
-#print("ocupada: " + str(celda1.occupied))
+print("x mapa: " + str(celda1.x_map) + "y mapa: " + str(celda1.y_map))
+print("x gazebo: " + str(celda1.x_gazebo) + "y gazebo: " + str(celda1.y_gazebo))
+print("ocupada: " + str(celda1.occupied))
+
+
+celda2 = cells[y-1][x-1-1]
+#celda2.direction=Direction.NORTE
+print("x mapa: " + str(celda2.x_map) + "y mapa: " + str(celda2.y_map))
+print("x gazebo: " + str(celda2.x_gazebo) + "y gazebo: " + str(celda2.y_gazebo))
+print("ocupada: " + str(celda2.occupied))
+
+
+celda3 = cells[y-1-1][x-1]
+#celda1.direction=Direction.NORTE
+print("x mapa: " + str(celda3.x_map) + "y mapa: " + str(celda3.y_map))
+print("x gazebo: " + str(celda3.x_gazebo) + "y gazebo: " + str(celda3.y_gazebo))
+print("ocupada: " + str(celda3.occupied))
+
+
+celda4 = cells[y-1][x-1+1]
+#celda1.direction=Direction.NORTE
+print("x mapa: " + str(celda4.x_map) + "y mapa: " + str(celda4.y_map))
+print("x gazebo: " + str(celda4.x_gazebo) + "y gazebo: " + str(celda4.y_gazebo))
+print("ocupada: " + str(celda4.occupied))
+
+
+celda5 = cells[y-1+1][x-1]
+#celda1.direction=Direction.NORTE
+print("x mapa: " + str(celda5.x_map) + "y mapa: " + str(celda5.y_map))
+print("x gazebo: " + str(celda5.x_gazebo) + "y gazebo: " + str(celda5.y_gazebo))
+print("ocupada: " + str(celda5.occupied))
+
 #print("direccion: " + str(celda1.direction))
+#paint_cell(filled_map, 20, 11, CELL_WIDTH, CELL_HEIGHT, YELLOW)
+"""
 
 print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
+
+#for i in range(0,32):
+#  for j in range(0,32):
+#    if(cells[j][i].occupied == True):
+#      paint_cell(filled_map, i+1, j+1, CELL_WIDTH, CELL_HEIGHT, BLUE)
+      #total_white_cells = total_white_cells + 1 
 # Always before iterative code
-draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
+#draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
 
 #init_vel = abs(HAL.getPose3d().x)
 #print(init_vel)
-x = 21 
-y = 19
+
 
 
 goes_west = True
@@ -286,12 +391,14 @@ goes_east = False
 goes_south = False 
 
 
+# calculate all white cells in the map
 total_white_cells = 0
 for i in range(0,32):
   for j in range(0,32):
     if(cells[i][j].occupied == False):
       total_white_cells = total_white_cells + 1 
      
+    
     
 move_points = []
 return_points = []
@@ -303,10 +410,22 @@ return_points = []
 
 # while total_white_cells != 0 
 
+
+
+
 is_no_return_point = False
 
-for i in range (0,50):
-  
+
+
+x = 20
+y = 11
+
+#store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
+
+
+#while (total_white_cells > 5): 
+
+for i in range (0,100):
   
   store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
 
@@ -341,6 +460,8 @@ for i in range (0,50):
         goes_west = False
         goes_north = True
         
+      total_white_cells = total_white_cells - 1
+      
   if (goes_north): 
       
       # si la celda encima de ella es blanca y está sucia: limpia la actual y avanza hacia arriba
@@ -368,6 +489,8 @@ for i in range (0,50):
       
         goes_north = False
         goes_east = True
+        
+      total_white_cells = total_white_cells - 1
         
   if (goes_east):
       
@@ -398,6 +521,8 @@ for i in range (0,50):
         goes_east = False
         goes_south = True
         
+      total_white_cells = total_white_cells - 1
+        
   if (goes_south):
       
       # si la celda  que tiene por debajo es blanca y no está limpia: limpia la actual y avanzas 
@@ -427,9 +552,12 @@ for i in range (0,50):
         
         goes_south = False
         goes_west = True
+        
+      total_white_cells = total_white_cells - 1
        
        
-  if (cells[y-1][x-1].cleaned is True):
+  # Means you have reached to a no return point
+  if (cells[y-1][x-1].cleaned):
       is_no_return_point = True
       #print(y,x)
       
@@ -440,12 +568,12 @@ for i in range (0,50):
 
 # add condition if it is stuck
 
-      print(y, x)
+      #print(y, x)
 
       unique_coordinates = remove_duplicates_from_list_of_coordinates(return_points)
       finally_return_points = remove_duplicates_from_arrays(unique_coordinates, move_points)
 
-      print(finally_return_points)
+      #print(finally_return_points)
 
 
 
@@ -454,7 +582,7 @@ for i in range (0,50):
 
       best_coordinate = best_first_search(current_cell, finally_return_points)
 
-      print(best_coordinate)
+      #print(best_coordinate)
       
       #print(best_coordinate[0])
       
@@ -467,6 +595,7 @@ for i in range (0,50):
   
       
 
+ # print(total_white_cells)
 #paint_cell(filled_map, 21, 17, CELL_WIDTH, CELL_HEIGHT, ORANGE)
 
 
