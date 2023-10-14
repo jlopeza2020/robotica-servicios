@@ -424,7 +424,7 @@ while(total_white_cells > 0):
         
       total_white_cells = total_white_cells - 1
 
-
+  
   # Means you have reached to a no return point
   if (cells[y-1][x-1].cleaned):
       is_no_return_point = True
@@ -444,12 +444,16 @@ while(total_white_cells > 0):
       
       is_no_return_point = False
       
-
+  
+  #time.sleep(5)
+  
 unique_move_coordinates = remove_duplicates_from_list_of_coordinates(move_points)  
-print(unique_move_coordinates)
+#print(unique_move_coordinates)
+#print(cells[19-1][21-1].direction)
 
 #print(cells[x-1][y-1].direction)
 
+init_vel = 
 while True:
   
     #print(total_white_cells)
@@ -458,13 +462,13 @@ while True:
     #print(abs(HAL.getPose3d().x), abs(HAL.getPose3d().y))
     
     #Turn
-    #grados = HAL.getPose3d().yaw * (180 / math.pi)
+    grados = HAL.getPose3d().yaw * (180 / math.pi)
     #print(round(abs(grados)))
-    #HAL.setW(0.1)
+    HAL.setW(0.1)
     
     # avanza 2 casillas
-    #vel = abs(HAL.getPose3d().x)
-    #if(vel > (init_vel - 0.32*2) ):
+    vel = abs(HAL.getPose3d().x)
+    if(vel > (init_vel - 0.32*2) ):
       
     #  HAL.setV(1)
     #  HAL.setW(0)
