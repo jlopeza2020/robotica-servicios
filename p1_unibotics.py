@@ -25,12 +25,17 @@ GREEN = 131
 BLUE = 132
 VIOLET = 134
 
+WEST_DIR = 0
+NORTH_DIR = 90
+EAST_DIR = 180
+SOUTH_DIR = 270
+
 
 class Direction(Enum):
-    NORTH = "North"
-    SOUTH = "South"
-    EAST = "East"
-    WEST = "West"
+    NORTH = "north"
+    SOUTH = "south"
+    EAST = "east"
+    WEST = "west"
     
     def __str__(self):
         return self.value
@@ -152,6 +157,7 @@ def get_2d_x():
     x_3d = HAL.getPose3d().x
     x_2d = 17.963 - 2.915*x_3d
     
+    
     return x_2d
   
 # equation obtained by linear regresion
@@ -195,7 +201,7 @@ def remove_duplicates_from_arrays(array1, array2):
     return unique_array1
 
 
-def store_return_points(cells, return_points, y, x, cell_width, cell_height, color):
+def store_return_points(cells, filled_map, return_points, y, x, cell_width, cell_height, color):
   
   # oeste
   if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
@@ -276,7 +282,7 @@ total_white_cells = 418
 while(total_white_cells > 0):
 
 
-  store_return_points(cells, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
+  store_return_points(cells, filled_map, return_points, y, x, CELL_WIDTH, CELL_HEIGHT, RED)
 
   ## MAKE SPIRAL
   
@@ -444,17 +450,213 @@ while(total_white_cells > 0):
       
       is_no_return_point = False
       
+      
+     
+  #time.sleep(5)
+  #draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
+  #GUI.showNumpy(filled_map)
+      
   
   #time.sleep(5)
   
 unique_move_coordinates = remove_duplicates_from_list_of_coordinates(move_points)  
 #print(unique_move_coordinates)
+#print(len(unique_move_coordinates))
+
 #print(cells[19-1][21-1].direction)
 
 #print(cells[x-1][y-1].direction)
 
-init_vel = 
+
+"""
+# Coordenadas del primer vector
+x1 = 21
+y1 = 19
+
+# Coordenadas del segundo vector
+x2 = 20
+y2 = 19
+
+# Calcular la arco tangente del ángulo entre los vectores
+angulo = math.atan2(y2 - y1, x2 - x1)
+print(math.degrees(angulo))
+
+# Coordenadas del segundo vector
+x3 = 21
+y3 = 18
+
+# Calcular la arco tangente del ángulo entre los vectores
+angulo2 = math.atan2(y3 - y1, x3 - x1)
+print(math.degrees(angulo2))
+
+
+# Coordenadas del segundo vector
+x4 = 22
+y4 = 19
+
+# Calcular la arco tangente del ángulo entre los vectores
+angulo3 = math.atan2(y4 - y1, x4 - x1)
+print(math.degrees(angulo3))
+
+
+# Coordenadas del segundo vector
+x5 = 21
+y5 = 20
+
+# Calcular la arco tangente del ángulo entre los vectores
+angulo4 = math.atan2(y5 - y1, x5 - x1)
+print(math.degrees(angulo4))
+
+"""
+init_vel = abs(HAL.getPose3d().x)
+
+#print(len(unique_move_coordinates))
+
+#for i in range(0, len(unique_move_coordinates)):
+
+pos_move_coords = 0
+
+init_pos = HAL.getPose3d().x
+
+print(cells[19-1][21-1].x_gazebo, cells[19-1][21-1].y_gazebo)
+print(cells[19-1][20-1].x_gazebo, cells[19-1][20-1].y_gazebo)
+print(cells[19-1][19-1].x_gazebo, cells[19-1][19-1].y_gazebo)
+
 while True:
+  
+    
+    x_3d = HAL.getPose3d().x
+    
+    y_3d = HAL.getPose3d().y
+    
+    #print(x_3d,y_3d)
+     
+    current_2d_x = int(round(get_2d_x()))
+    current_2d_y = int(round(get_2d_y()))
+    
+    yaw_degrees = abs(round(HAL.getPose3d().yaw * (180 / math.pi)))
+  
+    y_coord = unique_move_coordinates[pos_move_coords][0]
+    x_coord = unique_move_coordinates[pos_move_coords][1]
+    
+    
+    #print(yaw_degrees)
+    
+    
+    #else:
+      
+      #mirarla dirección 
+      
+    # IR HACIA ADELANTE
+      
+    # meter en una función
+    #init_vel = abs(HAL.getPose3d().x)
+    if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and yaw_degrees == WEST_DIR):
+      
+      #while(y_coord != current_2d_y and x_coord != current_2d_x):
+      pos = HAL.getPose3d().x
+      print(pos)
+      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+      if(pos < (init_pos + 0.32)):
+      
+        HAL.setV(0.5)
+        HAL.setW(0)
+      
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        init_pos = HAL.getPose3d().x
+        
+      #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+        
+        
+      
+      
+      #distancia = math.sqrt((x_coord - current_2d_x) ** 2 + (y_coord - current_2d_y) ** 2)
+      
+      
+      #HAL.setV(0)
+      #while (y_coord != current_2d_y or x_coord != current_2d_x):
+      #  HAL.setV(0.5)
+      #  HAL.setW(0)
+         
+        
+      
+    # comprobar si los signos son correctos 
+    
+    if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and yaw_degrees == NORTH_DIR):
+      
+      pos = HAL.getPose3d().x
+      print(pos)
+      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+      if(pos < (init_pos - 0.32)):
+      
+        HAL.setV(0.5)
+        HAL.setW(0)
+      
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        init_pos = HAL.getPose3d().x
+      
+    
+    
+    if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and yaw_degrees == EAST_DIR):
+      
+      pos = HAL.getPose3d().x
+      print(pos)
+      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+      if(pos < (init_pos - 0.32)):
+      
+        HAL.setV(0.5)
+        HAL.setW(0)
+      
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        init_pos = HAL.getPose3d().x
+    
+    
+    if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and yaw_degrees == SOUTH_DIR):
+      
+      pos = HAL.getPose3d().x
+      print(pos)
+      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+      if(pos < (init_pos + 0.32)):
+      
+        HAL.setV(0.5)
+        HAL.setW(0)
+      
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        init_pos = HAL.getPose3d().x
+      
+    
+    # GIRAR
+      
+    #if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and yaw_degrees != WEST_DIR):
+  
+    
+    #if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and yaw_degrees != NORTH_DIR):
+  
+    
+    #if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and yaw_degrees != EAST_DIR):
+    
+    
+    #if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and yaw_degrees != SOUTH_DIR):
+    
+    #print("iguales")
+      
+    if(y_coord == current_2d_y and x_coord == current_2d_x):
+      pos_move_coords = pos_move_coords + 1
+      #if()
+  
+  #if()
+  
+    
+  
+    
   
     #print(total_white_cells)
     #paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, RED)
@@ -462,13 +664,14 @@ while True:
     #print(abs(HAL.getPose3d().x), abs(HAL.getPose3d().y))
     
     #Turn
-    grados = HAL.getPose3d().yaw * (180 / math.pi)
+    #grados = HAL.getPose3d().yaw * (180 / math.pi)
+    #angulo_grados = math.degrees(angulo)
     #print(round(abs(grados)))
-    HAL.setW(0.1)
+    #HAL.setW(0.1)
     
     # avanza 2 casillas
-    vel = abs(HAL.getPose3d().x)
-    if(vel > (init_vel - 0.32*2) ):
+    #vel = abs(HAL.getPose3d().x)
+    #if(vel > (init_vel - 0.32*4) ):
       
     #  HAL.setV(1)
     #  HAL.setW(0)
@@ -485,7 +688,7 @@ while True:
     #current_2d_x = int(round(get_2d_x()))
     #current_2d_y = int(round(get_2d_y()))
     #print(current_2d_x, current_2d_y)
-    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, RED)
+    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
 
     
 
@@ -495,3 +698,4 @@ while True:
       
     
     GUI.showNumpy(filled_map)
+    
