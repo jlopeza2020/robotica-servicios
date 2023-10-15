@@ -1,38 +1,42 @@
-from queue import PriorityQueue
-import numpy as np
+def obtener_punto_siguiente():
+    # Esta función debería devolver las coordenadas del siguiente punto en el plan
+    # Supondremos que devuelve una tupla (x, y)
+    return (20.0, 19.0)  # Ejemplo de coordenadas
 
-# Definir la celda actual y las posibles soluciones
-current_cell = np.array([13, 18])
-possible_solutions = np.array([[18, 21], [19, 22], [20, 21], [20, 20], [20, 19], [20, 18], [20, 17], [17, 21]])
+def celda_a_pixel(celda_x, celda_y, ancho_celda, alto_celda):
+    pixel_x = celda_x * ancho_celda + ancho_celda / 2
+    pixel_y = celda_y * alto_celda + alto_celda / 2
+    return (pixel_x, pixel_y)
 
-# Función para calcular la distancia euclidiana entre dos puntos
-def euclidean_distance(point1, point2):
-    return np.linalg.norm(point1 - point2)
+def pixel_a_coordenada_mundo(pixel_x, pixel_y):
+    mundo_x = pixel_x * 0.02 # Supongamos que 1 pixel equivale a 1/50 unidad en el mundo
+    mundo_y = pixel_y * 0.02
+    return (mundo_x, mundo_y)
 
-# Función para encontrar la mejor coordenada usando Best-First Search
-def best_first_search(start, possible_solutions):
-    priority_queue = PriorityQueue()
-    for solution in possible_solutions:
-        priority_queue.put((euclidean_distance(start, solution), tuple(solution)))  # Convertir a tupla
+def coordenada_mundo_a_relativa(coordenada_mundo, posicion_robot):
+    relativa_x = coordenada_mundo[0] - posicion_robot[0]
+    relativa_y = coordenada_mundo[1] - posicion_robot[1]
+    return (relativa_x, relativa_y)
 
-    best_coordinate = None
-    best_distance = float('inf')
+# Ejemplo de uso
+celda_x = 21
+celda_y = 19
+ancho_celda = 16
+alto_celda = 16
 
-    while not priority_queue.empty():
-        _, coordinate = priority_queue.get()
-        coordinate = np.array(coordinate)  # Convertir nuevamente a array
-        distance = euclidean_distance(start, coordinate)
-        if distance < best_distance:
-            best_coordinate = coordinate
-            best_distance = distance
+pixel_central = celda_a_pixel(celda_x, celda_y, ancho_celda, alto_celda)
+print("Pixel central:", pixel_central)
 
-    return best_coordinate
+coordenada_mundo = pixel_a_coordenada_mundo(*pixel_central)
+print("Coordenada del mundo:", coordenada_mundo)
 
-# Encontrar la mejor coordenada
-best_coordinate = best_first_search(current_cell, possible_solutions)
+posicion_robot = (30.0, 35.0)
+coordenada_relativa = coordenada_mundo_a_relativa(coordenada_mundo, posicion_robot)
+print("Coordenada relativa al robot:", coordenada_relativa)
 
-# Imprimir el resultado
-print("Celda actual:", current_cell)
-print("Posibles soluciones:", possible_solutions)
-print("La mejor coordenada encontrada es:", best_coordinate)
-
+# Obtener el siguiente punto del plan y convertirlo a coordenada relativa al robot
+siguiente_punto = obtener_punto_siguiente()
+siguiente_punto_pixel = celda_a_pixel(*siguiente_punto, ancho_celda, alto_celda)
+siguiente_punto_mundo = pixel_a_coordenada_mundo(*siguiente_punto_pixel)
+siguiente_punto_relativo = coordenada_mundo_a_relativa(siguiente_punto_mundo, posicion_robot)
+print("Siguiente punto relativo al robot:", siguiente_punto_relativo)
