@@ -260,6 +260,24 @@ def pixel_a_coordenada_mundo(pixel_x, pixel_y):
     mundo_x = pixel_x * 0.02 # Supongamos que 1 pixel equivale a 1/50 unidad en el mundo
     mundo_y = pixel_y * 0.02
     return (mundo_y, mundo_x)
+    
+    
+def calcular_arcotangente(punto1, punto2):
+    # Puntos representados como tuplas (x, y)
+    x1, y1 = punto1
+    x2, y2 = punto2
+    
+    # Calcula la diferencia en coordenadas x e y
+    delta_x = x2 - x1
+    delta_y = y2 - y1
+    
+    # Calcula la arcotangente en radianes
+    arcotangente_rad = math.atan2(delta_y, delta_x)
+    
+    # Convierte la arcotangente a grados
+    arcotangente_grados = math.degrees(arcotangente_rad)
+    
+    return arcotangente_rad, arcotangente_grados
 
 
 map = get_unibotics_map()
@@ -472,7 +490,7 @@ while(total_white_cells > 0):
   #time.sleep(5)
   
 unique_move_coordinates = remove_duplicates_from_list_of_coordinates(move_points)  
-#print(unique_move_coordinates)
+print(unique_move_coordinates)
 #print(len(unique_move_coordinates))
 
 #print(cells[19-1][21-1].direction)
@@ -537,6 +555,10 @@ init_pos = HAL.getPose3d().x
 dif_y = 0
 dif_x = 0
 
+avanza_casilla =  True
+
+
+
 while True:
   
     x_3d = HAL.getPose3d().x
@@ -551,11 +573,18 @@ while True:
     current_2d_y = int(round(get_2d_y()))
     
     yaw_degrees = abs(round(HAL.getPose3d().yaw * (180 / math.pi)))
+    
+    print(yaw_degrees)
+    
+    
+    
   
   
     # make conversion for central coord 
     y_coord = unique_move_coordinates[pos_move_coords][0]
     x_coord = unique_move_coordinates[pos_move_coords][1]
+    
+    print(y_coord, x_coord)
     
     
     objective_y_sup_izq_pixel = (y_coord -1) * 16
@@ -566,14 +595,29 @@ while True:
     
     objective_x_central_pixel = objective_x_sup_izq_pixel + 8
     
-    print("objective"+ str(objective_y_central_pixel), objective_x_central_pixel)
+    #print("objective"+ str(objective_y_central_pixel), objective_x_central_pixel)
 
     
   
     pixel_x_actual = 272-50*x_3d
     pixel_y_actual = 208+50*y_3d
-    print(pixel_y_actual, pixel_x_actual)
+    #print(pixel_y_actual, pixel_x_actual)
+    
+    
+    # clacular grados 
+    p1 = (objective_x_central_pixel,objective_y_central_pixel)
+    p2 = (pixel_x_actual, pixel_y_actual)
+    arcotangente_rad, arcotangente_grados = calcular_arcotangente(p1 , p2)
+    
+    print(arcotangente_rad, arcotangente_grados)
   
+    
+    
+    #if(abs(arcotangente_grados) > 0.5):
+    #  HAL.setW(1)
+    #else:
+    #  HAL.setW(0)
+      
     # usar para probarlo
     #celda_x_actual= current_2d_x
     #celda_y_actual = current_2d_y
@@ -600,13 +644,102 @@ while True:
     print("dif y " + str(dif_y), dif_x)
     
     
-    if(dif_x > 0.001):
-      HAL.setV(0.5)
-      HAL.setW(0)
+    # avanza recto
+    if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and yaw_degrees == WEST_DIR):
+      if(dif_x > 0.5):
+        HAL.setV(0.5)
+        HAL.setW(0)
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        
+        
+    if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and yaw_degrees == NORTH_DIR):
+      if(dif_y > 0.5):
+        HAL.setV(0.5)
+        HAL.setW(0)
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        
+    if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and yaw_degrees == EAST_DIR):
+      if(dif_x > 0.5):
+        HAL.setV(0.5)
+        HAL.setW(0)
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        
+        
+    if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and yaw_degrees == SOUTH_DIR):
+      if(dif_y > 0.5):
+        HAL.setV(0.5)
+        HAL.setW(0)
+      else: 
+        HAL.setV(0)
+        HAL.setW(0)
+        
       
-    else: 
-      HAL.setV(0)
-      HAL.setW(0)
+    
+    #if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and yaw_degrees != WEST_DIR):
+    dif_degrees = 0
+    
+    if (yaw_degrees < NORTH_DIR): 
+      dif_degrees =  NORTH_DIR - yaw_degrees
+    else:
+      dif_degrees = yaw_degrees - NORTH_DIR
+    
+    
+    if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and yaw_degrees != NORTH_DIR):
+      
+      #avanza_casilla = True
+      
+      if (avanza_casilla):
+      # avance una casilla más y que ya gire 
+        if(dif_y > 3.5):
+          HAL.setV(0.5)
+          HAL.setW(0)
+        else: 
+          HAL.setV(0)
+          HAL.setW(0)
+          avanza_casilla = False
+          
+          
+      
+      if(avanza_casilla == False): 
+        
+        arcotangente_rad, arcotangente_grados = calcular_arcotangente(p1 , p2)
+      
+        #print("arcotangente_grados" + str(arcotangente_grados))
+        if(dif_degrees > 2):
+          HAL.setV(0)
+          HAL.setW(0.15)
+        else:
+          #yaw_degrees = NORTH_DIR
+          HAL.setW(0)
+          HAL.setV(0)
+        
+      
+      #avanza  una casilla y gira al norte 
+  
+    
+    #if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and yaw_degrees != EAST_DIR):
+    
+    
+    #if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and yaw_degrees != SOUTH_DIR):
+        
+    
+       
+        
+    paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+    
+    
+    if(y_coord == current_2d_y and x_coord == current_2d_x):
+      pos_move_coords = pos_move_coords + 1
+      
+      
+      
+    # ARREGLAR LO DE LOS GRADOS 
   #ancho_celda = 16
   #alto_celda = 16
 
@@ -734,5 +867,3 @@ while True:
       
     #draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
   #GUI.showNumpy(filled_map)
-    
-  
