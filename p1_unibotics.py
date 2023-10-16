@@ -156,6 +156,7 @@ def get_2d_x():
   
     x_3d = HAL.getPose3d().x
     x_2d = 17.963 - 2.915*x_3d
+    #x_2d = 17.61 - 3.13*x_3d
     
     
     return x_2d
@@ -165,6 +166,7 @@ def get_2d_y():
   
     y_3d = HAL.getPose3d().y
     y_2d = 13.959 + 3.092*y_3d
+    #y_2d = 12.72 + 3.12*y_3d
   
     return y_2d
 
@@ -248,6 +250,16 @@ def best_first_search(start, possible_solutions):
 
     return best_coordinate
 
+
+def celda_a_pixel(celda_x, celda_y, ancho_celda, alto_celda):
+    pixel_x = celda_x * ancho_celda + ancho_celda / 2
+    pixel_y = celda_y * alto_celda + alto_celda / 2
+    return (pixel_y, pixel_x)
+
+def pixel_a_coordenada_mundo(pixel_x, pixel_y):
+    mundo_x = pixel_x * 0.02 # Supongamos que 1 pixel equivale a 1/50 unidad en el mundo
+    mundo_y = pixel_y * 0.02
+    return (mundo_y, mundo_x)
 
 
 map = get_unibotics_map()
@@ -514,31 +526,146 @@ init_vel = abs(HAL.getPose3d().x)
 
 #for i in range(0, len(unique_move_coordinates)):
 
-pos_move_coords = 0
+# la primera la omitimos 
+pos_move_coords = 1
 
 init_pos = HAL.getPose3d().x
 
-print(cells[19-1][21-1].x_gazebo, cells[19-1][21-1].y_gazebo)
-print(cells[19-1][20-1].x_gazebo, cells[19-1][20-1].y_gazebo)
-print(cells[19-1][19-1].x_gazebo, cells[19-1][19-1].y_gazebo)
+#print(cells[19-1][21-1].x_gazebo, cells[19-1][21-1].y_gazebo)
+#print(cells[19-1][20-1].x_gazebo, cells[19-1][20-1].y_gazebo)
+#print(cells[19-1][19-1].x_gazebo, cells[19-1][19-1].y_gazebo)
+dif_y = 0
+dif_x = 0
 
 while True:
   
-    
     x_3d = HAL.getPose3d().x
-    
     y_3d = HAL.getPose3d().y
+    
+    #print(y_3d, x_3d)
     
     #print(x_3d,y_3d)
      
+    # use it  to draw cell
     current_2d_x = int(round(get_2d_x()))
     current_2d_y = int(round(get_2d_y()))
     
     yaw_degrees = abs(round(HAL.getPose3d().yaw * (180 / math.pi)))
   
+  
+    # make conversion for central coord 
     y_coord = unique_move_coordinates[pos_move_coords][0]
     x_coord = unique_move_coordinates[pos_move_coords][1]
     
+    
+    objective_y_sup_izq_pixel = (y_coord -1) * 16
+    objective_x_sup_izq_pixel = (x_coord -1) * 16
+    #print(objective_y_sup_izq_pixel, objective_x_sup_izq_pixel)
+    
+    objective_y_central_pixel = objective_y_sup_izq_pixel + 8
+    
+    objective_x_central_pixel = objective_x_sup_izq_pixel + 8
+    
+    print("objective"+ str(objective_y_central_pixel), objective_x_central_pixel)
+
+    
+  
+    pixel_x_actual = 272-50*x_3d
+    pixel_y_actual = 208+50*y_3d
+    print(pixel_y_actual, pixel_x_actual)
+  
+    # usar para probarlo
+    #celda_x_actual= current_2d_x
+    #celda_y_actual = current_2d_y
+    #print(cells[current_2d_y-1][current_2d_x-1].y_gazebo, cells[current_2d_y-1][current_2d_x-1].x_gazebo)
+    #print(cells[19-1][20-1].y_gazebo, cells[19-1][20-1].x_gazebo)
+    
+    
+    
+    
+      # 0 es la y, 1 es la x 
+    if (objective_y_central_pixel < pixel_y_actual): 
+      dif_y = pixel_y_actual - objective_y_central_pixel
+    else:
+      dif_y = objective_y_central_pixel - pixel_y_actual
+    
+    
+      # 0 es la y, 1 es la x 
+    if (objective_x_central_pixel < pixel_x_actual ): 
+      dif_x = pixel_x_actual - objective_x_central_pixel
+    else:
+      dif_x = objective_x_central_pixel - pixel_x_actual  
+      
+  
+    print("dif y " + str(dif_y), dif_x)
+    
+    
+    if(dif_x > 0.001):
+      HAL.setV(0.5)
+      HAL.setW(0)
+      
+    else: 
+      HAL.setV(0)
+      HAL.setW(0)
+  #ancho_celda = 16
+  #alto_celda = 16
+
+  #pixel_central_actual = celda_a_pixel(celda_x_actual, celda_y_actual, ancho_celda, alto_celda)
+  #print("Pixel central:", pixel_central_actual)
+
+  #coordenada_mundo_actual = pixel_a_coordenada_mundo(*pixel_central_actual)
+  #print("Coordenada del mundo en m:", coordenada_mundo_actual)
+    
+    """
+    celda_x_siguiente= unique_move_coordinates[1][1]
+    celda_y_siguiente = unique_move_coordinates[1][0]
+    #ancho_celda = 16
+    #alto_celda = 16
+
+    #pixel_central_siguiente = celda_a_pixel(celda_x_siguiente, celda_y_siguiente, ancho_celda, alto_celda)
+    #print("Pixel central:", pixel_central_siguiente)
+
+    #coordenada_mundo_siguiente = pixel_a_coordenada_mundo(*pixel_central_siguiente)
+    print("Coordenada del mundo en m:", coordenada_mundo_siguiente)
+    
+    
+    
+    dif_y = 0
+      # 0 es la y, 1 es la x 
+   if (coordenada_mundo_siguiente[0] < coordenada_mundo_actual[0]): 
+      dif_y = coordenada_mundo_actual[0] - coordenada_mundo_siguiente[0]
+    else:
+      dif_y = coordenada_mundo_siguiente[0] - coordenada_mundo_actual[0]
+    
+    
+    dif_x = 0
+      # 0 es la y, 1 es la x 
+    if (coordenada_mundo_siguiente[1] < coordenada_mundo_actual[1]): 
+      dif_x = coordenada_mundo_actual[1] - coordenada_mundo_siguiente[1]
+    else:
+      dif_x = coordenada_mundo_siguiente[1] - coordenada_mundo_actual[1]  
+      
+      
+    print(dif_y, dif_x)
+    
+    if(dif_x > 0.001):
+      HAL.setV(0.5)
+      HAL.setW(0)
+      
+    else: 
+      HAL.setV(0)
+      HAL.setW(0)
+      
+    
+  
+    print(HAL.getPose3d().x, HAL.getPose3d().y) 
+   
+    
+    """
+    GUI.showNumpy(filled_map)
+    draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
+    
+#while True:
     
     #print(yaw_degrees)
     
@@ -551,113 +678,27 @@ while True:
       
     # meter en una función
     #init_vel = abs(HAL.getPose3d().x)
-    if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and yaw_degrees == WEST_DIR):
-      
-      #while(y_coord != current_2d_y and x_coord != current_2d_x):
-      pos = HAL.getPose3d().x
-      print(pos)
-      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
-      if(pos < (init_pos + 0.32)):
-      
-        HAL.setV(0.5)
-        HAL.setW(0)
-      
-      else: 
-        HAL.setV(0)
-        HAL.setW(0)
-        init_pos = HAL.getPose3d().x
-        
-      #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
-        
-        
-      
-      
-      #distancia = math.sqrt((x_coord - current_2d_x) ** 2 + (y_coord - current_2d_y) ** 2)
-      
-      
-      #HAL.setV(0)
-      #while (y_coord != current_2d_y or x_coord != current_2d_x):
-      #  HAL.setV(0.5)
-      #  HAL.setW(0)
-         
-        
-      
-    # comprobar si los signos son correctos 
-    
-    if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and yaw_degrees == NORTH_DIR):
-      
-      pos = HAL.getPose3d().x
-      print(pos)
-      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
-      if(pos < (init_pos - 0.32)):
-      
-        HAL.setV(0.5)
-        HAL.setW(0)
-      
-      else: 
-        HAL.setV(0)
-        HAL.setW(0)
-        init_pos = HAL.getPose3d().x
-      
-    
-    
-    if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and yaw_degrees == EAST_DIR):
-      
-      pos = HAL.getPose3d().x
-      print(pos)
-      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
-      if(pos < (init_pos - 0.32)):
-      
-        HAL.setV(0.5)
-        HAL.setW(0)
-      
-      else: 
-        HAL.setV(0)
-        HAL.setW(0)
-        init_pos = HAL.getPose3d().x
-    
-    
-    if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and yaw_degrees == SOUTH_DIR):
-      
-      pos = HAL.getPose3d().x
-      print(pos)
-      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
-      if(pos < (init_pos + 0.32)):
-      
-        HAL.setV(0.5)
-        HAL.setW(0)
-      
-      else: 
-        HAL.setV(0)
-        HAL.setW(0)
-        init_pos = HAL.getPose3d().x
-      
-    
+  
     # GIRAR
       
-    #if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and yaw_degrees != WEST_DIR):
+      #if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and yaw_degrees != WEST_DIR):
   
     
-    #if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and yaw_degrees != NORTH_DIR):
+      #if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and yaw_degrees != NORTH_DIR):
   
     
-    #if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and yaw_degrees != EAST_DIR):
+      #if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and yaw_degrees != EAST_DIR):
     
     
-    #if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and yaw_degrees != SOUTH_DIR):
+      #if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and yaw_degrees != SOUTH_DIR):
     
-    #print("iguales")
+      #print("iguales")
       
-    if(y_coord == current_2d_y and x_coord == current_2d_x):
-      pos_move_coords = pos_move_coords + 1
+      #if(y_coord == current_2d_y and x_coord == current_2d_x):
+      #  pos_move_coords = pos_move_coords + 1
+        #if()
+  
       #if()
-  
-  #if()
-  
-    
-  
-    
-  
     #print(total_white_cells)
     #paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, RED)
     # Assuming HAL.getPose3d().x and HAL.getPose3d().y provide the current position in the map
@@ -690,12 +731,8 @@ while True:
     #print(current_2d_x, current_2d_y)
     #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
 
-    
-
       
-    draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
-
-      
+    #draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
+  #GUI.showNumpy(filled_map)
     
-    GUI.showNumpy(filled_map)
-    
+  

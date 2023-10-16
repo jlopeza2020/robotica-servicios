@@ -19,8 +19,8 @@ def coordenada_mundo_a_relativa(coordenada_mundo, posicion_robot):
     return (relativa_x, relativa_y)
 
 # Ejemplo de uso
-celda_x = 21
-celda_y = 19
+celda_x = 18
+celda_y = 14
 ancho_celda = 16
 alto_celda = 16
 
