@@ -548,11 +548,11 @@ while True:
     print("dif y " + str(dif_y), dif_x)
     
     
-    HAL.setV(0.25)
-    print(HAL.getPose3d().yaw)
-    print(yaw_degrees)
+    #HAL.setV(0.25)
+    #print(HAL.getPose3d().yaw)
+    #print(yaw_degrees)
     
-    """
+    
     # si las coordenadas no son iguales, hay que moverse 
     if(y_coord != current_2d_y or x_coord != current_2d_x):
       
@@ -596,12 +596,15 @@ while True:
       #avanza_casilla = True
           
       
-          #dif_x_bt = get_difference(x_coord, current_2d_x)
-          #print("diferencia  " + str(dif_x_bt))
+      
+          #MODIFICAR 
+          
+          dif_x_bt = get_difference(x_coord, current_2d_x)
+          print("diferencia  " + str(dif_x_bt))
           
           
           #if(dif_x_bt == 0):
-          #if (avanza_casilla):
+          if (avanza_casilla):
               #print("avanzo casilla")
       # avance una casilla más y que ya gire 
               #if(avanza_casilla):
@@ -609,12 +612,10 @@ while True:
                 #HAL.setV(0.5)
                 #HAL.setW(0)
               #else: 
-                #HAL.setV(0)
-                #HAL.setW(0)
+              HAL.setV(0)
+              HAL.setW(0)
                 #avanza_casilla = False
                 #dif_x = 0
-          """
-          """
           else:
       
 
@@ -693,8 +694,8 @@ while True:
                 
                 
         #girar
-        """
-    """
+      
+    
     elif((y_coord == current_2d_y and x_coord == current_2d_x) or has_reached):
         #HAL.setV(0)
         #HAL.setW(0)
@@ -705,7 +706,7 @@ while True:
     print("Y_OBJETIVO " +str(y_coord), "Y_ACTUAL " + str(current_2d_y), "X_OBJETIVO " + str(x_coord), "X_ACTUAL "+str(current_2d_x))
       
     """
-     """ 
+    
       
       
       
