@@ -508,6 +508,8 @@ avanza_casilla =  True
 
 has_reached = False
 
+#previous_arcotangente_rad = 0.0
+
 while True:
   
 
@@ -520,14 +522,14 @@ while True:
     
     yaw_degrees = abs(round(HAL.getPose3d().yaw * (180 / math.pi)))
     
-    print(yaw_degrees)
+    #print(yaw_degrees)
 
-    # make conversion for central coord 
+    # make conversion for central coord : objective
     y_coord = unique_move_coordinates[pos_move_coords][0]
     x_coord = unique_move_coordinates[pos_move_coords][1]
     
-    print(y_coord, x_coord)
-    print(cells[y_coord-1][x_coord-1].direction)
+    #print(y_coord, x_coord)
+    #print(cells[y_coord-1][x_coord-1].direction)
 
     objective_y_sup_izq_pixel = (y_coord -1) * 16
     objective_x_sup_izq_pixel = (x_coord -1) * 16
@@ -545,12 +547,114 @@ while True:
     dif_y = get_difference(objective_y_central_pixel, pixel_y_actual)
     dif_x = get_difference(objective_x_central_pixel, pixel_x_actual)
     
+    
+    dir_objetivo = cells[y_coord-1][x_coord-1].direction
+    dir_actual = cells[current_2d_y-1][current_2d_x-1].direction
+    
+    print("dir objetivo " + str(dir_objetivo), "dir actual " + str(dir_actual))
+    
     print("dif y " + str(dif_y), dif_x)
     
+    #if (objective_x_central_pixel < pixel_x_actual):
+    #  print("move west")
+      
+    arcotangente_rad = math.atan2(y_coord - current_2d_y, x_coord - current_2d_x)
+   
+    print("arcotangente en radianes" + str (arcotangente_rad))
+    print("mi orientación es " + str(HAL.getPose3d().yaw))
+    
+    # IMPORTANTE TENER EN CUENTA LA ORIENTACIÓN Y CREAR LA CONVERSIÓN 
+   
+   
+   # Check if the current and previous angles are the same
+    #f arcotangente_rad != previous_arcotangente_rad:
+      # Use the previous angle
+      #arcotangente_rad = previous_arcotangente_rad
+    #else:
+      # Update the previous angle if it's different
+      #previous_arcotangente_rad = arcotangente_rad
+
+    #print("arcotangente previa en radianes" + str (previous_arcotangente_rad))
+    
+    if(arcotangente_rad == math.pi):
+      #print("WESTTTTTTTT")
+    #if (x_coord < current_2d_x and y_coord == current_2d_y):
+      print("move west")
+      if(dif_x > 0.20):
+        HAL.setV(1.0)
+        HAL.setW(0.0)
+        #previous_arcotangente_rad = math.pi
+        
+      else: 
+        HAL.setV(0.0)
+        HAL.setW(0.0)
+        has_reached = True
+        
+      #previous_arcotangente_rad = math.pi
+        
+      
+      
+    
+    if(arcotangente_rad == (-math.pi/2)):
+      print("move north")
+       
+      #previous_arcotangente_rad = (-math.pi/2)
+       
+    if(arcotangente_rad == 0):
+       print("move east")   
+    
+    if(arcotangente_rad == (math.pi/2)):
+       print("move south")
+       
+    #if (arcotangente_rad != HAL.getPose3d().yaw):
+      
+      #print("girarrrrrrrrr")
+    #print("mi orientación es " + str(HAL.getPose3d().yaw))
+      
+      
+      #if (dir_objetivo == Direction.NORTH):
+      #  if (yaw_degrees > 95 or yaw_degrees < 85):
+                
+      #    dif_degrees = get_difference(NORTH_DIR, yaw_degrees)
+      
+            #print("arcotangente_grados" + str(arcotangente_grados))
+      #    if(dif_degrees > 2):
+    HAL.setV(0)
+    HAL.setW(0.25)
+          #else:
+          #yaw_degrees = NORTH_DIR
+          #  HAL.setW(0)
+          #  HAL.setV(0)
+          #  dif_degrees = 0 
+          #  previous_arcotangente_rad = arcotangente_rad 
+                        #has_reached = True
+                        #avanza_casilla = True
+      
+      
+      
+        
+    #if (x_coord == current_2d_x and y_coord < current_2d_y):
+    #print("move north")    
+  
+          #dif_x = 0
+    
+    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+    
+    if((y_coord == current_2d_y and x_coord == current_2d_x) or has_reached): 
+    #if(has_reached): 
+
+      pos_move_coords = pos_move_coords + 1
+      has_reached = False
+      
+    paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)   
+    print("Y_OBJETIVO " +str(y_coord), "Y_ACTUAL " + str(current_2d_y), "X_OBJETIVO " + str(x_coord), "X_ACTUAL "+str(current_2d_x))
+
     
     #HAL.setV(0.25)
     #print(HAL.getPose3d().yaw)
     #print(yaw_degrees)
+    
+    # Navegation 
     
     """
     # si las coordenadas no son iguales, hay que moverse 
