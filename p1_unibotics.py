@@ -552,7 +552,7 @@ while True:
     #print(HAL.getPose3d().yaw)
     #print(yaw_degrees)
     
-    
+    """
     # si las coordenadas no son iguales, hay que moverse 
     if(y_coord != current_2d_y or x_coord != current_2d_x):
       
@@ -708,7 +708,7 @@ while True:
     """
     
       
-      
+    """  
       
       
       
