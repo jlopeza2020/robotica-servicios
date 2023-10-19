@@ -1,14 +1,13 @@
 import math
 
-# Coordenadas de los puntos
-x1, y1 = 21, 19  # Primer punto
-x2, y2 = 21, 20  # Segundo punto
+def convertir_orientaciones(orientaciones):
+    # Convierte cada orientación en el primer sistema al segundo sistema restando π.
+    orientaciones_convertidas = [orientacion - math.pi for orientacion in orientaciones]
+    return orientaciones_convertidas
 
-# Calcular la arcotangente
-arcotangente_rad = math.atan2(y2 - y1, x2 - x1)
+# Ejemplo de uso:
+orientaciones_sistema1 = [math.pi, -math.pi/2, 0, math.pi/2]
+orientaciones_sistema2 = convertir_orientaciones(orientaciones_sistema1)
+print("Orientaciones en el primer sistema:", orientaciones_sistema1)
+print("Orientaciones convertidas al segundo sistema:", orientaciones_sistema2)
 
-# Convertir a grados si es necesario
-arcotangente_grados = math.degrees(arcotangente_rad)
-
-print("Arcotangente en radianes:", arcotangente_rad)
-print("Arcotangente en grados:", arcotangente_grados)

@@ -493,75 +493,136 @@ while(total_white_cells > 0):
       
   
 unique_move_coordinates = remove_duplicates_from_list_of_coordinates(move_points)  
-# la primera la omitimos 
+# la primera la omitimos, apunta al array donde está las posiciones para moverse 
 pos_move_coords = 1
 
-init_pos = HAL.getPose3d().x
+#init_pos = HAL.getPose3d().x
 
-dif_y = 0
-dif_x = 0
+# diferencia entre las casillas centrales del robot 
+dif_y = 0.0
+dif_x = 0.0
 
-dif_degrees = 0
-dif_x_bt = 0
+#dif_degrees = 0
+dif_rad = 0.0
+#dif_x_bt = 0
 
-avanza_casilla =  True
+#avanza_casilla =  True
 
+# a la siguietne casilla 
 has_reached = False
-
-#previous_arcotangente_rad = 0.0
+#arc_rad_robot = 0.0
+orientation_converted = 0.0
 
 while True:
   
 
+    # obtenemos las posiciones del mundo de gazebo
     x_3d = HAL.getPose3d().x
     y_3d = HAL.getPose3d().y
     
     # use it  to draw cell
+    
+    # obtenemos las posiciones en celdas de nuestro robot en el mapa 
     current_2d_x = int(round(get_2d_x()))
     current_2d_y = int(round(get_2d_y()))
     
-    yaw_degrees = abs(round(HAL.getPose3d().yaw * (180 / math.pi)))
-    
+    #yaw_degrees = abs(round(HAL.getPose3d().yaw * (180 / math.pi)))
     #print(yaw_degrees)
 
-    # make conversion for central coord : objective
+    
+    # del array de movimiento obtenido previamente, accedemos a cada una de esas corrdenadas
+    # que siguen el formato de celdas 
     y_coord = unique_move_coordinates[pos_move_coords][0]
     x_coord = unique_move_coordinates[pos_move_coords][1]
     
     #print(y_coord, x_coord)
     #print(cells[y_coord-1][x_coord-1].direction)
 
+    # de esas celdas objetivo, calculamos la posición superior izq en píxeles 
     objective_y_sup_izq_pixel = (y_coord -1) * 16
     objective_x_sup_izq_pixel = (x_coord -1) * 16
     #print(objective_y_sup_izq_pixel, objective_x_sup_izq_pixel)
     
+    # calculamos el pixel central objetivo
     objective_y_central_pixel = objective_y_sup_izq_pixel + 8
-    
     objective_x_central_pixel = objective_x_sup_izq_pixel + 8
+    
     
     #print("objective"+ str(objective_y_central_pixel), objective_x_central_pixel)
 
+    # con la regresión lineal, calculamos el pixel actual que se encuentra nuestro robot 
     pixel_x_actual = 272-50*x_3d
     pixel_y_actual = 208+50*y_3d
 
+    # calculamos la diferencia de la posición actual con respecto al objetivo
     dif_y = get_difference(objective_y_central_pixel, pixel_y_actual)
     dif_x = get_difference(objective_x_central_pixel, pixel_x_actual)
     
     
+    # dirección
+    # NOSE SI HACE FALTA INCLUIRLO, REVISAR !!!! 
     dir_objetivo = cells[y_coord-1][x_coord-1].direction
     dir_actual = cells[current_2d_y-1][current_2d_x-1].direction
     
-    print("dir objetivo " + str(dir_objetivo), "dir actual " + str(dir_actual))
+    #print("dir objetivo " + str(dir_objetivo), "dir actual " + str(dir_actual))
     
     print("dif y " + str(dif_y), dif_x)
     
     #if (objective_x_central_pixel < pixel_x_actual):
     #  print("move west")
       
-    arcotangente_rad = math.atan2(y_coord - current_2d_y, x_coord - current_2d_x)
+    # calculamos la arcotnagente que tiene la posición objetivo con la actual 
+    arc_rad_objetivo = math.atan2(y_coord - current_2d_y, x_coord - current_2d_x)
    
-    print("arcotangente en radianes" + str (arcotangente_rad))
+    print("arcotangente en radianes" + str (arc_rad_objetivo))
     print("mi orientación es " + str(HAL.getPose3d().yaw))
+    #print("mi orientación  REDONDEADA es " + str(round(HAL.getPose3d().yaw,1)))
+    
+    #HAL.setW(0.1)
+    
+    # converter my orientation
+    # CONVERTIR LA ORIENTCIÓN YA QUE HAL Y LA ARCOTANGENTE TIENE VALORES DISTINTOS
+    
+    # valores del oeste
+    if ((0.00 + 0.05) > HAL.getPose3d().yaw > (0.00 - 0.05)):
+    #if(round(HAL.getPose3d().yaw,1)  == 0.0 or round(HAL.getPose3d().yaw,1)  == -0.1 or round(HAL.getPose3d().yaw,1) == 0.1):
+      orientation_converted = math.pi
+    # valores del este 
+    elif ((math.pi + 0.05) > HAL.getPose3d().yaw > (math.pi - 0.05) or ((-math.pi + 0.05) > HAL.getPose3d().yaw > (-math.pi - 0.05))):
+    #elif(HAL.getPose3d().yaw == math.pi or HAL.getPose3d().yaw == (-math.pi)):
+      orientation_converted = 0.0
+    else:
+      orientation_converted = HAL.getPose3d().yaw 
+      
+      
+      
+    print("mi orientación  CONVERTIDA es " + str(orientation_converted))
+    #print("mi orientación  CONVERTIDA REDONDEADA es " + str(round(orientation_converted,1)))
+    
+    
+    
+    # obtiene la diferencia de radianes entre el valor objetivo y el actual
+    dif_rad = get_difference(round(arc_rad_objetivo,1), round(orientation_converted,1))
+    #dif_rad = get_difference(arc_rad_objetivo, orientation_converted)
+
+    print(dif_rad)
+    
+    if (dif_rad > 0.15):
+    #if(round(arc_rad_objetivo,1) != round(orientation_converted,1)):
+      print("TOCA GIRAR")
+      HAL.setW(0.25)
+      HAL.setV(0.0)
+      
+    else: 
+      HAL.setW(0.0)
+      dif_rad = 0.0
+      #HAL.setV(0.0)
+      
+    #elif():
+    
+    #elif():
+      
+    #elif():
     
     # IMPORTANTE TENER EN CUENTA LA ORIENTACIÓN Y CREAR LA CONVERSIÓN 
    
@@ -576,12 +637,14 @@ while True:
 
     #print("arcotangente previa en radianes" + str (previous_arcotangente_rad))
     
-    if(arcotangente_rad == math.pi):
+    
+    
+    if(arc_rad_objetivo == math.pi and orientation_converted == math.pi):
       #print("WESTTTTTTTT")
     #if (x_coord < current_2d_x and y_coord == current_2d_y):
       print("move west")
-      if(dif_x > 0.20):
-        HAL.setV(1.0)
+      if(dif_x > 0.1):
+        HAL.setV(0.5)
         HAL.setW(0.0)
         #previous_arcotangente_rad = math.pi
         
@@ -594,18 +657,55 @@ while True:
         
       
       
-    
-    if(arcotangente_rad == (-math.pi/2)):
-      print("move north")
+    #print((-math.pi/2 + 0.05) > orientation_converted > (-math.pi/2 - 0.05))
+    if (arc_rad_objetivo == (-math.pi/2) and ((-math.pi/2 + 0.05) >=  orientation_converted >= (-math.pi/2 - 0.05))):
+    #if( (-math.pi/2) - dif_rad < arc_rad_objetivo and  (-math.pi/2) + dif_rad and round(orientation_converted,1) == round((-math.pi/2),1)):
+    #print(arc_rad_objetivo == (-math.pi/2))
+    #print(round((-math.pi/2),1))
+      print("NORTHHHHH")
+    #print(orientation_converted)
+    #print(orientation_converted == round((-math.pi/2),1))
+    #if(arc_rad_objetivo == (-1.6) and orientation_converted == (-1.6)):
+    #  print("move north")
+      if(dif_y > 0.2):
+        HAL.setV(0.5)
+        HAL.setW(0)
+      else: 
+        HAL.setV(0.0)
+        HAL.setW(0.0)
+        has_reached = True
+        #dif_y = 0
        
       #previous_arcotangente_rad = (-math.pi/2)
        
-    if(arcotangente_rad == 0):
-       print("move east")   
-    
-    if(arcotangente_rad == (math.pi/2)):
-       print("move south")
+    if(arc_rad_objetivo == 0.0 and orientation_converted == 0.0):
+      print("move east")
+      # no me cuadra que se use dif_y 
+      if(dif_y > 1.8):
+        HAL.setV(0.5)
+        HAL.setW(0.0)
+        #previous_arcotangente_rad = math.pi
+        
+      else: 
+        HAL.setV(0.0)
+        HAL.setW(0.0)
+        has_reached = True
        
+    
+    if (arc_rad_objetivo == (math.pi/2) and ((math.pi/2 + 0.05) > orientation_converted > (math.pi/2 - 0.05))):
+    #if(arc_rad_objetivo == (math.pi/2) and orientation_converted == (math.pi/2)):
+      print("move south")
+      
+      if(dif_y > 0.2):
+        HAL.setV(0.5)
+        HAL.setW(0)
+      else: 
+        HAL.setV(0.0)
+        HAL.setW(0.0)
+        has_reached = True
+       
+       
+  
     #if (arcotangente_rad != HAL.getPose3d().yaw):
       
       #print("girarrrrrrrrr")
@@ -619,8 +719,8 @@ while True:
       
             #print("arcotangente_grados" + str(arcotangente_grados))
       #    if(dif_degrees > 2):
-    HAL.setV(0)
-    HAL.setW(0.25)
+    ##HAL.setV(0)
+    ##HAL.setW(0.25)
           #else:
           #yaw_degrees = NORTH_DIR
           #  HAL.setW(0)
@@ -631,7 +731,7 @@ while True:
                         #avanza_casilla = True
       
       
-      
+    
         
     #if (x_coord == current_2d_x and y_coord < current_2d_y):
     #print("move north")    
@@ -645,6 +745,9 @@ while True:
 
       pos_move_coords = pos_move_coords + 1
       has_reached = False
+      dif_x = 0.0
+      dif_y = 0.0
+      dif_rad = 0.0
       
     paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)   
     print("Y_OBJETIVO " +str(y_coord), "Y_ACTUAL " + str(current_2d_y), "X_OBJETIVO " + str(x_coord), "X_ACTUAL "+str(current_2d_x))
@@ -1018,7 +1121,7 @@ while True:
         
     
        
-        """    
+        """   
     #
     #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
     
@@ -1041,4 +1144,3 @@ while True:
     
     GUI.showNumpy(filled_map)
     draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
-    
