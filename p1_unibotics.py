@@ -613,8 +613,8 @@ while True:
     error_x = objective_x_meter - x_3d
     error_y = objective_y_meter - y_3d
     
-    #print(" error x" + str(error_x))
-    #print("error y " + str(error_y))
+    print(" error x" + str(error_x))
+    print("error y " + str(error_y))
     
     goal_angle = math.atan2(error_y, error_x)
     
@@ -645,16 +645,16 @@ while True:
       
     # significa que estoy lo suficientemente alineado y avanzo 
     if abs(angle_diff) < 0.1:
-      HAL.setV(0.5)
+      HAL.setV(1.0)
     else:
-      HAL.setV(0.03)
+      HAL.setV(0.0)
       
     
     #if (round(y_3d,4) == round(objective_y_meter,4) and round(x_3d,4) == round(objective_x_meter,4)):
     
     #if (error_x <= 0.001 and error_y <= 0.001 and abs(angle_diff) >=  0.1):
 
-    if (error_x <= 0.001 and error_y <= 0.001):
+    if (abs(error_x) <= 0.01 and abs(error_y) <= 0.01):
       has_reached = True
      
 
@@ -664,8 +664,8 @@ while True:
       
       if(pos_move_coords < len(unique_move_coordinates)):
         pos_move_coords = pos_move_coords + 1
-        
       has_reached = False
+        
       #dif_x = 0.0
       #dif_y = 0.0
       #dif_rad = 0.0
