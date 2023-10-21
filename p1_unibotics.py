@@ -261,7 +261,7 @@ def pixel_a_coordenada_mundo(pixel_x, pixel_y):
     mundo_y = pixel_y * 0.02
     return (mundo_y, mundo_x)
     
-    
+"""   
 def calcular_arcotangente(punto1, punto2):
     # Puntos representados como tuplas (x, y)
     x1, y1 = punto1
@@ -280,6 +280,7 @@ def calcular_arcotangente(punto1, punto2):
     return arcotangente_rad, arcotangente_grados
 
 
+"""
 def get_difference(objective, actual): 
   
     if (objective < actual): 
@@ -306,6 +307,19 @@ def get_x_meter(x_pixel_central):
   
   return x_meter
   
+  
+def parse_laser_data(laser_data, angle_min, angle_max):
+    laser = []
+    for i in range(180):
+        angle = math.radians(i)
+        if angle_min <= angle <= angle_max:
+            dist = laser_data.values[i]
+            #laser.append((dist, angle))
+            laser.append(dist)
+    
+    
+    laser_mean = np.mean(laser)
+    return laser_mean
 
 
 map = get_unibotics_map()
@@ -331,9 +345,14 @@ return_points = []
 
 is_no_return_point = False
 
-x = 21
-y = 19
+#x = 21
+#y = 19
 
+initial_2d_x = int(round(get_2d_x()))
+initial_2d_y = int(round(get_2d_y()))
+
+x = initial_2d_x
+y = initial_2d_y
 
 total_white_cells = 418
 
@@ -432,7 +451,7 @@ while(total_white_cells > 0):
         cells[y-1][x-1].cleaned = True
         cells[y-1][x-1].direction = Direction.EAST
 
-        move_points.append([y, x ])
+        move_points.append([y, x])
       
         goes_east = False
         goes_south = True
@@ -531,6 +550,8 @@ has_reached = False
 #arc_rad_robot = 0.0
 orientation_converted = 0.0
 
+Kp = 1.5
+
 """
 
 for i in range(0, len(unique_move_coordinates)):
@@ -579,27 +600,35 @@ while True:
     current_2d_x = int(round(get_2d_x()))
     current_2d_y = int(round(get_2d_y()))
     
+    print(current_2d_y, current_2d_x)
+    
     
     # CELDA OBJETIVO
     y_coord = unique_move_coordinates[pos_move_coords][0]
     x_coord = unique_move_coordinates[pos_move_coords][1]
     
-    print("Y CELDA OBJETIVO" + str(y_coord), "X CELDA OBJETIVO" + str(x_coord))
+    print("Y CELDA OBJETIVO  " + str(y_coord), "X CELDA OBJETIVO  " + str(x_coord))
 
     
     # de esas celdas objetivo, calculamos la posición superior izq en píxeles 
     #objective_y_sup_izq_pixel = (y_coord -1) * 16
     #objective_x_sup_izq_pixel = (x_coord -1) * 16
 
-    objective_y_sup_izq_pixel = y_coord * 16
-    objective_x_sup_izq_pixel = x_coord * 16
+    objective_y_sup_izq_pixel = (y_coord) * 16
+    objective_x_sup_izq_pixel = (x_coord) * 16
+    
+    
+    #print("CELL Y" + str(cells[y_coord-1][x_coord-1].y_gazebo),  "CELL X" +str(cells[y_coord-1][x_coord-1].x_gazebo))
+    #print("SUP IZQ Y" + str(objective_y_sup_izq_pixel),  "SUP IZQ X" +str(objective_x_sup_izq_pixel))
     
     # calculamos el pixel central objetivo
-    objective_y_central_pixel = objective_y_sup_izq_pixel + 8
-    objective_x_central_pixel = objective_x_sup_izq_pixel + 8
+    #objective_y_central_pixel = objective_y_sup_izq_pixel + 8
+    objective_y_central_pixel = objective_y_sup_izq_pixel + 16
+    #objective_x_central_pixel = objective_x_sup_izq_pixel - 8
+    objective_x_central_pixel = objective_x_sup_izq_pixel - 16
     
     
-    print(objective_y_central_pixel, objective_x_central_pixel)
+    #print(objective_y_central_pixel, objective_x_central_pixel)
     
 
     objective_y_meter = get_y_meter(objective_y_central_pixel)
@@ -613,8 +642,8 @@ while True:
     error_x = objective_x_meter - x_3d
     error_y = objective_y_meter - y_3d
     
-    print(" error x" + str(error_x))
-    print("error y " + str(error_y))
+    #print(" error x" + str(error_x))
+    #print("error y " + str(error_y))
     
     goal_angle = math.atan2(error_y, error_x)
     
@@ -623,7 +652,7 @@ while True:
     
     angle_diff = current_angle - goal_angle
     
-    print(angle_diff)
+    #print(angle_diff)
     
     
     
@@ -638,9 +667,9 @@ while True:
      
     
     if(angle_diff > 0):
-      HAL.setW(0.5)
+      HAL.setW(0.5 + Kp*angle_diff)
     else: 
-      HAL.setW(-0.5)
+      HAL.setW(-0.5 - Kp*angle_diff)
       #print(angle_diff)
       
     # significa que estoy lo suficientemente alineado y avanzo 
@@ -650,12 +679,27 @@ while True:
       HAL.setV(0.0)
       
     
+    
+    laser_dt = HAL.getLaserData()
+    # mean of the values of the center 
+    laser_info_mean = parse_laser_data(laser_dt, 60*math.pi/180 , 120*math.pi/180)
+
+    
+    
+    print("MEANNN" + str(laser_info_mean))
+  
+    
     #if (round(y_3d,4) == round(objective_y_meter,4) and round(x_3d,4) == round(objective_x_meter,4)):
     
     #if (error_x <= 0.001 and error_y <= 0.001 and abs(angle_diff) >=  0.1):
 
-    if (abs(error_x) <= 0.01 and abs(error_y) <= 0.01):
+    if (abs(error_x) <= 0.1 and abs(error_y) <= 0.1):
       has_reached = True
+      
+    ## modificar para que solo aumente uno 
+    #if(laser_info_mean <= 0.25):
+    #  has_reached = True
+    #  HAL.setW(1.0)
      
 
     
@@ -664,7 +708,7 @@ while True:
       
       if(pos_move_coords < len(unique_move_coordinates)):
         pos_move_coords = pos_move_coords + 1
-      has_reached = False
+        has_reached = False
         
       #dif_x = 0.0
       #dif_y = 0.0
