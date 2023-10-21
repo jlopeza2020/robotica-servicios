@@ -289,6 +289,24 @@ def get_difference(objective, actual):
       
     return dif
   
+  
+def get_y_meter(y_pixel_central):
+  
+  y_meter = -4.671 + 0.02*y_pixel_central
+  #y_meter = -4.28 + 0.01*y_pixel_central
+  
+  return y_meter
+  
+
+def get_x_meter(x_pixel_central):
+  
+  x_meter = 5.841 - 0.021*x_pixel_central
+  #x_meter = 5.84 - 0.01*x_pixel_central
+
+  
+  return x_meter
+  
+
 
 map = get_unibotics_map()
 # create cell array that has the same dimension of the grid (32x32)
@@ -513,12 +531,47 @@ has_reached = False
 #arc_rad_robot = 0.0
 orientation_converted = 0.0
 
+"""
+
+for i in range(0, len(unique_move_coordinates)):
+  
+    y_coord = unique_move_coordinates[pos_move_coords][0]
+    x_coord = unique_move_coordinates[pos_move_coords][1]
+    
+    print("Y CELDA OBJETIVO" + str(y_coord), "X CELDA OBJETIVO" + str(x_coord))
+    
+    # de esas celdas objetivo, calculamos la posición superior izq en píxeles 
+    objective_y_sup_izq_pixel = (y_coord) * 16
+    objective_x_sup_izq_pixel = (x_coord) * 16
+
+    # calculamos el pixel central objetivo
+    objective_y_central_pixel = objective_y_sup_izq_pixel + 8
+    objective_x_central_pixel = objective_x_sup_izq_pixel + 8
+    
+    
+    #print(objective_y_central_pixel, objective_x_central_pixel)
+    
+
+    objective_y_meter = get_y_meter(objective_y_central_pixel)
+    objective_x_meter = get_x_meter(objective_x_central_pixel)
+    
+    
+    print("Y METROS OBJETIVO" + str(objective_y_meter), "X METROS OBJETIVO" + str(objective_x_meter))
+    
+    pos_move_coords += 1
+"""  
+  
 while True:
   
-
-    # obtenemos las posiciones del mundo de gazebo
+    
+    # MODIFICAR 
+    
+    
+    # obtenemos las posiciones del mundo de gazebo EN METROS ACTUALES 
     x_3d = HAL.getPose3d().x
     y_3d = HAL.getPose3d().y
+    
+    print("Y METROS ACTUAL :"+str(y_3d), "X METROS ACTUAL :"+str(x_3d))
     
     # use it  to draw cell
     
@@ -526,621 +579,99 @@ while True:
     current_2d_x = int(round(get_2d_x()))
     current_2d_y = int(round(get_2d_y()))
     
-    #yaw_degrees = abs(round(HAL.getPose3d().yaw * (180 / math.pi)))
-    #print(yaw_degrees)
-
     
-    # del array de movimiento obtenido previamente, accedemos a cada una de esas corrdenadas
-    # que siguen el formato de celdas 
+    # CELDA OBJETIVO
     y_coord = unique_move_coordinates[pos_move_coords][0]
     x_coord = unique_move_coordinates[pos_move_coords][1]
     
-    #print(y_coord, x_coord)
-    #print(cells[y_coord-1][x_coord-1].direction)
+    print("Y CELDA OBJETIVO" + str(y_coord), "X CELDA OBJETIVO" + str(x_coord))
 
+    
     # de esas celdas objetivo, calculamos la posición superior izq en píxeles 
-    objective_y_sup_izq_pixel = (y_coord -1) * 16
-    objective_x_sup_izq_pixel = (x_coord -1) * 16
-    #print(objective_y_sup_izq_pixel, objective_x_sup_izq_pixel)
+    #objective_y_sup_izq_pixel = (y_coord -1) * 16
+    #objective_x_sup_izq_pixel = (x_coord -1) * 16
+
+    objective_y_sup_izq_pixel = y_coord * 16
+    objective_x_sup_izq_pixel = x_coord * 16
     
     # calculamos el pixel central objetivo
     objective_y_central_pixel = objective_y_sup_izq_pixel + 8
     objective_x_central_pixel = objective_x_sup_izq_pixel + 8
     
     
-    #print("objective"+ str(objective_y_central_pixel), objective_x_central_pixel)
+    print(objective_y_central_pixel, objective_x_central_pixel)
+    
 
-    # con la regresión lineal, calculamos el pixel actual que se encuentra nuestro robot 
-    pixel_x_actual = 272-50*x_3d
-    pixel_y_actual = 208+50*y_3d
-
-    # calculamos la diferencia de la posición actual con respecto al objetivo
-    dif_y = get_difference(objective_y_central_pixel, pixel_y_actual)
-    dif_x = get_difference(objective_x_central_pixel, pixel_x_actual)
+    objective_y_meter = get_y_meter(objective_y_central_pixel)
+    objective_x_meter = get_x_meter(objective_x_central_pixel)
     
     
-    # dirección
-    # NOSE SI HACE FALTA INCLUIRLO, REVISAR !!!! 
-    dir_objetivo = cells[y_coord-1][x_coord-1].direction
-    dir_actual = cells[current_2d_y-1][current_2d_x-1].direction
+    print("Y METROS OBJETIVO" + str(objective_y_meter), "X METROS OBJETIVO" + str(objective_x_meter))
     
-    #print("dir objetivo " + str(dir_objetivo), "dir actual " + str(dir_actual))
+    current_angle = HAL.getPose3d().yaw
     
-    print("dif y " + str(dif_y), dif_x)
+    error_x = objective_x_meter - x_3d
+    error_y = objective_y_meter - y_3d
     
-    #if (objective_x_central_pixel < pixel_x_actual):
-    #  print("move west")
+    #print(" error x" + str(error_x))
+    #print("error y " + str(error_y))
+    
+    goal_angle = math.atan2(error_y, error_x)
+    
+    #print("goal angle" + str(goal_angle))
+    #print("current  angle" + str(current_angle))
+    
+    angle_diff = current_angle - goal_angle
+    
+    print(angle_diff)
+    
+    
+    
+    if (angle_diff > math.pi):
+      angle_diff -= 2*math.pi
+    elif(angle_diff < -math.pi):
+      angle_diff +=2*math.pi
+     
       
-    # calculamos la arcotnagente que tiene la posición objetivo con la actual 
-    arc_rad_objetivo = math.atan2(y_coord - current_2d_y, x_coord - current_2d_x)
-   
-    print("arcotangente en radianes" + str (arc_rad_objetivo))
-    print("mi orientación es " + str(HAL.getPose3d().yaw))
-    #print("mi orientación  REDONDEADA es " + str(round(HAL.getPose3d().yaw,1)))
+    #print(angle_diff)
     
-    #HAL.setW(0.1)
+     
     
-    # converter my orientation
-    # CONVERTIR LA ORIENTCIÓN YA QUE HAL Y LA ARCOTANGENTE TIENE VALORES DISTINTOS
-    
-    # valores del oeste
-    if ((0.00 + 0.05) > HAL.getPose3d().yaw > (0.00 - 0.05)):
-    #if(round(HAL.getPose3d().yaw,1)  == 0.0 or round(HAL.getPose3d().yaw,1)  == -0.1 or round(HAL.getPose3d().yaw,1) == 0.1):
-      orientation_converted = math.pi
-    # valores del este 
-    elif ((math.pi + 0.05) > HAL.getPose3d().yaw > (math.pi - 0.05) or ((-math.pi + 0.05) > HAL.getPose3d().yaw > (-math.pi - 0.05))):
-    #elif(HAL.getPose3d().yaw == math.pi or HAL.getPose3d().yaw == (-math.pi)):
-      orientation_converted = 0.0
-    else:
-      orientation_converted = HAL.getPose3d().yaw 
-      
-      
-      
-    print("mi orientación  CONVERTIDA es " + str(orientation_converted))
-    #print("mi orientación  CONVERTIDA REDONDEADA es " + str(round(orientation_converted,1)))
-    
-    
-    
-    # obtiene la diferencia de radianes entre el valor objetivo y el actual
-    dif_rad = get_difference(round(arc_rad_objetivo,1), round(orientation_converted,1))
-    #dif_rad = get_difference(arc_rad_objetivo, orientation_converted)
-
-    print(dif_rad)
-    
-    if (dif_rad > 0.15):
-    #if(round(arc_rad_objetivo,1) != round(orientation_converted,1)):
-      print("TOCA GIRAR")
-      HAL.setW(0.25)
-      HAL.setV(0.0)
-      
+    if(angle_diff > 0):
+      HAL.setW(0.5)
     else: 
-      HAL.setW(0.0)
-      dif_rad = 0.0
-      #HAL.setV(0.0)
+      HAL.setW(-0.5)
+      #print(angle_diff)
       
-    #elif():
-    
-    #elif():
+    # significa que estoy lo suficientemente alineado y avanzo 
+    if abs(angle_diff) < 0.1:
+      HAL.setV(0.5)
+    else:
+      HAL.setV(0.03)
       
-    #elif():
     
-    # IMPORTANTE TENER EN CUENTA LA ORIENTACIÓN Y CREAR LA CONVERSIÓN 
-   
-   
-   # Check if the current and previous angles are the same
-    #f arcotangente_rad != previous_arcotangente_rad:
-      # Use the previous angle
-      #arcotangente_rad = previous_arcotangente_rad
-    #else:
-      # Update the previous angle if it's different
-      #previous_arcotangente_rad = arcotangente_rad
+    #if (round(y_3d,4) == round(objective_y_meter,4) and round(x_3d,4) == round(objective_x_meter,4)):
+    
+    #if (error_x <= 0.001 and error_y <= 0.001 and abs(angle_diff) >=  0.1):
 
-    #print("arcotangente previa en radianes" + str (previous_arcotangente_rad))
+    if (error_x <= 0.001 and error_y <= 0.001):
+      has_reached = True
+     
+
     
-    
-    
-    if(arc_rad_objetivo == math.pi and orientation_converted == math.pi):
-      #print("WESTTTTTTTT")
-    #if (x_coord < current_2d_x and y_coord == current_2d_y):
-      print("move west")
-      if(dif_x > 0.1):
-        HAL.setV(0.5)
-        HAL.setW(0.0)
-        #previous_arcotangente_rad = math.pi
-        
-      else: 
-        HAL.setV(0.0)
-        HAL.setW(0.0)
-        has_reached = True
-        
-      #previous_arcotangente_rad = math.pi
-        
-      
-      
-    #print((-math.pi/2 + 0.05) > orientation_converted > (-math.pi/2 - 0.05))
-    if (arc_rad_objetivo == (-math.pi/2) and ((-math.pi/2 + 0.05) >=  orientation_converted >= (-math.pi/2 - 0.05))):
-    #if( (-math.pi/2) - dif_rad < arc_rad_objetivo and  (-math.pi/2) + dif_rad and round(orientation_converted,1) == round((-math.pi/2),1)):
-    #print(arc_rad_objetivo == (-math.pi/2))
-    #print(round((-math.pi/2),1))
-      print("NORTHHHHH")
-    #print(orientation_converted)
-    #print(orientation_converted == round((-math.pi/2),1))
-    #if(arc_rad_objetivo == (-1.6) and orientation_converted == (-1.6)):
-    #  print("move north")
-      if(dif_y > 0.2):
-        HAL.setV(0.5)
-        HAL.setW(0)
-      else: 
-        HAL.setV(0.0)
-        HAL.setW(0.0)
-        has_reached = True
-        #dif_y = 0
-       
-      #previous_arcotangente_rad = (-math.pi/2)
-       
-    if(arc_rad_objetivo == 0.0 and orientation_converted == 0.0):
-      print("move east")
-      # no me cuadra que se use dif_y 
-      if(dif_y > 1.8):
-        HAL.setV(0.5)
-        HAL.setW(0.0)
-        #previous_arcotangente_rad = math.pi
-        
-      else: 
-        HAL.setV(0.0)
-        HAL.setW(0.0)
-        has_reached = True
-       
-    
-    if (arc_rad_objetivo == (math.pi/2) and ((math.pi/2 + 0.05) > orientation_converted > (math.pi/2 - 0.05))):
-    #if(arc_rad_objetivo == (math.pi/2) and orientation_converted == (math.pi/2)):
-      print("move south")
-      
-      if(dif_y > 0.2):
-        HAL.setV(0.5)
-        HAL.setW(0)
-      else: 
-        HAL.setV(0.0)
-        HAL.setW(0.0)
-        has_reached = True
-       
-       
-  
-    #if (arcotangente_rad != HAL.getPose3d().yaw):
-      
-      #print("girarrrrrrrrr")
-    #print("mi orientación es " + str(HAL.getPose3d().yaw))
-      
-      
-      #if (dir_objetivo == Direction.NORTH):
-      #  if (yaw_degrees > 95 or yaw_degrees < 85):
-                
-      #    dif_degrees = get_difference(NORTH_DIR, yaw_degrees)
-      
-            #print("arcotangente_grados" + str(arcotangente_grados))
-      #    if(dif_degrees > 2):
-    ##HAL.setV(0)
-    ##HAL.setW(0.25)
-          #else:
-          #yaw_degrees = NORTH_DIR
-          #  HAL.setW(0)
-          #  HAL.setV(0)
-          #  dif_degrees = 0 
-          #  previous_arcotangente_rad = arcotangente_rad 
-                        #has_reached = True
-                        #avanza_casilla = True
-      
-      
-    
-        
-    #if (x_coord == current_2d_x and y_coord < current_2d_y):
-    #print("move north")    
-  
-          #dif_x = 0
-    
-    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
-    
-    if((y_coord == current_2d_y and x_coord == current_2d_x) or has_reached): 
+    if(has_reached): 
     #if(has_reached): 
-
-      pos_move_coords = pos_move_coords + 1
-      has_reached = False
-      dif_x = 0.0
-      dif_y = 0.0
-      dif_rad = 0.0
       
-    paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)   
-    print("Y_OBJETIVO " +str(y_coord), "Y_ACTUAL " + str(current_2d_y), "X_OBJETIVO " + str(x_coord), "X_ACTUAL "+str(current_2d_x))
-
-    
-    #HAL.setV(0.25)
-    #print(HAL.getPose3d().yaw)
-    #print(yaw_degrees)
-    
-    # Navegation 
-    
-    """
-    # si las coordenadas no son iguales, hay que moverse 
-    if(y_coord != current_2d_y or x_coord != current_2d_x):
-      
-        dir_objetivo = cells[y_coord-1][x_coord-1].direction
-        dir_actual = cells[current_2d_y-1][current_2d_x-1].direction
-      
-        if(dir_objetivo == dir_actual):
-        # avanzar hacia delante
-        
-            if(dir_objetivo == Direction.WEST or dir_objetivo == Direction.EAST):
-                if(dif_x > 0.1):
-                    HAL.setV(0.25)
-                    HAL.setW(0)
-                else: 
-                    HAL.setV(0.0)
-                    HAL.setW(0)
-                    has_reached = True
-                    dif_x = 0
-          
-            elif(dir_objetivo == Direction.NORTH or dir_objetivo == Direction.SOUTH):
-          
-                if(dif_y > 0.1):
-                    HAL.setV(0.25)
-                    HAL.setW(0)
-                else: 
-                    HAL.setV(0.0)
-                    HAL.setW(0)
-                    has_reached = True
-                    dif_y = 0
-        
-        else:
-          
-          
-            
-          
-          
-          #if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and (yaw_degrees > 272 or yaw_degrees < 268)):
-      
-      #dif_degrees = get_difference(SOUTH_DIR, yaw_degrees)
-      
-      #avanza_casilla = True
-          
-      
-      
-          #MODIFICAR 
-          
-          dif_x_bt = get_difference(x_coord, current_2d_x)
-          print("diferencia  " + str(dif_x_bt))
-          
-          
-          #if(dif_x_bt == 0):
-          if (avanza_casilla):
-              #print("avanzo casilla")
-      # avance una casilla más y que ya gire 
-              #if(avanza_casilla):
-                #print("avanzo casilla")
-                #HAL.setV(0.5)
-                #HAL.setW(0)
-              #else: 
-              HAL.setV(0)
-              HAL.setW(0)
-                #avanza_casilla = False
-                #dif_x = 0
-          else:
-      
-
-            if (dir_objetivo == Direction.WEST):
-                if (yaw_degrees > 2  or yaw_degrees < 358):
-              
-                    dif_degrees = get_difference(WEST_DIR, yaw_degrees)
-      
-            #print("arcotangente_grados" + str(arcotangente_grados))
-                    if(dif_degrees > 2):
-                        HAL.setV(0)
-                        HAL.setW(0.25)
-                    else:
-          #yaw_degrees = NORTH_DIR
-                        HAL.setW(0)
-                        HAL.setV(0)
-                        dif_degrees = 0
-                        avanza_casilla = True
-                        has_reached = True
-          #dif_degrees =  0
-              
-            elif (dir_objetivo == Direction.NORTH):
-                if (yaw_degrees > 95 or yaw_degrees < 85):
-                
-                    dif_degrees = get_difference(NORTH_DIR, yaw_degrees)
-      
-            #print("arcotangente_grados" + str(arcotangente_grados))
-                    if(dif_degrees > 2):
-                        HAL.setV(0)
-                        HAL.setW(0.25)
-                    else:
-          #yaw_degrees = NORTH_DIR
-                        HAL.setW(0)
-                        HAL.setV(0)
-                        dif_degrees = 0  
-                        has_reached = True
-                        avanza_casilla = True
-    
-            
-          
-            elif (dir_objetivo == Direction.EAST):
-                if (yaw_degrees > 185 or yaw_degrees < 175):
-                
-                    dif_degrees = get_difference(EAST_DIR, yaw_degrees)
-      
-            #print("arcotangente_grados" + str(arcotangente_grados))
-                    if(dif_degrees > 2):
-                        HAL.setV(0)
-                        HAL.setW(0.25)
-                    else:
-          #yaw_degrees = NORTH_DIR
-                        HAL.setW(0)
-                        HAL.setV(0)
-                        dif_degrees = 0
-                        has_reached = True
-                        avanza_casilla = True
-            
-            
-            else: 
-            # asumimos que es sur
-                if (yaw_degrees > 272 or yaw_degrees < 268):
-                
-                    dif_degrees = get_difference(WEST_DIR, yaw_degrees)
-      
-            #print("arcotangente_grados" + str(arcotangente_grados))
-                    if(dif_degrees > 2):
-                        HAL.setV(0)
-                        HAL.setW(0.25)
-                    else:
-          #yaw_degrees = NORTH_DIR
-                        HAL.setW(0)
-                        HAL.setV(0)
-                        dif_degrees = 0 
-                        has_reached = True
-                        avanza_casilla = True
-                
-                
-        #girar
-      
-    
-    elif((y_coord == current_2d_y and x_coord == current_2d_x) or has_reached):
-        #HAL.setV(0)
-        #HAL.setW(0)
+      if(pos_move_coords < len(unique_move_coordinates)):
         pos_move_coords = pos_move_coords + 1
-        has_reached = False
-      
-      
-    print("Y_OBJETIVO " +str(y_coord), "Y_ACTUAL " + str(current_2d_y), "X_OBJETIVO " + str(x_coord), "X_ACTUAL "+str(current_2d_x))
-      
-    """
+        
+      has_reached = False
+      #dif_x = 0.0
+      #dif_y = 0.0
+      #dif_rad = 0.0
     
-      
-    """  
-      
-      
-      
-    # avanza recto
-    
-    if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and cells[current_2d_y-1][current_2d_x-1].direction == Direction.WEST  and (yaw_degrees < 2)):
-      if(dif_x > 0.5):
-        HAL.setV(0.25)
-        HAL.setW(0)
-      else: 
-        HAL.setV(0.1)
-        HAL.setW(0)
-        #dif_x = 0
-        
-        
-    if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and (yaw_degrees < 95 and yaw_degrees > 85)):
-      if(dif_y > 0.5):
-        HAL.setV(0.25)
-        HAL.setW(0)
-      else: 
-        HAL.setV(0.1)
-        HAL.setW(0)
-        #dif_y = 0
-        
-    if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and (yaw_degrees < 185 and yaw_degrees > 175)):
-      if(dif_x > 0.5):
-        HAL.setV(0.25)
-        HAL.setW(0)
-      else: 
-        HAL.setV(0.1)
-        HAL.setW(0)
-        #dif_x = 0
-        
-        
-    if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and (yaw_degrees < 275 and yaw_degrees > 265)):
-      if(dif_y > 0.5):
-        HAL.setV(0.25)
-        HAL.setW(0)
-      else: 
-        HAL.setV(0.1)
-        HAL.setW(0)
-        #dif_y = 0
-        
-    if(cells[y_coord-1][x_coord-1].direction == Direction.WEST and (yaw_degrees > 2  or yaw_degrees < 358)):
-      
-      #dif_degrees = get_difference(WEST_DIR, yaw_degrees)
-      
-      #avanza_casilla = True
-      
-      if (avanza_casilla):
-      # avance una casilla más y que ya gire 
-        if(dif_y > 3.5):
-          HAL.setV(0.5)
-          HAL.setW(0)
-        else: 
-          HAL.setV(0)
-          HAL.setW(0)
-          avanza_casilla = False
-          #dif_y = 0
-          
-          
-      
-      if(avanza_casilla == False): 
-        
-        #arcotangente_rad, arcotangente_grados = calcular_arcotangente(p1 , p2)
-        
-        # print(girando)
-        dif_degrees = get_difference(WEST_DIR, yaw_degrees)
-      
-        #print("arcotangente_grados" + str(arcotangente_grados))
-        if(dif_degrees > 2):
-          HAL.setV(0)
-          HAL.setW(0.25)
-        else:
-          #yaw_degrees = NORTH_DIR
-          HAL.setW(0)
-          HAL.setV(0)
-          avanza_casilla = True
-          dif_degrees =  0
-    
-    
-    if(cells[y_coord-1][x_coord-1].direction == Direction.NORTH and (yaw_degrees > 95 or yaw_degrees < 85)):
-      
-      #dif_degrees = get_difference(NORTH_DIR, yaw_degrees)
-      
-      #avanza_casilla = True
-      
-      if (avanza_casilla):
-      # avance una casilla más y que ya gire 
-        if(dif_y > 3.5):
-          HAL.setV(0.5)
-          HAL.setW(0)
-        else: 
-          HAL.setV(0)
-          HAL.setW(0)
-          avanza_casilla = False
-          dif_y = 0
-          
-          
-      
-      if(avanza_casilla == False): 
-        #print("girando")
-        
-        dif_degrees = get_difference(NORTH_DIR, yaw_degrees)
-        
-        #arcotangente_rad, arcotangente_grados = calcular_arcotangente(p1 , p2)
-        
-        # print(girando)
-      
-        #print("arcotangente_grados" + str(arcotangente_grados))
-        if(dif_degrees > 2):
-          HAL.setV(0)
-          HAL.setW(0.25)
-        else:
-          #yaw_degrees = NORTH_DIR
-          HAL.setW(0)
-          HAL.setV(0)
-          avanza_casilla = True
-          #dif_degrees = 0
-        
-      
-      #avanza  una casilla y gira al norte 
-  
-    
-    if(cells[y_coord-1][x_coord-1].direction == Direction.EAST and (yaw_degrees > 185 or yaw_degrees < 175)):
-      
-      #dif_degrees = get_difference(EAST_DIR, yaw_degrees)
-      
-      #avanza_casilla = True
-      
-      if (avanza_casilla):
-      # avance una casilla más y que ya gire 
-        if(dif_x > 3.5):
-          HAL.setV(0.5)
-          HAL.setW(0)
-        else: 
-          HAL.setV(0)
-          HAL.setW(0)
-          avanza_casilla = False
-          #dif_y = 0
-          
-          
-      
-      if(avanza_casilla == False): 
-        dif_degrees = get_difference(EAST_DIR, yaw_degrees)
-        
-        #arcotangente_rad, arcotangente_grados = calcular_arcotangente(p1 , p2)
-        
-        # print(girando)
-      
-        #print("arcotangente_grados" + str(arcotangente_grados))
-        if(dif_degrees > 2):
-          HAL.setV(0)
-          HAL.setW(0.15)
-        else:
-          #yaw_degrees = NORTH_DIR
-          HAL.setW(0)
-          HAL.setV(0)
-          avanza_casilla = True
-          #dif_degrees = 0
-    
-    
-    if(cells[y_coord-1][x_coord-1].direction == Direction.SOUTH and (yaw_degrees > 272 or yaw_degrees < 268)):
-      
-      #dif_degrees = get_difference(SOUTH_DIR, yaw_degrees)
-      
-      #avanza_casilla = True
-      
-      if (avanza_casilla):
-      # avance una casilla más y que ya gire 
-        if(dif_x > 3.5):
-          HAL.setV(0.5)
-          HAL.setW(0)
-        else: 
-          HAL.setV(0)
-          HAL.setW(0)
-          avanza_casilla = False
-          #dif_x = 0
-          
-          
-      
-      if(avanza_casilla == False): 
-        
-        dif_degrees = get_difference(SOUTH_DIR, yaw_degrees)
-        
-        #arcotangente_rad, arcotangente_grados = calcular_arcotangente(p1 , p2)
-        
-        # print(girando)
-      
-        #print("arcotangente_grados" + str(arcotangente_grados))
-        
-        print(dif_degrees)
-        
-        if(dif_degrees > 2):
-          HAL.setV(0)
-          HAL.setW(0.25)
-        else:
-          #yaw_degrees = NORTH_DIR
-          HAL.setW(0)
-          HAL.setV(0)
-          avanza_casilla = True
-          dif_degrees = 0
-        
-    
-       
-        """   
-    #
-    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
-    
-    #print(y_coord, current_2d_y, x_coord, current_2d_x)
-    #if(y_coord == current_2d_y and x_coord == current_2d_x):
-    #else: 
-      #pos_move_coords = pos_move_coords + 1
-      
-      
-      
-    # ARREGLAR LO DE LOS GRADOS 
-  #ancho_celda = 16
-  #alto_celda = 16
 
-  #pixel_central_actual = celda_a_pixel(celda_x_actual, celda_y_actual, ancho_celda, alto_celda)
-  #print("Pixel central:", pixel_central_actual)
-
-  #coordenada_mundo_actual = pixel_a_coordenada_mundo(*pixel_central_actual)
-  #print("Coordenada del mundo en m:", coordenada_mundo_actual)
+    paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
     
     GUI.showNumpy(filled_map)
     draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
