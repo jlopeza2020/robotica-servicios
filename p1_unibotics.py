@@ -24,13 +24,15 @@ YELLOW = 130
 GREEN = 131
 BLUE = 132
 VIOLET = 134
-
-WEST_DIR = 0
-NORTH_DIR = 90
-EAST_DIR = 180
-SOUTH_DIR = 270
+DARK_VIOLET = 133
 
 
+#WEST_DIR = 0
+#NORTH_DIR = 90
+#EAST_DIR = 180
+#SOUTH_DIR = 270
+
+"""
 class Direction(Enum):
     NORTH = "north"
     SOUTH = "south"
@@ -39,9 +41,11 @@ class Direction(Enum):
     
     def __str__(self):
         return self.value
-
+"""
 class Cell:
-    def __init__(self, x_map, y_map, x_gazebo=0, y_gazebo=0, occupied=False, cleaned=False, direction=None):
+    def __init__(self, x_map, y_map, x_gazebo=0, y_gazebo=0, occupied=False, cleaned=False):
+    #def __init__(self, x_map, y_map, x_gazebo=0, y_gazebo=0, occupied=False, cleaned=False, direction=None):
+
     #def __init__(self, x_map, y_map, occupied=False, cleaned=False):
         self.x_map = x_map
         self.y_map = y_map
@@ -49,7 +53,7 @@ class Cell:
         self.y_gazebo = y_gazebo
         self.occupied = occupied  # True si está ocupada, False si no
         self.cleaned = cleaned  # True si ya ha sido barrida, False si no
-        self.direction = direction  # Dirección cardinal (NORTE, SUR, ESTE, OESTE)
+        #self.direction = direction  # Dirección cardinal (NORTE, SUR, ESTE, OESTE)
 
 
 def get_unibotics_map():
@@ -102,8 +106,7 @@ def dilate_black_pixels(image):
 
 # Fill cells in the image with black color if any pixel in the cell is black.
 # Fill class cell
-
-def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height, ):
+def set_scenario(image, arr_cells, image_width, image_height, cell_width, cell_height):
 
     arr_cells_x = 0
     arr_cells_y = 0
@@ -157,8 +160,6 @@ def get_2d_x():
     x_3d = HAL.getPose3d().x
     x_2d = 17.963 - 2.915*x_3d
     #x_2d = 17.61 - 3.13*x_3d
-    
-    
     return x_2d
   
 # equation obtained by linear regresion
@@ -167,26 +168,15 @@ def get_2d_y():
     y_3d = HAL.getPose3d().y
     y_2d = 13.959 + 3.092*y_3d
     #y_2d = 12.72 + 3.12*y_3d
-  
     return y_2d
-
-
 
 def paint_cell(cell_map, x, y, cell_width, cell_height, color):
   
     for aux_y in range((y * cell_height) - cell_height, y * cell_height):
       for aux_x in range((x * cell_width) - cell_width, x * cell_width):
           cell_map[aux_y][aux_x] = color
+
     
-  
-"""    
-def paint_cell(cell_map, x, y, cell_width, cell_height, color):
-  
-    for aux_y in range((y * cell_height) + cell_height, y * cell_height):
-      for aux_x in range((x * cell_width) + cell_width, x * cell_width):
-          cell_map[aux_y][aux_x] = color
-    
- """   
 def remove_duplicates_from_list_of_coordinates(coords):
     unique_coords = set()
     result_coords = []
@@ -214,44 +204,43 @@ def remove_duplicates_from_arrays(array1, array2):
 
 def store_return_points(cells, filled_map, return_points, y, x, cell_width, cell_height, color):
   
-  # oeste
+  # WEST
   if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
     paint_cell(filled_map, x-1, y, cell_width, cell_height, RED)
     return_points.append([y, x-1])
   
-  # norte 
+  # NORTH
   if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
      paint_cell(filled_map, x, y-1, cell_width, cell_height, RED)
      return_points.append([y-1, x])
    
-  # este
+  # EAST
   if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
     paint_cell(filled_map, x+1, y, cell_width, cell_height, RED)
     return_points.append([y, x+1])
     
-  # sur 
+  # SOUTH 
   if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
     paint_cell(filled_map, x, y+1, cell_width, cell_height, RED)
     return_points.append([y+1, x])
     
 
-
-# Función para calcular la distancia euclidiana entre dos puntos
+#  Heuristic: Calculate eclidian distance
 def euclidean_distance(point1, point2):
     return np.linalg.norm(point1 - point2)
 
-# Función para encontrar la mejor coordenada usando Best-First Search
+# To calculate te best coordinate 
 def best_first_search(start, possible_solutions):
     priority_queue = PriorityQueue()
     for solution in possible_solutions:
-        priority_queue.put((euclidean_distance(start, solution), tuple(solution)))  # Convertir a tupla
+        priority_queue.put((euclidean_distance(start, solution), tuple(solution)))  # Convert int a tuple 
 
     best_coordinate = None
     best_distance = float('inf')
 
     while not priority_queue.empty():
         _, coordinate = priority_queue.get()
-        coordinate = np.array(coordinate)  # Convertir nuevamente a array
+        coordinate = np.array(coordinate)  # Convert into and array
         distance = euclidean_distance(start, coordinate)
         if distance < best_distance:
             best_coordinate = coordinate
@@ -260,6 +249,7 @@ def best_first_search(start, possible_solutions):
     return best_coordinate
 
 
+"""
 def celda_a_pixel(celda_x, celda_y, ancho_celda, alto_celda):
     pixel_x = celda_x * ancho_celda + ancho_celda / 2
     pixel_y = celda_y * alto_celda + alto_celda / 2
@@ -269,7 +259,7 @@ def pixel_a_coordenada_mundo(pixel_x, pixel_y):
     mundo_x = pixel_x * 0.02 # Supongamos que 1 pixel equivale a 1/50 unidad en el mundo
     mundo_y = pixel_y * 0.02
     return (mundo_y, mundo_x)
-    
+"""    
 """   
 def calcular_arcotangente(punto1, punto2):
     # Puntos representados como tuplas (x, y)
@@ -290,6 +280,7 @@ def calcular_arcotangente(punto1, punto2):
 
 
 """
+"""
 def get_difference(objective, actual): 
   
     if (objective < actual): 
@@ -298,7 +289,7 @@ def get_difference(objective, actual):
       dif = objective - actual
       
     return dif
-  
+"""  
   
 def get_y_meter(y_pixel_central):
   
@@ -329,7 +320,8 @@ def parse_laser_data(laser_data, angle_min, angle_max):
     
     laser_mean = np.mean(laser)
     return laser_mean
-
+    
+    
 
 map = get_unibotics_map()
 # create cell array that has the same dimension of the grid (32x32)
@@ -360,8 +352,11 @@ is_no_return_point = False
 initial_2d_x = int(round(get_2d_x()))
 initial_2d_y = int(round(get_2d_y()))
 
+#paint_cell(filled_map, initial_2d_x + 1, initial_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+
 x = initial_2d_x
 y = initial_2d_y
+
 
 total_white_cells = 418
 
@@ -378,7 +373,7 @@ while(total_white_cells > 0):
       if (cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.WEST
+        #cells[y-1][x-1].direction = Direction.WEST
         
         move_points.append([y, x])
         x = x-1
@@ -387,7 +382,7 @@ while(total_white_cells > 0):
       if(cells[y-1][x-1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.WEST
+        #cells[y-1][x-1].direction = Direction.WEST
         move_points.append([y, x])
       
         goes_west = False
@@ -397,7 +392,7 @@ while(total_white_cells > 0):
       if(cells[y-1][x-1-1].occupied is False and cells[y-1][x-1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, VIOLET)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.WEST
+        #cells[y-1][x-1].direction = Direction.WEST
         move_points.append([y, x])
       
         goes_west = False
@@ -411,7 +406,7 @@ while(total_white_cells > 0):
       if (cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.NORTH
+        #cells[y-1][x-1].direction = Direction.NORTH
         move_points.append([y, x])
         y = y-1
         
@@ -420,7 +415,7 @@ while(total_white_cells > 0):
       if(cells[y-1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.NORTH
+        #cells[y-1][x-1].direction = Direction.NORTH
 
         move_points.append([y, x])
       
@@ -433,7 +428,7 @@ while(total_white_cells > 0):
       if(cells[y-1-1][x-1].occupied is False and cells[y-1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, YELLOW)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.NORTH
+        #cells[y-1][x-1].direction = Direction.NORTH
         move_points.append([y, x])
       
         goes_north = False
@@ -447,7 +442,7 @@ while(total_white_cells > 0):
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.EAST
+        #cells[y-1][x-1].direction = Direction.EAST
 
         move_points.append([y, x])
 
@@ -458,7 +453,7 @@ while(total_white_cells > 0):
       if(cells[y-1][x+1-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.EAST
+        #cells[y-1][x-1].direction = Direction.EAST
 
         move_points.append([y, x])
       
@@ -470,7 +465,7 @@ while(total_white_cells > 0):
       if(cells[y-1][x+1-1].occupied is False and cells[y-1][x+1-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, GREEN)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.EAST
+        #cells[y-1][x-1].direction = Direction.EAST
 
         move_points.append([y, x])
       
@@ -485,7 +480,7 @@ while(total_white_cells > 0):
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.SOUTH
+        #cells[y-1][x-1].direction = Direction.SOUTH
         move_points.append([y, x])
         
         y = y + 1
@@ -495,7 +490,7 @@ while(total_white_cells > 0):
       if(cells[y+1-1][x-1].occupied is True and cells[y-1][x-1].cleaned is False):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.SOUTH
+        #cells[y-1][x-1].direction = Direction.SOUTH
         move_points.append([y, x])
       
         goes_south = False
@@ -507,7 +502,7 @@ while(total_white_cells > 0):
       if(cells[y+1-1][x-1].occupied is False and cells[y+1-1][x-1].cleaned is True):
         paint_cell(filled_map, x, y, CELL_WIDTH, CELL_HEIGHT, BLUE)
         cells[y-1][x-1].cleaned = True
-        cells[y-1][x-1].direction = Direction.SOUTH
+        #cells[y-1][x-1].direction = Direction.SOUTH
         move_points.append([y,  x])
         
         goes_south = False
@@ -523,7 +518,6 @@ while(total_white_cells > 0):
 
   if (is_no_return_point):
       
-
       unique_return_coordinates = remove_duplicates_from_list_of_coordinates(return_points)
       finally_return_points = remove_duplicates_from_arrays(unique_return_coordinates, move_points)
 
@@ -536,20 +530,21 @@ while(total_white_cells > 0):
       
       is_no_return_point = False
       
-      
-  
+
+
 unique_move_coordinates = remove_duplicates_from_list_of_coordinates(move_points)  
 # la primera la omitimos, apunta al array donde está las posiciones para moverse 
+# omit first position since it is the initial one 
 pos_move_coords = 1
 
 #init_pos = HAL.getPose3d().x
 
 # diferencia entre las casillas centrales del robot 
-dif_y = 0.0
-dif_x = 0.0
+#dif_y = 0.0
+#dif_x = 0.0
 
 #dif_degrees = 0
-dif_rad = 0.0
+#dif_rad = 0.0
 #dif_x_bt = 0
 
 #avanza_casilla =  True
@@ -557,7 +552,7 @@ dif_rad = 0.0
 # a la siguietne casilla 
 has_reached = False
 #arc_rad_robot = 0.0
-orientation_converted = 0.0
+#orientation_converted = 0.0
 
 Kp = 1.5
 
@@ -594,6 +589,8 @@ for i in range(0, len(unique_move_coordinates)):
 paint_cell(filled_map, initial_2d_x, initial_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
 
 while True:
+    
+    
   
     
     # MODIFICAR 
@@ -611,7 +608,7 @@ while True:
     current_2d_x = int(round(get_2d_x()))
     current_2d_y = int(round(get_2d_y()))
     
-    print(current_2d_y, current_2d_x)
+    print("Y CELDA ACTUAL " + str(current_2d_y), "X CELDA ACTUAL "+ str(current_2d_x))
     
     
     # CELDA OBJETIVO
@@ -634,9 +631,13 @@ while True:
     
     # calculamos el pixel central objetivo
     #objective_y_central_pixel = objective_y_sup_izq_pixel + 8
-    objective_y_central_pixel = objective_y_sup_izq_pixel + 16
-    #objective_x_central_pixel = objective_x_sup_izq_pixel - 8
-    objective_x_central_pixel = objective_x_sup_izq_pixel - 16
+    objective_y_central_pixel = objective_y_sup_izq_pixel + 16 #working version
+    #objective_y_central_pixel = objective_y_sup_izq_pixel + 8
+    #objective_y_central_pixel = objective_y_sup_izq_pixel + 14
+    #objective_x_central_pixel = objective_x_sup_izq_pixel - 6
+    #objective_x_central_pixel = objective_x_sup_izq_pixel - 8 
+    objective_x_central_pixel = objective_x_sup_izq_pixel - 16# working version
+    #objective_x_central_pixel = objective_x_sup_izq_pixel + 8 
     
     
     #print(objective_y_central_pixel, objective_x_central_pixel)
@@ -653,7 +654,7 @@ while True:
     error_x = objective_x_meter - x_3d
     error_y = objective_y_meter - y_3d
     
-    print(" error x" + str(error_x), "error y " + str(error_y))
+    #print(" error x" + str(error_x), "error y " + str(error_y))
     
     goal_angle = math.atan2(error_y, error_x)
     
@@ -710,9 +711,11 @@ while True:
     
     #laser_info_mean = 1
     #times_obstacle = 0
-    #if(laser_info_mean <= 0.3):
+    
+    
+    #if(laser_info_mean <= 0.5):
       #has_reached = True
-    #  HAL.setW(2.0)
+    #  HAL.setW(5.0)
     #  times_obstacle += 1
       #paint_cell(filled_map, current_2d_x+1, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
       
@@ -729,10 +732,18 @@ while True:
     if(has_reached): 
       
       if(pos_move_coords < len(unique_move_coordinates)):
+        #print(x_coord == x_3d and y_coord == y_3d, x_coord == x_3d or y_coord == y_3d)
+        #if(x_coord == x_3d and y_coord == y_3d):
+        
+         # paint_cell(filled_map, current_2d_x , current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+        #elif (x_coord == x_3d or y_coord == y_3d):
+          #paint_cell(filled_map, current_2d_x +1 , current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+        
+        
         pos_move_coords = pos_move_coords + 1
         has_reached = False
         
-      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+      
         
       #times_obstacle = 0
         
@@ -740,8 +751,8 @@ while True:
       #dif_y = 0.0
       #dif_rad = 0.0
     
-
-    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+    
+    paint_cell(filled_map, x_coord, y_coord, CELL_WIDTH, CELL_HEIGHT, 133)
     
     GUI.showNumpy(filled_map)
     draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
