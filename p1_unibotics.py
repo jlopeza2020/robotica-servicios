@@ -171,13 +171,22 @@ def get_2d_y():
     return y_2d
 
 
+
 def paint_cell(cell_map, x, y, cell_width, cell_height, color):
   
     for aux_y in range((y * cell_height) - cell_height, y * cell_height):
       for aux_x in range((x * cell_width) - cell_width, x * cell_width):
           cell_map[aux_y][aux_x] = color
     
+  
+"""    
+def paint_cell(cell_map, x, y, cell_width, cell_height, color):
+  
+    for aux_y in range((y * cell_height) + cell_height, y * cell_height):
+      for aux_x in range((x * cell_width) + cell_width, x * cell_width):
+          cell_map[aux_y][aux_x] = color
     
+ """   
 def remove_duplicates_from_list_of_coordinates(coords):
     unique_coords = set()
     result_coords = []
@@ -552,6 +561,7 @@ orientation_converted = 0.0
 
 Kp = 1.5
 
+#times_obstacle = 0
 """
 
 for i in range(0, len(unique_move_coordinates)):
@@ -581,7 +591,8 @@ for i in range(0, len(unique_move_coordinates)):
     
     pos_move_coords += 1
 """  
-  
+paint_cell(filled_map, initial_2d_x, initial_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+
 while True:
   
     
@@ -592,7 +603,7 @@ while True:
     x_3d = HAL.getPose3d().x
     y_3d = HAL.getPose3d().y
     
-    print("Y METROS ACTUAL :"+str(y_3d), "X METROS ACTUAL :"+str(x_3d))
+    #print("Y METROS ACTUAL :"+str(y_3d), "X METROS ACTUAL :"+str(x_3d))
     
     # use it  to draw cell
     
@@ -635,15 +646,14 @@ while True:
     objective_x_meter = get_x_meter(objective_x_central_pixel)
     
     
-    print("Y METROS OBJETIVO" + str(objective_y_meter), "X METROS OBJETIVO" + str(objective_x_meter))
+    #print("Y METROS OBJETIVO" + str(objective_y_meter), "X METROS OBJETIVO" + str(objective_x_meter))
     
     current_angle = HAL.getPose3d().yaw
     
     error_x = objective_x_meter - x_3d
     error_y = objective_y_meter - y_3d
     
-    #print(" error x" + str(error_x))
-    #print("error y " + str(error_y))
+    print(" error x" + str(error_x), "error y " + str(error_y))
     
     goal_angle = math.atan2(error_y, error_x)
     
@@ -680,13 +690,13 @@ while True:
       
     
     
-    laser_dt = HAL.getLaserData()
+    #laser_dt = HAL.getLaserData()
     # mean of the values of the center 
-    laser_info_mean = parse_laser_data(laser_dt, 60*math.pi/180 , 120*math.pi/180)
+    #laser_info_mean = parse_laser_data(laser_dt, 0*math.pi/180 , 180*math.pi/180)
 
     
     
-    print("MEANNN" + str(laser_info_mean))
+    #print("MEANNN" + str(laser_info_mean))
   
     
     #if (round(y_3d,4) == round(objective_y_meter,4) and round(x_3d,4) == round(objective_x_meter,4)):
@@ -697,25 +707,41 @@ while True:
       has_reached = True
       
     ## modificar para que solo aumente uno 
-    #if(laser_info_mean <= 0.25):
-    #  has_reached = True
-    #  HAL.setW(1.0)
+    
+    #laser_info_mean = 1
+    #times_obstacle = 0
+    #if(laser_info_mean <= 0.3):
+      #has_reached = True
+    #  HAL.setW(2.0)
+    #  times_obstacle += 1
+      #paint_cell(filled_map, current_2d_x+1, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+      
+    #  if(times_obstacle >= 1):
+    #    times_obstacle = 1
+        
+    #print(times_obstacle)
+    
+    #laser_info_mean = 1    
      
 
     
+    #if(has_reached or times_obstacle == 1): 
     if(has_reached): 
-    #if(has_reached): 
       
       if(pos_move_coords < len(unique_move_coordinates)):
         pos_move_coords = pos_move_coords + 1
         has_reached = False
+        
+      paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+        
+      #times_obstacle = 0
         
       #dif_x = 0.0
       #dif_y = 0.0
       #dif_rad = 0.0
     
 
-    paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
+    #paint_cell(filled_map, current_2d_x, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
     
     GUI.showNumpy(filled_map)
     draw_rectangles(filled_map, CELL_WIDTH, CELL_HEIGHT)
