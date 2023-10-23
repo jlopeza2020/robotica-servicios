@@ -608,14 +608,14 @@ while True:
     current_2d_x = int(round(get_2d_x()))
     current_2d_y = int(round(get_2d_y()))
     
-    print("Y CELDA ACTUAL " + str(current_2d_y), "X CELDA ACTUAL "+ str(current_2d_x))
+    #print("Y CELDA ACTUAL " + str(current_2d_y), "X CELDA ACTUAL "+ str(current_2d_x))
     
     
     # CELDA OBJETIVO
     y_coord = unique_move_coordinates[pos_move_coords][0]
     x_coord = unique_move_coordinates[pos_move_coords][1]
     
-    print("Y CELDA OBJETIVO  " + str(y_coord), "X CELDA OBJETIVO  " + str(x_coord))
+    #print("Y CELDA OBJETIVO  " + str(y_coord), "X CELDA OBJETIVO  " + str(x_coord))
 
     
     # de esas celdas objetivo, calculamos la posición superior izq en píxeles 
@@ -691,9 +691,9 @@ while True:
       
     
     
-    #laser_dt = HAL.getLaserData()
+    laser_dt = HAL.getLaserData()
     # mean of the values of the center 
-    #laser_info_mean = parse_laser_data(laser_dt, 0*math.pi/180 , 180*math.pi/180)
+    laser_info_mean = parse_laser_data(laser_dt, 60*math.pi/180 , 120*math.pi/180)
 
     
     
@@ -713,9 +713,9 @@ while True:
     #times_obstacle = 0
     
     
-    #if(laser_info_mean <= 0.5):
+    if(laser_info_mean <= 0.3):
       #has_reached = True
-    #  HAL.setW(5.0)
+      HAL.setv(-0.1)
     #  times_obstacle += 1
       #paint_cell(filled_map, current_2d_x+1, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
       
