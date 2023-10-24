@@ -1,4 +1,3 @@
-from GUI import GUI
 from HAL import HAL
 import cv2
 import numpy as np
@@ -691,9 +690,11 @@ while True:
       
     
     
-    laser_dt = HAL.getLaserData()
+    #laser_dt = HAL.getLaserData()
     # mean of the values of the center 
-    laser_info_mean = parse_laser_data(laser_dt, 60*math.pi/180 , 120*math.pi/180)
+    #laser_info_mean_left = parse_laser_data(laser_dt, 0*math.pi/180 , 60*math.pi/180)
+    #laser_info_mean_center = parse_laser_data(laser_dt, 60*math.pi/180 , 120*math.pi/180)
+    #laser_info_mean_right = parse_laser_data(laser_dt, 120*math.pi/180 , 180*math.pi/180)
 
     
     
@@ -713,9 +714,10 @@ while True:
     #times_obstacle = 0
     
     
-    if(laser_info_mean <= 0.3):
+    #if(laser_info_mean_left <= 0.3 or laser_info_mean_center <= 0.3 or laser_info_mean_right <= 0.3):
       #has_reached = True
-      HAL.setv(-0.1)
+    #  HAL.setV(-0.1)
+    #  HAL.setW(0.5)
     #  times_obstacle += 1
       #paint_cell(filled_map, current_2d_x+1, current_2d_y, CELL_WIDTH, CELL_HEIGHT, 133)
       
