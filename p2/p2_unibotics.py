@@ -108,9 +108,33 @@ while True:
         phase_finding = True
         
     if(phase_finding):
-      if
-      for point in waypoints_list:
-    print(point)
+      if(num_pos_waypoints < len(waypoints_list)):
+        
+        goal_x_waypoint = waypoints_list[num_pos_waypoints][0]
+        goal_y_waypoint = waypoints_list[num_pos_waypoints][1]
+        goal_height_waypoint = waypoints_list[num_pos_waypoints][2]
+        goal_yaw_waypoint = np.arctan2(goal_y_waypoint , goal_x_waypoint)
+        
+        diff_x_waypoint = get_difference(goal_x_waypoint, actual_x)
+        diff_y_waypoint = get_difference(goal_y_waypoint,  actual_y)
+        diff_height_waypoint = get_difference(goal_height_waypoint, actual_height)
+        diff_yaw_waypoint = get_difference(goal_yaw_waypoint, actual_yaw)
+        
+        if(diff_x_waypoint > 0.1 and diff_y_waypoint > 0.1 and  diff_height_waypoint < 0.1 and diff_yaw_waypoint > 0.01):
+          HAL.set_cmd_pos(goal_x_waypoint ,goal_y_waypoint ,goal_height_waypoint , goal_yaw_waypoint)
+        else:
+          num_pos_waypoints += 1
+          
+      else: 
+          #phase_go_to_survivors = False
+          phase_finding = False
+        
+        
+        #for point in waypoints_list:
+        #print(goal_x_waypoint)
+        
+    #  for point in waypoints_list:
+    #print(point)
     
     # if robot lleva 10 minutos operando, vuelva a cargarse 
     # retome por donde se haya quedado 
