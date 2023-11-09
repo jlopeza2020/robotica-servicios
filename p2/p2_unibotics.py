@@ -2,6 +2,7 @@ from GUI import GUI
 from HAL import HAL
 import numpy as np
 
+"""
 def generate_spiral_square(center, initial_side_length, num_turns, step_size):
     waypoints = []
     
@@ -23,7 +24,73 @@ def generate_spiral_square(center, initial_side_length, num_turns, step_size):
             current_point[1] -= step_size  # Incremento en y para formar la espiral cuadrada
     
     return waypoints
+"""
 
+def generate_spiral_square(center, num_turns, step_size):
+    waypoints = []
+    
+    # Punto de inicio en la espiral
+    current_point = np.array(center)
+    waypoints.append(tuple(current_point))
+    incremento = 1
+    
+    # Generar la espiral cuadrada
+    for _ in range(num_turns):
+        #for _ in range(4):
+        #waypoints.append(tuple())    # Agregar el punto actual a la lista de waypoints
+            #waypoints.append(tuple(current_point))
+            
+            # primera (x, y + 1)
+            if(current_point[1] > 0):
+              current_point[1] += incremento
+              #waypoints.append(tuple(current_point))
+              #incremento += 1
+            else:
+              current_point[1] -= incremento
+            
+            waypoints.append(tuple(current_point))
+            incremento += 1
+            
+            # segunda(x-2, y) 
+            if(current_point[0] > 0):
+              current_point[0] -= incremento
+              #waypoints.append(tuple(current_point))
+            #  incremento += 1
+            else:
+              current_point[0] += incremento
+            waypoints.append(tuple(current_point))
+            incremento += 1
+            
+            # tercera (x, y - 3)
+            if(current_point[1] > 0):
+              current_point[1] -= incremento
+              #waypoints.append(tuple(current_point))
+              #incremento += 1
+            else: 
+              current_point[1] += incremento
+            waypoints.append(tuple(current_point))
+            incremento += 1
+              
+            # segunda(x+4, y)
+            
+            if(current_point[0] > 0):
+              current_point[0] += incremento
+              #waypoints.append(tuple(current_point))
+              #incremento += 1
+            else:
+              current_point[0] += incremento
+            waypoints.append(tuple(current_point))
+            incremento += 1
+            
+            
+            
+            # Agregar el punto después de moverse en el lado
+            #waypoints.append(tuple(current_point))
+            
+            # Actualizar la posición para el próximo lado (y)
+            #current_point[1] -= step_size  # Incremento en y para formar la espiral cuadrada
+    
+    return waypoints
     
 def get_difference(objective, actual): 
     if (objective < actual): 
@@ -64,17 +131,25 @@ phase_finding = False
 
 num_pos_waypoints = 0
 # Definir el centro, longitud del lado inicial, número de vueltas y tamaño del paso
-center = [goal_x, goal_y, goal_height]
-initial_side_length = 1
+center = [goal_x, goal_y]
+#initial_side_length = 1
 num_turns = 10
-step_size = 1
+step_size = 2
+
+#center_point = [0, 0]
+#initial_side_length = 5
+#num_turns = 3
+#step_size = 1
+
+#waypoints_list = generate_spiral_square(center_point, initial_side_length, num_turns, step_size)
+
 
 # Generar los waypoints de la espiral cuadrada
-waypoints_list = generate_spiral_square(center, initial_side_length, num_turns, step_size)
+waypoints_list = generate_spiral_square(center, num_turns, step_size)
 
 # Imprimir los waypoints generados
 
-print("Waypoints:")
+#print("Waypoints:")
 for point in waypoints_list:
     print(point)
     
@@ -85,6 +160,8 @@ while True:
     actual_y = HAL.get_position()[1]
     actual_height = HAL.get_position()[2]
     actual_yaw = HAL.get_yaw()
+    
+    #print(actual_x, actual_y, actual_height, actual_yaw)
     
     
     diff_x = get_difference(goal_x, actual_x)
@@ -101,7 +178,7 @@ while True:
     
 
     if(phase_go_to_survivors): 
-      if(diff_x > 0.1 and diff_y > 0.1 and  diff_height < 0.1 and diff_yaw > 0.01):
+      if(diff_x > 0.1 or diff_y > 0.1 or  diff_height < 0.1 or diff_yaw > 0.01):
         HAL.set_cmd_pos(goal_x,goal_y,goal_height, goal_yaw)
       else: 
         phase_go_to_survivors = False
@@ -112,7 +189,8 @@ while True:
         
         goal_x_waypoint = waypoints_list[num_pos_waypoints][0]
         goal_y_waypoint = waypoints_list[num_pos_waypoints][1]
-        goal_height_waypoint = waypoints_list[num_pos_waypoints][2]
+        goal_height_waypoint = goal_height
+        #goal_height_waypoint = waypoints_list[num_pos_waypoints][2]
         goal_yaw_waypoint = np.arctan2(goal_y_waypoint , goal_x_waypoint)
         
         diff_x_waypoint = get_difference(goal_x_waypoint, actual_x)
@@ -120,13 +198,20 @@ while True:
         diff_height_waypoint = get_difference(goal_height_waypoint, actual_height)
         diff_yaw_waypoint = get_difference(goal_yaw_waypoint, actual_yaw)
         
-        if(diff_x_waypoint > 0.1 and diff_y_waypoint > 0.1 and  diff_height_waypoint < 0.1 and diff_yaw_waypoint > 0.01):
+        print("-------------------------------------------------------------")
+        print("actual")
+        print(actual_x, actual_y, actual_height, actual_yaw)
+        print("goal")
+        print(goal_x_waypoint, goal_y_waypoint, goal_height_waypoint, goal_yaw_waypoint)
+        print("diff")
+        print(diff_x_waypoint, diff_y_waypoint, diff_height_waypoint, diff_yaw_waypoint)
+        
+        if(diff_x_waypoint > 0.1 or diff_y_waypoint > 0.1 or  diff_height_waypoint < 0.1 or diff_yaw_waypoint > 0.01):
           HAL.set_cmd_pos(goal_x_waypoint ,goal_y_waypoint ,goal_height_waypoint , goal_yaw_waypoint)
         else:
           num_pos_waypoints += 1
           
       else: 
-          #phase_go_to_survivors = False
           phase_finding = False
         
         
