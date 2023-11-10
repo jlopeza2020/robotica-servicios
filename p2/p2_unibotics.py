@@ -2,8 +2,102 @@ from GUI import GUI
 from HAL import HAL
 import numpy as np
 import math
+import time
 
 
+# Función para calcular las coordenadas de la espiral de Arquímedes creciente
+
+def arquimedes_spiral_creciente(a, b, theta):
+    r = a + b * theta  # Ajusta según sea necesario
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
+    return x, y
+"""
+# Función para calcular las coordenadas de la espiral de Arquímedes creciente
+def arquimedes_spiral_creciente(a, b, c, theta):
+    r = a + b * theta + c * theta**2  # Puedes ajustar el término cuadrático c según sea necesario
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
+    return x, y
+
+# Función para mover el dron en una espiral de Arquímedes creciente usando HAL.set_cmd_vel()
+def move_drone_in_spiral_creciente(a, b, c, num_turns, velocity, angular_velocity, height):
+    theta_interval = 2 * np.pi / (num_turns * 360)
+    current_theta = 0
+
+    while current_theta <= num_turns * 2 * np.pi:
+        x, y = arquimedes_spiral_creciente(a, b, c, current_theta)
+
+        # Calcular las velocidades lineales en x e y
+        vx = velocity * np.cos(current_theta)
+        vy = velocity * np.sin(current_theta)
+
+        # Enviar comandos al dron
+        HAL.set_cmd_mix(vx, vy, height, angular_velocity)
+#HAL.set_cmd_vel(vx, vy, height, angular_velocity)
+
+        # Imprimir información (opcional)
+        print(f"Theta: {np.degrees(current_theta)}, X: {x}, Y: {y}, VX: {vx}, VY: {vy}")
+
+        # Incrementar el ángulo para la siguiente iteración
+        current_theta += theta_interval
+
+        # Ajustar según sea necesario para controlar la velocidad de iteración
+        time.sleep(0.1)
+
+    # Detener el dron después de completar la espiral
+    HAL.set_cmd_mix(0.0, 0.0, height, 0.0)
+"""
+
+"""
+# Función para calcular las coordenadas de la espiral de Arquímedes creciente
+def arquimedes_spiral_creciente(a, b, c, theta):
+    r = a + b * theta + c * theta**2  # Ajusta el término cuadrático c según sea necesario
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
+    return x, y
+
+# Función para mover el dron en una espiral de Arquímedes creciente usando HAL.set_cmd_vel()
+def move_drone_in_spiral_creciente(a, b, c, num_turns, velocity, angular_velocity, height):
+    theta_interval = 2 * np.pi / (num_turns * 360)
+    current_theta = 0
+
+    while current_theta <= num_turns * 2 * np.pi:
+        x, y = arquimedes_spiral_creciente(a, b, c, current_theta)
+
+        # Calcular las velocidades lineales en x e y
+        vx = velocity * np.cos(current_theta)
+        vy = velocity * np.sin(current_theta)
+
+        # Enviar comandos al dron
+        HAL.set_cmd_mix(vx, vy, height, angular_velocity)
+
+        # Imprimir información (opcional)
+        print(f"Theta: {np.degrees(current_theta)}, X: {x}, Y: {y}, VX: {vx}, VY: {vy}")
+
+        # Incrementar el ángulo para la siguiente iteración
+        current_theta += theta_interval
+
+        # Ajustar según sea necesario para controlar la velocidad de iteración
+        time.sleep(0.1)
+
+    # Detener el dron después de completar la espiral
+    HAL.set_cmd_mix(0.0, 0.0, height, 0.0)
+"""
+# Parámetros de la espiral de Arquímedes
+#a_param = 1.0
+#b_param = 0.1
+#num_turns_param = 2
+#velocity_param = 1.0
+#angular_velocity_param = 0.5  # Ajustar según sea necesario
+
+# Llamar a la función para mover el dron en la espiral de Arquímedes
+#move_drone_in_spiral(a_param, b_param, num_turns_param, velocity_param, angular_velocity_param)
+
+
+
+
+"""
 def generate_spiral_square(center, num_turns):
     waypoints = []
     
@@ -50,7 +144,7 @@ def generate_spiral_square(center, num_turns):
         incremento += 1
   
     return waypoints
-    
+"""  
 def get_difference(objective, actual): 
     if (objective < actual): 
       dif = actual - objective
@@ -58,6 +152,7 @@ def get_difference(objective, actual):
       dif = objective - actual
       
     return dif
+  
   
 actual_height = 0.0
 goal_height = 2.5
@@ -88,18 +183,40 @@ phase_go_to_survivors = False
 phase_finding = False
 
 
-num_pos_waypoints = 0
+#num_pos_waypoints = 0
 # Definir el centro, longitud del lado inicial, número de vueltas y tamaño del paso
-center = [goal_x, goal_y]
-num_turns = 10
+#center = [goal_x, goal_y]
+#num_turns = 10
 #step_size = 2
 
 # Generar los waypoints de la espiral cuadrada
-waypoints_list = generate_spiral_square(center, num_turns)
-
-Kp = 1.5
+#waypoints_list = generate_spiral_square(center, num_turns)
+#
+#Kp = 1.5
 #for point in waypoints_list:
 #    print(point)
+
+# Parámetros de la espiral de Arquímedes creciente
+#a_param_creciente = 20.0
+#b_param_creciente = 2.0
+#c_param_creciente = 1.0 # Puedes ajustar este valor según sea necesario
+#num_turns_param_creciente = 10
+#velocity_param_creciente = 2.0
+#angular_velocity_param_creciente = 1.0  # Ajustar según sea necesario
+
+# Parámetros de la espiral
+a = 3.0
+b = 1.0
+
+# Parámetros de control del dron
+height = 1.0  # Altura del dron
+velocity = 3.0  # Velocidad lineal del dron
+angular_velocity = 0.1  # Velocidad angular del dron
+
+# Coordenadas iniciales del dron
+#x_actual = 0.0
+#y_actual = 0.0
+
 print("++++++++++++++++++++++++++++++++++++++++++")
 while True:
     # state 1 
@@ -129,142 +246,39 @@ while True:
         phase_finding = True
         
     if(phase_finding):
-      if(num_pos_waypoints < len(waypoints_list)):
-        
-        goal_x_waypoint = waypoints_list[num_pos_waypoints][0]
-        goal_y_waypoint = waypoints_list[num_pos_waypoints][1]
-        goal_height_waypoint = goal_height
-        #goal_height_waypoint = waypoints_list[num_pos_waypoints][2]
-        goal_yaw_waypoint = np.arctan2(goal_y_waypoint , goal_x_waypoint)
-        
-        
-        # to know where to go 
-        diff_x_waypoint = goal_x_waypoint - actual_x
-        diff_y_waypoint = goal_y_waypoint - actual_y
-        
-        diff_height_waypoint = get_difference(goal_height_waypoint, actual_height)
-        diff_yaw_waypoint = get_difference(goal_yaw_waypoint, actual_yaw)
-        revisar 
-        
-        #current_angle = HAL.getPose3d().yaw
-    
-    ##diff_x = objective_x_meter - x_3d
-    #diff_y = objective_y_meter - y_3d
-    
-    #objective_angle = math.atan2(diff_y, diff_x)
-    
-    #angle_diff = current_angle - objective_angle
-        
-        #objective_angle = math.atan2(diff_y, diff_x)
-    
-    #angle_diff = current_angle - objective_angle
-        if (diff_yaw_waypoint > math.pi):
-          diff_yaw_waypoint -= 2*math.pi
-        elif(diff_yaw_waypoint < -math.pi):
-          diff_yaw_waypoint +=2*math.pi
-        
-        
-        print("-------------------------------------------------------------")
-        print("actual")
-        print(actual_x, actual_y, actual_height, actual_yaw)
-        print("goal")
-        print(goal_x_waypoint, goal_y_waypoint, goal_height_waypoint, goal_yaw_waypoint)
-        print("diff")
-        print(diff_x_waypoint, diff_y_waypoint, diff_height_waypoint, diff_yaw_waypoint)
-        
-        HAL.set_cmd_mix(-1.0, 0.0, goal_height_waypoint, 0.0)
-        
-        """
-        # significa que está alineado
-        if(abs(diff_yaw_waypoint) < 0.1):
-          # mover a lo largo del eje x
-          if(abs(diff_x_waypoint) > abs(diff_y_waypoint)):
-            if(diff_x_waypoint > 0):
+      # Llamar a la función para mover el dron en la espiral de Arquímedes
+      #move_drone_in_spiral(a_param, b_param, num_turns_param, velocity_param, angular_velocity_param)
+      # Llamar a la función para mover el dron en la espiral de Arquímedes creciente
+      #move_drone_in_spiral_creciente(a_param_creciente, b_param_creciente, c_param_creciente,
+      #num_turns_param_creciente, velocity_param_creciente, 
+      #                          angular_velocity_param_creciente,  goal_height)
       
-              HAL.set_cmd_mix(0.5, 0.0, goal_height_waypoint, 0.0)
-  
-            else:
-              HAL.set_cmd_mix(-0.5, 0.0, goal_height_waypoint, 0.0)
-            
-          else: 
-            # mover a lo largo del eje y 
-            
-            if(diff_y_waypoint > 0): 
-              
-              HAL.set_cmd_mix(0.0, -0.5, goal_height_waypoint, 0.0)
-              
-            else: 
-              
-              HAL.set_cmd_mix(0.0, -0.5, goal_height_waypoint, 0.0)
-              
-    
-        else: 
-          #HAL.set_cmd_mix(0.0, 0.0, goal_height_waypoint, 0.0)
-          HAL.set_cmd_mix(0.0, 0.0, goal_height_waypoint, 0.15)
-        """
-        
-        # hemos llegado
-        if(abs(diff_x_waypoint) < 0.1 and  abs(diff_y_waypoint) < 0.1 and  abs(diff_height_waypoint) < 0.1 and abs(diff_yaw_waypoint) < 0.01):
-          num_pos_waypoints += 1
-        
-        #HAL.set_cmd_mix(0.0, 0.0, goal_height_waypoint, 1.0)
-        # hay que ir hacia adelante
-        
-  
-        """
-       # Navigation logic 
-        if (diff_yaw_waypoint > math.pi):
-          diff_yaw_waypoint -= 2*math.pi
-        elif(diff_yaw_waypoint < -math.pi):
-          diff_yaw_waypoint +=2*math.pi
+      # move in spiral
+      theta_inicial = np.arctan2(actual_y, actual_x)
+      # Simular control de un dron a lo largo de la espiral desde la posición actual
+      for theta in np.linspace(theta_inicial, theta_inicial + 4 * np.pi, 100):
           
-          
-        if(diff_yaw_waypoint > 0):
-          #HAL.setW(0.5 + Kp*diff_yaw_waypoint)
-          HAL.set_cmd_mix(0.0, 0.0, goal_height_waypoint, 0.5 + Kp*diff_yaw_waypoint)
+          x, y = arquimedes_spiral_creciente(a, b, theta)
 
-        else: 
-          #HAL.setW(-0.5 - Kp*diff_yaw_waypoint)
-          HAL.set_cmd_mix(0.0, 0.0, goal_height_waypoint, -0.5 - Kp*diff_yaw_waypoint)
+          # Calcula comandos de velocidad (simulación)
+          vx = velocity * np.cos(theta)
+          vy = velocity * np.sin(theta)
+
+          # Envia comandos al dron (simulación)
+          HAL.set_cmd_mix(vx, vy, height, angular_velocity)
+
+          # Imprimir información (opcional)
+          print(f"Theta: {np.degrees(theta)}, X: {x}, Y: {y}, VX: {vx}, VY: {vy}")
+
+          # Ajusta según sea necesario para controlar la velocidad de iteración
+          time.sleep(0.1)
+
+      # Detener el dron después de completar la espiral
+      HAL.set_cmd_mix(0.0, 0.0, height, 0.0)
+
       
-        # means that it is so close that it goes forward 
-        if abs(diff_yaw_waypoint) < 0.0001:
-          #HAL.setV(1.0)
-          HAL.set_cmd_mix(1.0, 0.0, goal_height_waypoint, 0.0)
-        else:
-          #HAL.setV(0.0)
-          HAL.set_cmd_mix(0.0, 0.0, goal_height_waypoint, 0.0)
       
-        # has reached to destination
-        if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
-          num_pos_waypoints += 1
-          #has_reached = True
-        """
-        #print(HAL.get_velocity())
-        #print(HAL.get_yaw_rate())
-        
-        #if(diff_x_waypoint > 0.1 or diff_y_waypoint > 0.1 or  diff_height_waypoint > 0.1 or diff_yaw_waypoint > 0.01):
-          #HAL.set_cmd_pos(goal_x_waypoint ,goal_y_waypoint ,goal_height_waypoint , goal_yaw_waypoint)
-          #vx = 0.5 * diff_x_waypoint  # Ajusta la ganancia según sea necesario
-          #vy = 0.5 * diff_y_waypoint
-          #vz = 0.5 * diff_height_waypoint
-          #az = 0.5 * diff_yaw_waypoint
-          #HAL.set_cmd_vel(vx, vy, vz, az)
-          
-          #HAL.set_cmd_mix(0.5, 0.0, goal_height_waypoint, 0.0)
-        
-        #else:
-          #num_pos_waypoints += 1
-          
-      else: 
-          phase_finding = False
-        
-        
-        #for point in waypoints_list:
-        #print(goal_x_waypoint)
-        
-    #  for point in waypoints_list:
-    #print(point)
+      
     
     # if robot lleva 10 minutos operando, vuelva a cargarse 
     # retome por donde se haya quedado 
@@ -273,8 +287,8 @@ while True:
  
     
     # Show ventral and frontal image
-    frontal_image = HAL.get_frontal_image()
-    GUI.showImage(frontal_image)
+    #frontal_image = HAL.get_frontal_image()
+    #GUI.showImage(frontal_image)
     ventral_image = HAL.get_ventral_image()
     GUI.showLeftImage(ventral_image)
     

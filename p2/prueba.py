@@ -1,35 +1,26 @@
+import numpy as np
 import matplotlib.pyplot as plt
 
-# Función para generar puntos de la espiral cuadrada
-def square_spiral_points(size, turns, side_length_increment):
-    x, y = [0], [0]
-    angle = 0
-
-    for _ in range(turns):
-        for _ in range(4):
-            angle_rad = angle * (3.141592653589793 / 180.0)
-            x.append(x[-1] + size * side_length_increment * (1 if angle % 180 == 0 else -1) * round(abs(angle % 180 - 90) / 90))
-            y.append(y[-1] + size * side_length_increment * (1 if (angle + 90) % 180 == 0 else -1) * round(abs((angle + 90) % 180 - 90) / 90))
-            angle += 90
-
-    # Centrar la espiral restando la media de las coordenadas
-    x = [coord - sum(x) / len(x) for coord in x]
-    y = [coord - sum(y) / len(y) for coord in y]
-
+# Función para calcular las coordenadas de la espiral de Arquímedes creciente
+def arquimedes_spiral_creciente(a, b, theta):
+    r = a + b * theta  # Ajusta según sea necesario
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
     return x, y
 
 # Parámetros de la espiral
-size = 10
-turns = 20
-side_length_increment = 5
+a = 0.2
+b = 0.1
 
-# Generar puntos de la espiral cuadrada
-x, y = square_spiral_points(size, turns, side_length_increment)
+# Generar puntos en la espiral
+theta_vals = np.linspace(0, 4 * np.pi, 1000)
+print(theta_vals)
+x_vals, y_vals = arquimedes_spiral_creciente(a, b, theta_vals)
 
-# Graficar la espiral cuadrada
-plt.plot(x, y, marker='o', linestyle='-')
-plt.title('Espiral Cuadrada')
-plt.xlabel('Coordenada X')
-plt.ylabel('Coordenada Y')
+# Dibujar la espiral
+plt.plot(x_vals, y_vals)
+plt.title('Espiral de Arquímedes Creciente')
+plt.xlabel('X')
+plt.ylabel('Y')
 plt.grid(True)
 plt.show()
