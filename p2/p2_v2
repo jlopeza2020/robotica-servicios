@@ -25,70 +25,7 @@ def generate_spiral_square(center, initial_side_length, num_turns, step_size):
     
     return waypoints
 """
-def generate_rectangles(init_point, num_turns):
-    waypoints = []
-    
-    # Punto de inicio en la espiral
-    current_point = np.array(init_point)
-    waypoints.append(tuple(current_point))
-    
-    # Generar la espiral cuadrada
-    for _ in range(num_turns):
 
-        # primera (x, y + 25)
-        if(current_point[1] > 0):
-          current_point[1] += 10
-
-        else:
-          current_point[1] -= 10
-            
-        waypoints.append(tuple(current_point))
-
-        # segunda(x-2, y) 
-        if(current_point[0] > 0):
-          current_point[0] -= 1
-
-        else:
-          current_point[0] += 1
-        waypoints.append(tuple(current_point))
-
-
-        # tercera (x, y - 25)
-        if(current_point[1] > 0):
-          current_point[1] -= 10
-        else: 
-          current_point[1] += 10
-        waypoints.append(tuple(current_point))
-
-        # cuarta (x, y - 25)
-        if(current_point[1] > 0):
-          current_point[1] -= 10
-        
-        else: 
-          current_point[1] += 10
-        waypoints.append(tuple(current_point))
-
-
-        # quinta (x-2, y)
-        if(current_point[0] > 0):
-          current_point[0] -= 1
-          
-        else:
-          current_point[0] += 1
-        waypoints.append(tuple(current_point))
-
-        # sexta (x, y + 25)
-        if(current_point[1] > 0):
-          current_point[1] += 10
-            
-        else:
-          current_point[1] -= 10
-            
-        waypoints.append(tuple(current_point))
-
-    return waypoints
-    
-    
 def generate_spiral_square(center, num_turns, step_size):
     waypoints = []
     
@@ -156,6 +93,93 @@ def generate_spiral_square(center, num_turns, step_size):
     
     return waypoints
     
+
+def generate_rectangles(init_point, num_turns):
+    waypoints = []
+    
+    # Punto de inicio en la espiral
+    current_point = np.array(init_point)
+    waypoints.append(tuple(current_point))
+    #incremento = 1
+
+    #(x,y+25)
+    #x = current_point[0]
+    #y = current_point[1]
+    #y += 25
+
+
+    # Generar la espiral cuadrada
+    for _ in range(num_turns):
+
+            # primera (x, y + 25)
+            if(current_point[1] > 0):
+              current_point[1] += 25
+              #waypoints.append(tuple(current_point))
+              #incremento += 1
+            else:
+              current_point[1] -= 25
+            
+            waypoints.append(tuple(current_point))
+            #incremento += 1
+            
+            # segunda(x-2, y) 
+            if(current_point[0] > 0):
+              current_point[0] -= 2
+              #waypoints.append(tuple(current_point))
+            #  incremento += 1
+            else:
+              current_point[0] += 2
+            waypoints.append(tuple(current_point))
+            #incremento += 1
+            
+            # tercera (x, y - 25)
+            if(current_point[1] > 0):
+              current_point[1] -= 25
+              #waypoints.append(tuple(current_point))
+              #incremento += 1
+            else: 
+              current_point[1] += 25
+            waypoints.append(tuple(current_point))
+            #incremento += 1
+              
+
+            # cuarta (x, y - 25)
+            if(current_point[1] > 0):
+              current_point[1] -= 25
+              #waypoints.append(tuple(current_point))
+              #incremento += 1
+            else: 
+              current_point[1] += 25
+            waypoints.append(tuple(current_point))
+
+
+            # quinta (x-2, y)
+            if(current_point[0] > 0):
+              current_point[0] -= 2
+              #waypoints.append(tuple(current_point))
+            #  incremento += 1
+            else:
+              current_point[0] += 2
+            waypoints.append(tuple(current_point))
+
+            # sexta (x, y + 25)
+            if(current_point[1] > 0):
+              current_point[1] += 25
+              #waypoints.append(tuple(current_point))
+              #incremento += 1
+            else:
+              current_point[1] -= 25
+            
+            waypoints.append(tuple(current_point))
+
+            # Agregar el punto después de moverse en el lado
+            #waypoints.append(tuple(current_point))
+            
+            # Actualizar la posición para el próximo lado (y)
+            #current_point[1] -= step_size  # Incremento en y para formar la espiral cuadrada
+    
+    return waypoints
+
 def get_difference(objective, actual): 
     if (objective < actual): 
       dif = actual - objective
@@ -197,7 +221,7 @@ num_pos_waypoints = 0
 # Definir el centro, longitud del lado inicial, número de vueltas y tamaño del paso
 center = [goal_x, goal_y]
 #initial_side_length = 1
-num_turns = 20
+num_turns = 10
 step_size = 2
 
 #center_point = [0, 0]
@@ -209,10 +233,8 @@ step_size = 2
 
 
 # Generar los waypoints de la espiral cuadrada
-#waypoints_list = generate_spiral_square(center, num_turns, step_size)
-waypoints_list = generate_rectangles(center, num_turns)
-#def generate_rectangles(init_point, num_turns):
-
+waypoints_list = generate_spiral_square(center, num_turns, step_size)
+waypoints_list = generate_square(center, num_turns, step_size)
 
 
 # Imprimir los waypoints generados
