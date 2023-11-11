@@ -43,7 +43,8 @@ while angulo_inicial < 360:
 
     # Dibujar rectángulos alrededor de las caras detectadas
     for (x, y, w, h) in faces_result:
-        img_copia = cv2.rectangle(img_copia, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        #img_copia = cv2.rectangle(img_copia, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        print("DETECTADO")
 
     # Mostrar la imagen con las caras detectadas
     cv2.imshow('img', img_copia)
