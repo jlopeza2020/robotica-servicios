@@ -205,7 +205,7 @@ if face_detector.empty():
 # Definir el ángulo de rotación inicial y el incremento
 #angulo_inicial = 0
 #angulo_incremento = 20
-
+tiempo_inicio = time.time()
 print("++++++++++++++++++++++++++++++++++++++++++")
 
 while True:
@@ -277,8 +277,44 @@ while True:
       else: 
           phase_finding = False
       
+      
+    # si han pasado 10 minutos 
+    #tiempo_inicio = time.time()
+    tiempo_transcurrido = time.time() - tiempo_inicio
+    if(tiempo_transcurrido >= 600.00):
+      print("Come to charge")
+      phase_finding = False
+      phase_go_to_survivors = False
+      phase_take_off = False
+      
+      phase_go_boat = True
+      
+      tiempo_transcurrido = 0.0
+      
+    if(phase_go_boat):
+      goal_x = 0.0
+      goal_y = 0.0
+      goal_yaw = np.arctan2(goal_y , goal_x)
+
+      if(diff_x > 0.1 or diff_y > 0.1 or  diff_height > 0.1 or diff_yaw > 0.01):
+        HAL.set_cmd_pos(goal_x,goal_y,goal_height, goal_yaw)
+      else: 
+        phase_go_boat = False
+        phase_landing = True
+      
+      
+    if(phase_landing):
+      HAL.land()
+      
+    if(phase_landing and (num_pos_waypoints < len(waypoints_list))):
+      print("I need to finish searching")
+      phase_landing = False
+      phase_take_off = True 
+      
+    print(tiempo_transcurrido)
+    
     # Show ventral and frontal image
-    frontal_image = HAL.get_frontal_image()
-    GUI.showImage(frontal_image)
+    #frontal_image = HAL.get_frontal_image()
+    #GUI.showImage(frontal_image)
     #ventral_image = HAL.get_ventral_image()
     #GUI.showLeftImage(ventral_image)
