@@ -1,7 +1,9 @@
 from GUI import GUI
 from HAL import HAL
 import numpy as np
-
+import cv2
+import time
+import copy
 """
 def generate_spiral_square(center, initial_side_length, num_turns, step_size):
     waypoints = []
@@ -25,6 +27,8 @@ def generate_spiral_square(center, initial_side_length, num_turns, step_size):
     
     return waypoints
 """
+def detect_faces(): 
+  
 def generate_rectangles(init_point, num_turns):
     waypoints = []
     
@@ -35,7 +39,7 @@ def generate_rectangles(init_point, num_turns):
     # Generar la espiral cuadrada
     for _ in range(num_turns):
 
-        # primera (x, y + 25)
+        # primera (x, y + 15)
         if(current_point[1] > 0):
           current_point[1] += 10
 
@@ -44,7 +48,7 @@ def generate_rectangles(init_point, num_turns):
             
         waypoints.append(tuple(current_point))
 
-        # segunda(x-2, y) 
+        # segunda(x-1, y) 
         if(current_point[0] > 0):
           current_point[0] -= 1
 
@@ -53,14 +57,14 @@ def generate_rectangles(init_point, num_turns):
         waypoints.append(tuple(current_point))
 
 
-        # tercera (x, y - 25)
+        # tercera (x, y - 15)
         if(current_point[1] > 0):
           current_point[1] -= 10
         else: 
           current_point[1] += 10
         waypoints.append(tuple(current_point))
 
-        # cuarta (x, y - 25)
+        # cuarta (x, y - 51)
         if(current_point[1] > 0):
           current_point[1] -= 10
         
@@ -69,7 +73,7 @@ def generate_rectangles(init_point, num_turns):
         waypoints.append(tuple(current_point))
 
 
-        # quinta (x-2, y)
+        # quinta (x-1, y)
         if(current_point[0] > 0):
           current_point[0] -= 1
           
@@ -77,7 +81,7 @@ def generate_rectangles(init_point, num_turns):
           current_point[0] += 1
         waypoints.append(tuple(current_point))
 
-        # sexta (x, y + 25)
+        # sexta (x, y + 15)
         if(current_point[1] > 0):
           current_point[1] += 10
             
@@ -198,7 +202,7 @@ num_pos_waypoints = 0
 center = [goal_x, goal_y]
 #initial_side_length = 1
 num_turns = 20
-step_size = 2
+#step_size = 2
 
 #center_point = [0, 0]
 #initial_side_length = 5
@@ -218,8 +222,8 @@ waypoints_list = generate_rectangles(center, num_turns)
 # Imprimir los waypoints generados
 
 #print("Waypoints:")
-for point in waypoints_list:
-    print(point)
+#for point in waypoints_list:
+#    print(point)
     
 print("++++++++++++++++++++++++++++++++++++++++++")
 while True:
