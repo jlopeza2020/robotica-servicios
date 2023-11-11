@@ -24,6 +24,7 @@ gray_original = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 # Definir el ángulo de rotación inicial y el incremento
 angulo_inicial = 0
 angulo_incremento = 20
+times_detected = 0
 
 # Iterar hasta alcanzar 360 grados
 while angulo_inicial < 360:
@@ -43,8 +44,9 @@ while angulo_inicial < 360:
 
     # Dibujar rectángulos alrededor de las caras detectadas
     for (x, y, w, h) in faces_result:
-        #img_copia = cv2.rectangle(img_copia, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        print("DETECTADO")
+        img_copia = cv2.rectangle(img_copia, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        #print("DETECTADO")
+        times_detected += 1
 
     # Mostrar la imagen con las caras detectadas
     cv2.imshow('img', img_copia)
@@ -54,4 +56,7 @@ while angulo_inicial < 360:
     angulo_inicial += angulo_incremento
 
 # Cerrar todas las ventanas al finalizar
+if(times_detected > 1):
+    times_detected = 1
+print("Veces detectado: " + str(times_detected))
 cv2.destroyAllWindows()

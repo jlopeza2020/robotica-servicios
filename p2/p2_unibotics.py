@@ -4,65 +4,86 @@ import numpy as np
 import cv2
 import time
 import copy
-"""
-def generate_spiral_square(center, initial_side_length, num_turns, step_size):
-    waypoints = []
-    
-    # Punto de inicio en la espiral
-    current_point = np.array(center)
-    
-    # Generar la espiral cuadrada
-    for _ in range(num_turns):
-        for _ in range(4):
-            # Agregar el punto actual a la lista de waypoints
-            waypoints.append(tuple(current_point))
-            
-            # Moverse en el lado actual
-            current_point[0] += initial_side_length
-            waypoints.append(tuple(current_point))
-            
-            # Actualizar la posición para el próximo lado
-            current_point[0] += initial_side_length
-            current_point[1] -= step_size  # Incremento en y para formar la espiral cuadrada
-    
-    return waypoints
-"""
+
 def detect_faces(image, detector): 
   
-  angulo_inicial = 0
-  angulo_incremento = 20
+  initial_angle = 0
+  incremented_angle = 20
 
-  # Iterar hasta alcanzar 360 grados
-  while angulo_inicial < 360:
-    # Crear una copia de la imagen original
+  while initial_angle < 360:
+    
+    # create copy
     img_copia = copy.deepcopy(image)
-
-    # Realizar la rotación en la imagen copia
+  
+    # Make rotation of copy image 
     rows, cols, _ = img_copia.shape
-    matriz_rotacion = cv2.getRotationMatrix2D((cols / 2, rows / 2), angulo_inicial, 1)
+    matriz_rotacion = cv2.getRotationMatrix2D((cols / 2, rows / 2), initial_angle, 1)
     img_copia = cv2.warpAffine(img_copia, matriz_rotacion, (cols, rows))
 
-    # Convertir la imagen copia a escala de grises
+    # convert image in grayscale
     gray_copia = cv2.cvtColor(img_copia, cv2.COLOR_BGR2GRAY)
 
-    # Realizar la detección de caras en la imagen rotada
+    # make detection of faces in the image
     faces_result = detector.detectMultiScale(gray_copia)
 
-    # Dibujar rectángulos alrededor de las caras detectadas
     for (x, y, w, h) in faces_result:
-        #img_copia = cv2.rectangle(img_copia, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        print("DETECTADO")
+        print("DETECTADO" + str(HAL.get_position()))
 
-    # Mostrar la imagen con las caras detectadas
-    #cv2.imshow('img', img_copia)
-    cv2.waitKey(500)  # Esperar 0.5 segundos antes de pasar al siguiente ángulo
+    # wait 0.5 seconds to next angle 
+    cv2.waitKey(500)  
+    
+    # increment rotation angle 
+    initial_angle += incremented_angle
 
-    # Incrementar el ángulo de rotación
-    angulo_inicial += angulo_incremento
+#def increment_x(value_for_x):
+  
+  
+#def decrement_x(value_for_x):
 
-# Cerrar todas las ventanas al finalizar
-#cv2.destroyAllWindows()
-
+def increment_x(current_point, value_for_x):
+  
+  point = current_point
+  if(point[0] > 0):
+    point[0] += value_for_x
+  else:
+    point[0] -= value_for_x
+  
+  return point
+  
+def decrement_x(current_point, value_for_x):
+  
+  point = current_point
+  if(point[0] > 0):
+    point[0] -= value_for_x
+  else:
+    point[0] += value_for_x
+  
+  return point
+  
+  
+  
+def increment_y(current_point, value_for_y):
+  
+  point = current_point
+  if(point[1] > 0):
+    point[1] += value_for_y
+  else:
+    point[1] -= value_for_y
+  
+  return point
+  
+  
+def decrement_y(current_point, value_for_y):
+  
+  point = current_point
+  if(point[1] > 0):
+    point[1] -= value_for_y
+  else:
+    point[1] += value_for_y
+  
+  return point
+#def decrement_y(value_for_y):
+  
   
 def generate_rectangles(init_point, num_turns):
     waypoints = []
@@ -74,47 +95,58 @@ def generate_rectangles(init_point, num_turns):
     # Generar la espiral cuadrada
     for _ in range(num_turns):
 
-        # primera (x, y + 15)
-        if(current_point[1] > 0):
-          current_point[1] += 10
-        else:
-          current_point[1] -= 10
+        # primera (x, y + 10)
+        #if(current_point[1] > 0):
+        #  current_point[1] += 10
+        #else:
+        #  current_point[1] -= 10
+        current_point = increment_y(current_point, 10)
         waypoints.append(tuple(current_point))
 
+        # añadir puntos intermedios 
+        
         # segunda(x-1, y) 
-        if(current_point[0] > 0):
-          current_point[0] -= 1
-        else:
-          current_point[0] += 1
+        #if(current_point[0] > 0):
+        #  current_point[0] -= 1
+        #else:
+        #  current_point[0] += 1
+        current_point = decrement_x(current_point, 1)
+        waypoints.append(tuple(current_point))
+        
+        #añadir 
+
+        # tercera (x, y - 10)
+        #if(current_point[1] > 0):
+        #  current_point[1] -= 10
+        #else: 
+        #  current_point[1] += 10
+        current_point = decrement_y(current_point, 10)
         waypoints.append(tuple(current_point))
 
-
-        # tercera (x, y - 15)
-        if(current_point[1] > 0):
-          current_point[1] -= 10
-        else: 
-          current_point[1] += 10
-        waypoints.append(tuple(current_point))
-
-        # cuarta (x, y - 51)
-        if(current_point[1] > 0):
-          current_point[1] -= 10
-        else: 
-          current_point[1] += 10
+        # cuarta (x, y - 10)
+        #if(current_point[1] > 0):
+        #  current_point[1] -= 10
+        #else: 
+        #  current_point[1] += 10
+          
+        current_point = decrement_y(current_point, 10)
         waypoints.append(tuple(current_point))
 
         # quinta (x-1, y)
-        if(current_point[0] > 0):
-          current_point[0] -= 1
-        else:
-          current_point[0] += 1
+        #if(current_point[0] > 0):
+        #  current_point[0] -= 1
+        #else:
+        #  current_point[0] += 1
+          
+        current_point = decrement_x(current_point, 1)
         waypoints.append(tuple(current_point))
 
-        # sexta (x, y + 15)
-        if(current_point[1] > 0):
-          current_point[1] += 10
-        else:
-          current_point[1] -= 10
+        # sexta (x, y + 10)
+        #if(current_point[1] > 0):
+        #  current_point[1] += 10
+        #else:
+        #  current_point[1] -= 10
+        current_point = increment_y(current_point, 10)
         waypoints.append(tuple(current_point))
 
     return waypoints
@@ -212,7 +244,8 @@ init_point = [goal_x, goal_y]
 num_turns = 20
 waypoints_list = generate_rectangles(init_point, num_turns)
 
-
+for point in waypoints_list:
+  print(point)
 # Initialize face detector 
 # Create face detection 
 face_detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -266,7 +299,7 @@ while True:
         HAL.set_cmd_pos(goal_x,goal_y,goal_height, goal_yaw)
       else: 
         phase_go_to_survivors = False
-        phase_finding = True
+        #phase_finding = True
         
     # state 3    
     if(phase_finding):
@@ -282,6 +315,8 @@ while True:
         diff_height_waypoint = get_difference(goal_height_waypoint, actual_height)
         diff_yaw_waypoint = get_difference(goal_yaw_waypoint, actual_yaw)
         
+        ventral_image = HAL.get_ventral_image()
+        
         #print("-------------------------------------------------------------")
         #print("actual")
         #print(actual_x, actual_y, actual_height, actual_yaw)
@@ -290,14 +325,17 @@ while True:
         #print("diff")
         #print(diff_x_waypoint, diff_y_waypoint, diff_height_waypoint, diff_yaw_waypoint)
         
+        # go to the point 
         if(diff_x_waypoint > 0.1 or diff_y_waypoint > 0.1 or  diff_height_waypoint > 0.1 or diff_yaw_waypoint > 0.01):
           HAL.set_cmd_pos(goal_x_waypoint ,goal_y_waypoint ,goal_height_waypoint , goal_yaw_waypoint)
+          detect_faces(ventral_image, face_detector)
+          
         else:
           num_pos_waypoints += 1
          
         # detect faces 
-        ventral_image = HAL.get_ventral_image()
-        detect_faces(ventral_image, face_detector)
+        #ventral_image = HAL.get_ventral_image()
+        #detect_faces(ventral_image, face_detector)
         GUI.showLeftImage(ventral_image) 
         
         
