@@ -96,110 +96,45 @@ def generate_rectangles(init_point, num_turns):
     for _ in range(num_turns):
 
         # primera (x, y + 10)
-        #if(current_point[1] > 0):
-        #  current_point[1] += 10
-        #else:
-        #  current_point[1] -= 10
-        current_point = increment_y(current_point, 10)
-        waypoints.append(tuple(current_point))
 
-        # añadir puntos intermedios 
+        #current_point = increment_y(current_point, 10)
+        #waypoints.append(tuple(current_point))
         
+        for i in range(10):
+        #print(i)
+          current_point = increment_y(current_point, 1)
+          waypoints.append(tuple(current_point))
+
         # segunda(x-1, y) 
-        #if(current_point[0] > 0):
-        #  current_point[0] -= 1
-        #else:
-        #  current_point[0] += 1
         current_point = decrement_x(current_point, 1)
         waypoints.append(tuple(current_point))
-        
-        #añadir 
 
-        # tercera (x, y - 10)
-        #if(current_point[1] > 0):
-        #  current_point[1] -= 10
-        #else: 
-        #  current_point[1] += 10
-        current_point = decrement_y(current_point, 10)
-        waypoints.append(tuple(current_point))
+        # tercera (x, y - 10) y cuarta (x, y - 10)
+        
+        for i in range(20):
+        #print(i)
+          current_point = decrement_y(current_point, 1)
+          waypoints.append(tuple(current_point))
+          
+        #current_point = decrement_y(current_point, 10)
+        #waypoints.append(tuple(current_point))
 
         # cuarta (x, y - 10)
-        #if(current_point[1] > 0):
-        #  current_point[1] -= 10
-        #else: 
-        #  current_point[1] += 10
-          
-        current_point = decrement_y(current_point, 10)
-        waypoints.append(tuple(current_point))
+        #current_point = decrement_y(current_point, 10)
+        #waypoints.append(tuple(current_point))
 
         # quinta (x-1, y)
-        #if(current_point[0] > 0):
-        #  current_point[0] -= 1
-        #else:
-        #  current_point[0] += 1
-          
         current_point = decrement_x(current_point, 1)
         waypoints.append(tuple(current_point))
 
         # sexta (x, y + 10)
-        #if(current_point[1] > 0):
-        #  current_point[1] += 10
-        #else:
-        #  current_point[1] -= 10
-        current_point = increment_y(current_point, 10)
-        waypoints.append(tuple(current_point))
+        for i in range(10):
+        #print(i)
+          current_point = increment_y(current_point, 1)
+          waypoints.append(tuple(current_point))
+        #current_point = increment_y(current_point, 10)
+        #waypoints.append(tuple(current_point))
 
-    return waypoints
-    
-    
-def generate_spiral_square(center, num_turns, step_size):
-    waypoints = []
-    
-    # Punto de inicio en la espiral
-    current_point = np.array(center)
-    waypoints.append(tuple(current_point))
-    incremento = 1
-    
-    # Generar la espiral cuadrada
-    for _ in range(num_turns):
-
-        # primera (x, y + 1)
-        if(current_point[1] > 0):
-          current_point[1] += incremento
-
-        else:
-          current_point[1] -= incremento
-            
-        waypoints.append(tuple(current_point))
-        incremento += 1
-            
-            # segunda(x-2, y) 
-        if(current_point[0] > 0):
-          current_point[0] -= incremento
-
-        else:
-          current_point[0] += incremento
-        waypoints.append(tuple(current_point))
-        incremento += 1
-            
-        # tercera (x, y - 3)
-        if(current_point[1] > 0):
-          current_point[1] -= incremento
-
-        else: 
-          current_point[1] += incremento
-        waypoints.append(tuple(current_point))
-        incremento += 1
-              
-        # cuarta(x+4, y)
-        if(current_point[0] > 0):
-          current_point[0] += incremento
-
-        else:
-          current_point[0] += incremento
-        waypoints.append(tuple(current_point))
-        incremento += 1
-            
     return waypoints
     
 def get_difference(objective, actual): 
@@ -299,7 +234,7 @@ while True:
         HAL.set_cmd_pos(goal_x,goal_y,goal_height, goal_yaw)
       else: 
         phase_go_to_survivors = False
-        #phase_finding = True
+        phase_finding = True
         
     # state 3    
     if(phase_finding):
@@ -335,7 +270,7 @@ while True:
          
         # detect faces 
         #ventral_image = HAL.get_ventral_image()
-        #detect_faces(ventral_image, face_detector)
+        detect_faces(ventral_image, face_detector)
         GUI.showLeftImage(ventral_image) 
         
         
