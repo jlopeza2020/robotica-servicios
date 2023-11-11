@@ -172,6 +172,8 @@ total_survivors = 6
 phase_take_off = True  
 phase_go_to_survivors = False
 phase_finding = False
+phase_go_boat = False
+phase_landing = False
 
 # initialize waypoint to navigate 
 num_pos_waypoints = 0
@@ -284,12 +286,12 @@ while True:
     if(tiempo_transcurrido >= 600.00):
       print("Come to charge")
       phase_finding = False
-      phase_go_to_survivors = False
-      phase_take_off = False
+      #phase_go_to_survivors = False
+      #phase_take_off = False
       
       phase_go_boat = True
       
-      tiempo_transcurrido = 0.0
+      #tiempo_inicio = 0.0
       
     if(phase_go_boat):
       goal_x = 0.0
@@ -308,8 +310,13 @@ while True:
       
     if(phase_landing and (num_pos_waypoints < len(waypoints_list))):
       print("I need to finish searching")
+      goal_height = 2.5
+      # restart timer
+      tiempo_inicio = time.time()
+      
       phase_landing = False
-      phase_take_off = True 
+      #HAL.takeoff(goal_height)
+      phase_finding = True
       
     print(tiempo_transcurrido)
     
