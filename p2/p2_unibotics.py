@@ -43,7 +43,7 @@ def agregar_coordenada(coord, lista_coordenadas):
     """Agrega una coordenada a la lista si no está dentro de un radio de 3 metros de ninguna coordenada existente."""
     for existente_coord in lista_coordenadas:
         distancia = calcular_distancia(coord, existente_coord)
-        if distancia <= 3.0:
+        if distancia <= 4.5:
             #print(f"La coordenada {coord} está a {distancia} metros de {existente_coord}. No se agregará.")
             return lista_coordenadas
     #print(f"Agregando la coordenada {coord}.")
@@ -270,9 +270,11 @@ while True:
           
         else:
           num_pos_waypoints += 1
-         
+        
+        # avoid detection far away
+        if(diff_x_waypoint <= 3.0 or diff_y_waypoint <= 3.0):
         # detect faces 
-        detect_faces(ventral_image, face_detector, all_survivors_positions)
+          detect_faces(ventral_image, face_detector, all_survivors_positions)
         #resultados_filtrados = calcular_distancias_filtrar(all_survivors_positions, umbral_distancia)
         GUI.showLeftImage(ventral_image) 
         
@@ -345,7 +347,7 @@ while True:
       # Imprimir la lista final de coordenadas
       print("Final coordinates:")
       for coord in coordenadas_vistas:
-        print(coord)
+        print(coord, coord[0] + east_boat_utm,  coord[1] + north_boat_utm)
       
       phase_landing = False
       #break
@@ -353,46 +355,4 @@ while True:
       # print survivors locations
       
     #print(num_pos_waypoints, len(waypoints_list))
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
       
