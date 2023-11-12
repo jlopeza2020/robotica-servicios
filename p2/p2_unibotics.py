@@ -9,6 +9,7 @@ def detect_faces(image, detector):
   
   initial_angle = 0
   incremented_angle = 20
+  times_detected = 0
 
   while initial_angle < 360:
     
@@ -27,7 +28,8 @@ def detect_faces(image, detector):
     faces_result = detector.detectMultiScale(gray_copia)
 
     for (x, y, w, h) in faces_result:
-        print("DETECTADO" + str(HAL.get_position()))
+        #print("DETECTADO" + str(HAL.get_position()))
+        times_detected += 1
 
     # wait 0.5 seconds to next angle 
     cv2.waitKey(500)  
@@ -35,6 +37,11 @@ def detect_faces(image, detector):
     # increment rotation angle 
     initial_angle += incremented_angle
 
+
+  if(times_detected > 1):
+    times_detected = 1
+    print("Veces detectado: " + str(times_detected))
+    print("DETECTADO" + str(HAL.get_position()))
 #def increment_x(value_for_x):
   
   
@@ -105,8 +112,8 @@ def generate_rectangles(init_point, num_turns):
           current_point = increment_y(current_point, 1)
           waypoints.append(tuple(current_point))
 
-        # segunda(x-1, y) 
-        current_point = decrement_x(current_point, 1)
+        # segunda(x-2, y) 
+        current_point = decrement_x(current_point, 2)
         waypoints.append(tuple(current_point))
 
         # tercera (x, y - 10) y cuarta (x, y - 10)
@@ -123,8 +130,8 @@ def generate_rectangles(init_point, num_turns):
         #current_point = decrement_y(current_point, 10)
         #waypoints.append(tuple(current_point))
 
-        # quinta (x-1, y)
-        current_point = decrement_x(current_point, 1)
+        # quinta (x-2, y)
+        current_point = decrement_x(current_point, 2)
         waypoints.append(tuple(current_point))
 
         # sexta (x, y + 10)
@@ -146,7 +153,7 @@ def get_difference(objective, actual):
     return dif
   
 actual_height = 0.0
-goal_height = 2.5
+goal_height = 3.0
 
 # Previously converted corrdinates from GPS to UTM
 east_boat_utm = 430492.2
@@ -173,6 +180,7 @@ phase_take_off = True
 phase_go_to_survivors = False
 phase_finding = False
 phase_go_boat = False
+phase_recharging = False
 phase_landing = False
 
 # initialize waypoint to navigate 
@@ -283,7 +291,7 @@ while True:
     # si han pasado 10 minutos 
     #tiempo_inicio = time.time()
     tiempo_transcurrido = time.time() - tiempo_inicio
-    if(tiempo_transcurrido >= 600.00):
+    if(tiempo_transcurrido >= 200.00):
       print("Come to charge")
       phase_finding = False
       #phase_go_to_survivors = False
@@ -302,21 +310,30 @@ while True:
         HAL.set_cmd_pos(goal_x,goal_y,goal_height, goal_yaw)
       else: 
         phase_go_boat = False
-        phase_landing = True
+        phase_recharging = True
       
+    if(phase_recharging):
+      #HAL.land()
+      for i in range(30): 
+        print("I am recharging")
+        
+
+    if(phase_recharging and (num_pos_waypoints < len(waypoints_list))):
+      print("I need to finish searching")
+      # restart timer
+      tiempo_inicio = time.time()
+      
+      phase_recharging = False
+      #HAL.takeoff(goal_height)
+      phase_finding = True
+      
+    if(num_pos_waypoints >= len(waypoints_list)):
+      phase_finding = False
+      phase_landing = True
       
     if(phase_landing):
       HAL.land()
       
-    if(phase_landing and (num_pos_waypoints < len(waypoints_list))):
-      print("I need to finish searching")
-      goal_height = 2.5
-      # restart timer
-      tiempo_inicio = time.time()
-      
-      phase_landing = False
-      #HAL.takeoff(goal_height)
-      phase_finding = True
       
     print(tiempo_transcurrido)
     
