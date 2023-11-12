@@ -4,12 +4,58 @@ import numpy as np
 import cv2
 import time
 import copy
+import math
 
-def detect_faces(image, detector): 
+"""
+def distancia_euclidiana(punto1, punto2):
+    return np.sqrt(np.sum((np.array(punto1) - np.array(punto2))**2))
+
+def calcular_distancias_filtrar(array_puntos, umbral):
+    num_puntos = len(array_puntos)
+    
+    resultados = []
+
+    for i in range(num_puntos):
+        for j in range(num_puntos):
+            if i != j:
+                origen = array_puntos[i]
+                destino = array_puntos[j]
+                distancia = distancia_euclidiana(origen, destino)
+
+                resultados.append({
+                    'origen': origen,
+                    'destino': destino,
+                    'distancia': distancia
+                })
+
+    # Filtrar los resultados por distancia mayor de 3
+    resultados_filtrados = [resultado for resultado in resultados if resultado['distancia'] > umbral]
+
+    return resultados_filtrados
+    
+"""
+
+def calcular_distancia(coord1, coord2):
+    """Calcula la distancia euclidiana entre dos coordenadas."""
+    return math.sqrt((int(coord1[0]) - int(coord2[0]))**2 + (int(coord1[1]) - int(coord2[1]))**2)
+
+def agregar_coordenada(coord, lista_coordenadas):
+    """Agrega una coordenada a la lista si no está dentro de un radio de 3 metros de ninguna coordenada existente."""
+    for existente_coord in lista_coordenadas:
+        distancia = calcular_distancia(coord, existente_coord)
+        if distancia <= 3.0:
+            #print(f"La coordenada {coord} está a {distancia} metros de {existente_coord}. No se agregará.")
+            return lista_coordenadas
+    #print(f"Agregando la coordenada {coord}.")
+    lista_coordenadas.append(coord)
+    return lista_coordenadas
+
+def detect_faces(image, detector, locations): 
   
   initial_angle = 0
   incremented_angle = 20
   times_detected = 0
+  #locations = []
 
   while initial_angle < 360:
     
@@ -28,7 +74,6 @@ def detect_faces(image, detector):
     faces_result = detector.detectMultiScale(gray_copia)
 
     for (x, y, w, h) in faces_result:
-        #print("DETECTADO" + str(HAL.get_position()))
         times_detected += 1
 
     # wait 0.5 seconds to next angle 
@@ -40,13 +85,12 @@ def detect_faces(image, detector):
 
   if(times_detected > 1):
     times_detected = 1
-    print("Veces detectado: " + str(times_detected))
     print("DETECTADO" + str(HAL.get_position()))
-#def increment_x(value_for_x):
-  
-  
-#def decrement_x(value_for_x):
+    locations.append(HAL.get_position())
+    # store value
 
+  #return locations
+  
 def increment_x(current_point, value_for_x):
   
   point = current_point
@@ -67,8 +111,6 @@ def decrement_x(current_point, value_for_x):
   
   return point
   
-  
-  
 def increment_y(current_point, value_for_y):
   
   point = current_point
@@ -79,7 +121,6 @@ def increment_y(current_point, value_for_y):
   
   return point
   
-  
 def decrement_y(current_point, value_for_y):
   
   point = current_point
@@ -89,58 +130,38 @@ def decrement_y(current_point, value_for_y):
     point[1] += value_for_y
   
   return point
-#def decrement_y(value_for_y):
-  
-  
+
 def generate_rectangles(init_point, num_turns):
     waypoints = []
     
-    # Punto de inicio en la espiral
+    # init point
     current_point = np.array(init_point)
     waypoints.append(tuple(current_point))
     
-    # Generar la espiral cuadrada
     for _ in range(num_turns):
 
-        # primera (x, y + 10)
-
-        #current_point = increment_y(current_point, 10)
-        #waypoints.append(tuple(current_point))
-        
+        # first (x, y + [0-10])
         for i in range(10):
-        #print(i)
           current_point = increment_y(current_point, 1)
           waypoints.append(tuple(current_point))
 
-        # segunda(x-2, y) 
+        # second (x-2, y) 
         current_point = decrement_x(current_point, 2)
         waypoints.append(tuple(current_point))
 
-        # tercera (x, y - 10) y cuarta (x, y - 10)
-        
+        # third (x, y - [0 -20])
         for i in range(20):
-        #print(i)
           current_point = decrement_y(current_point, 1)
           waypoints.append(tuple(current_point))
           
-        #current_point = decrement_y(current_point, 10)
-        #waypoints.append(tuple(current_point))
-
-        # cuarta (x, y - 10)
-        #current_point = decrement_y(current_point, 10)
-        #waypoints.append(tuple(current_point))
-
-        # quinta (x-2, y)
+        # fourth (x-2, y)
         current_point = decrement_x(current_point, 2)
         waypoints.append(tuple(current_point))
 
-        # sexta (x, y + 10)
+        # fifth (x, y + [0-10])
         for i in range(10):
-        #print(i)
           current_point = increment_y(current_point, 1)
           waypoints.append(tuple(current_point))
-        #current_point = increment_y(current_point, 10)
-        #waypoints.append(tuple(current_point))
 
     return waypoints
     
@@ -164,18 +185,11 @@ north_survivors_utm = 4459131.8
 
 # calculate distance from goal to actual
 goal_x = east_survivors_utm - east_boat_utm
-#goal_x = east_survivors2boat
-
 goal_y = north_survivors_utm - north_boat_utm
-#goal_y = north_survivors2boat
-
 # calculate goal yaw 
 goal_yaw = np.arctan2(goal_y , goal_x)
 
-# Must be 6
-num_survivors_found = 0
-total_survivors = 6
-
+# phases
 phase_take_off = True  
 phase_go_to_survivors = False
 phase_finding = False
@@ -183,38 +197,25 @@ phase_go_boat = False
 phase_recharging = False
 phase_landing = False
 
-# initialize waypoint to navigate 
+# creates waypoints to navigate 
 num_pos_waypoints = 0
 init_point = [goal_x, goal_y]
-num_turns = 20
+num_turns = 5
 waypoints_list = generate_rectangles(init_point, num_turns)
 
-for point in waypoints_list:
-  print(point)
-# Initialize face detector 
 # Create face detection 
 face_detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Verificar si el clasificador se ha cargado correctamente
+# check if clasificator is loaded correctly
 if face_detector.empty():
     print("Error loading clasifficator.")
     exit()
 
-# Cargar la imagen
-#img = cv2.imread('ejemplo5.png')
+# store survivors positions 
+all_survivors_positions = []
+coordenadas_vistas = []
+#real_survivors_positions = []
 
-# Verificar si la imagen se ha cargado correctamente
-#if img is None:#
-#    print("Error al cargar la imagen.")
-#   exit()
-
-# Convertir la imagen a escala de grises
-#convert
-#gray_original = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-# Definir el ángulo de rotación inicial y el incremento
-#angulo_inicial = 0
-#angulo_incremento = 20
 tiempo_inicio = time.time()
 print("++++++++++++++++++++++++++++++++++++++++++")
 
@@ -262,25 +263,17 @@ while True:
         
         ventral_image = HAL.get_ventral_image()
         
-        #print("-------------------------------------------------------------")
-        #print("actual")
-        #print(actual_x, actual_y, actual_height, actual_yaw)
-        #print("goal")
-        #print(goal_x_waypoint, goal_y_waypoint, goal_height_waypoint, goal_yaw_waypoint)
-        #print("diff")
-        #print(diff_x_waypoint, diff_y_waypoint, diff_height_waypoint, diff_yaw_waypoint)
-        
         # go to the point 
         if(diff_x_waypoint > 0.1 or diff_y_waypoint > 0.1 or  diff_height_waypoint > 0.1 or diff_yaw_waypoint > 0.01):
           HAL.set_cmd_pos(goal_x_waypoint ,goal_y_waypoint ,goal_height_waypoint , goal_yaw_waypoint)
-          detect_faces(ventral_image, face_detector)
+          #all_survivors_positions = detect_faces(ventral_image, face_detector)
           
         else:
           num_pos_waypoints += 1
          
         # detect faces 
-        #ventral_image = HAL.get_ventral_image()
-        detect_faces(ventral_image, face_detector)
+        detect_faces(ventral_image, face_detector, all_survivors_positions)
+        #resultados_filtrados = calcular_distancias_filtrar(all_survivors_positions, umbral_distancia)
         GUI.showLeftImage(ventral_image) 
         
         
@@ -288,19 +281,14 @@ while True:
           phase_finding = False
       
       
-    # si han pasado 10 minutos 
-    #tiempo_inicio = time.time()
+    # check baterries (has spent 10 minutes) 
     tiempo_transcurrido = time.time() - tiempo_inicio
-    if(tiempo_transcurrido >= 200.00):
-      print("Come to charge")
+    if(tiempo_transcurrido >= 600.00):
+      #print("Come to charge")
       phase_finding = False
-      #phase_go_to_survivors = False
-      #phase_take_off = False
-      
       phase_go_boat = True
       
-      #tiempo_inicio = 0.0
-      
+    # state 4
     if(phase_go_boat):
       goal_x = 0.0
       goal_y = 0.0
@@ -310,35 +298,101 @@ while True:
         HAL.set_cmd_pos(goal_x,goal_y,goal_height, goal_yaw)
       else: 
         phase_go_boat = False
-        phase_recharging = True
-      
+        #phase_recharging = True
+        if(num_pos_waypoints < len(waypoints_list)):
+          phase_recharging = True
+        else: 
+          phase_landing = True
+          
+    # state 5: simulates that it is recharging   
     if(phase_recharging):
-      #HAL.land()
-      for i in range(30): 
-        print("I am recharging")
+      print("RECHARGING")
+      
+      #if (num_pos_waypoints < len(waypoints_list):
+      #  print("I need to finish searching")
+      #  tiempo_inicio = time.time()
+      
+      #  phase_recharging = False
+      #  phase_finding = True
         
-
     if(phase_recharging and (num_pos_waypoints < len(waypoints_list))):
       print("I need to finish searching")
-      # restart timer
       tiempo_inicio = time.time()
       
       phase_recharging = False
-      #HAL.takeoff(goal_height)
       phase_finding = True
       
     if(num_pos_waypoints >= len(waypoints_list)):
+      #print("FINISHED")
       phase_finding = False
-      phase_landing = True
+      phase_go_boat = True
       
+    # state 6 
     if(phase_landing):
+      
       HAL.land()
       
+      #umbral_distancia = 3
+      #resultados_filtrados = calcular_distancias_filtrar(all_survivors_positions, umbral_distancia)
+
+      # Imprimir los resultados filtrados
+      #print("Resultados filtrados:")
+      #for resultado in resultados_filtrados:
+      #  print(f"Desde {resultado['origen']} hasta {resultado['destino']}: {resultado['distancia']}")
+      for resultado in all_survivors_positions:
+        coordenadas_vistas = agregar_coordenada(resultado, coordenadas_vistas)
+
+      # Imprimir la lista final de coordenadas
+      print("Final coordinates:")
+      for coord in coordenadas_vistas:
+        print(coord)
       
-    print(tiempo_transcurrido)
+      phase_landing = False
+      #break
     
-    # Show ventral and frontal image
-    #frontal_image = HAL.get_frontal_image()
-    #GUI.showImage(frontal_image)
-    #ventral_image = HAL.get_ventral_image()
-    #GUI.showLeftImage(ventral_image)
+      # print survivors locations
+      
+    #print(num_pos_waypoints, len(waypoints_list))
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
