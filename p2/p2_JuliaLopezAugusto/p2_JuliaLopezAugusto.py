@@ -15,7 +15,7 @@ def calculate_distance(coord1, coord2):
 def add_coordinate(coord, lista_coordenadas):
   
     for existente_coord in lista_coordenadas:
-        distancia = calcular_distancia(coord, existente_coord)
+        distancia = calculate_distance(coord, existente_coord)
         if distancia <= 4.5:
             return lista_coordenadas
   
@@ -183,7 +183,6 @@ if face_detector.empty():
 # store survivors positions 
 all_survivors_positions = []
 real_survivors_positions = []
-#coordenadas_vistas = []
 
 
 tiempo_inicio = time.time()
@@ -296,7 +295,7 @@ while True:
       
       # print results
       for resultado in all_survivors_positions:
-        real_survivors_positions = agregar_coordenada(resultado, real_survivors_positions)
+        real_survivors_positions = add_coordinate(resultado, real_survivors_positions)
 
       # Print final coordinates
       print("Final coordinates:")

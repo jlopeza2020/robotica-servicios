@@ -11,7 +11,7 @@ if face_detector.empty():
     exit()
 
 # Cargar la imagen
-img = cv2.imread('ejemplo5.png')
+img = cv2.imread('ejemplo.png')
 
 # Verificar si la imagen se ha cargado correctamente
 if img is None:
