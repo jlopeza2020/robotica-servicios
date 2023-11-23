@@ -4,21 +4,28 @@ import math
 import time
 import numpy as np
 
+
 # FASE DE APROXIMACION Y ALINEACIÓN
 # BÚSSQUEDA 
 # APARCAMIENTO
 
-def calculate_range_laser(x, y):
+def get_betha(a, b):
+  
+  h = math.sqrt(pow(a/2, 2) + pow(b,2))
+  
+  betha = math.acos((a/2)/h)
+  
+  return betha
   
   # for 0 - 90ª
   
-  init_angle = math.atan2(y, x)
+  #init_angle = math.atan2(y, x)
   
   # for 90 - 180 
-  end_angle = math.pi - math.atan2(y, x)
+  #end_angle = math.pi - math.atan2(y, x)
   
   
-  return init_angle, end_angle
+  #return init_angle, end_angle
   
 def parse_laser_data(laser_data):
   
@@ -40,36 +47,64 @@ def parse_laser_data(laser_data):
    
 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-#alpha = 0
-y = 1.2
-x = 2.64 
+
+y = 7
+x = 5 
+
 ocuppied = False 
-init_range = 1.0472 # 60º
-end_range = 2.0944 # 120º
+#init_range = 1.0472 # 60º
+#end_range = 2.0944 # 120º
 
 while True:
-    front_laser = HAL.getFrontLaserData()
-    parse_front_laser = parse_laser_data(front_laser)
+    #front_laser = HAL.getFrontLaserData()
+    #parse_front_laser = parse_laser_data(front_laser)
     
     right_laser = HAL.getRightLaserData()
     parse_right_laser = parse_laser_data(right_laser)
     
-   # print(parse_right_laser)
+    betha = get_betha(x,y)
     
-    back_laser = HAL.getBackLaserData()
-    parse_back_laser = parse_laser_data(back_laser)
+    for d_actual, angle in parse_right_laser:
+      
+      if(betha < angle < math.pi - betha):
+  
+        d_objective = y / math.sin(angle)
+        
+      else: 
+        d_objective = (x/2) / math.cos(angle)
+        
+        
+      # meanss that there is an obstacle
+      if d_actual < d_objective:
+        ocuppied = True
+        
+    if (ocuppied):
+      HAL.setV(0.5)
+      ocuppied = False
+      
+    else: 
+      print("HAY HUECO")
+      HAL.setV(0.0)
+      
+      
+    #HAL.setV(0.5)
+    #print(value)
     
-    #init_range, end_range = calculate_range_laser(x, y)
+    #back_laser = HAL.getBackLaserData()
+    #parse_back_laser = parse_laser_data(back_laser)
     
-    
-    #ocuppied = 100 not in [dist for dist, angle in parse_right_laser if init_range <= angle <= end_range]
 
-    #print("Occupied:", ocuppied)
-    
-    
-    
-    #time.sleep(1)  # Add a delay to control the loop frequency
+    # ALINEACIÓN
+    #avg_right = np.mean([dist for dist, angle in parse_right_laser if init_range <= angle <= end_range])
+    #print("Average Right Laser:", avg_right)
 
+  
+    # BÚSQUEDA
+    # Habrá que distinguir entre varios
+    
+    """
+    init_range, end_range = calculate_range_laser(x, y)
+    
     for measurement in parse_right_laser: 
         if init_range <= measurement[1] <= end_range and measurement[0] <= 5:
             ocuppied = True
@@ -89,6 +124,6 @@ while True:
             
     
     #.setV(0.3)
-    
+    """
 
     
