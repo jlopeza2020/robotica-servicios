@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 
-def get_right_straight_means():
+def get_right_straight_means(parse_right_laser,init_degree, end_degree):
   
   value_left = 0 
   count_left = 0
@@ -14,40 +14,24 @@ def get_right_straight_means():
       
   for dist , angle in parse_right_laser:
         
-    if(angle == math.radians(80)):
-      print("La distancia del angulo 80 grados es: " + str(dist))
-        
-    if(angle == math.pi/2):
-      print("La distancia del angulo 90 grados es: " + str(dist))
-        
-    if(angle == math.radians(100)):
-      print("La distancia del angulo 100 grados es: " + str(dist))
+    # left
+    if(math.radians(init_degree) < angle < math.pi/2): 
 
-
-    
-        
-        # left
-    if(math.radians(80) < angle < math.pi/2): 
-         # print(dist)
       value_left += dist
       count_left += 1
         
-        # right 
-    if(math.pi/2 < angle < math.radians(100)):
+    # right 
+    if(math.pi/2 < angle < math.radians(end_degree)):
       value_right += dist
       count_right += 1
       
-      #print(value)
-      #print(count)
+
       
   mean_left = value_left/count_left
   mean_right = value_right/count_right
   
   return mean_left, mean_right
   
-  #print("LEFT: " + str(value_left/count_left))
-  #print("RIGHT " + str(value_right/count_right))
-      # calculate mean 
 
 def get_back_straight(back_laser):
   
@@ -72,7 +56,7 @@ def get_front_straight(front_laser):
   for dist , angle in front_laser:
     
     if (angle >= math.pi/2):
-      print(angle, dist)
+      #print(angle, dist)
       
       if(dist != 100): 
         is_turned = True
@@ -116,23 +100,18 @@ align = True
 find = False 
 
 
-init_degree_detection  = 60
-end_degree_detection = 120
+#init_degree_detection  = 60
+#end_degree_detection = 120
 
 #convert degrees into radian
-init_radian_detection = math.radians(init_degree_detection)
-end_radian_detection = math.radians(end_degree_detection)
-
+#init_radian_detection = math.radians(init_degree_detection)
+#end_radian_detection = math.radians(end_degree_detection)
+#m_left, m_right = get_right_straight_means(parse_right_laser,80, 100)
 
 y = 7
 x = 5 
 betha = get_betha(x,y)
 
-
-#no_cien = False
-
-#is_turned_front = False
-#is_turned_back = False
 
 while True:
     
@@ -148,71 +127,23 @@ while True:
     # STATE 1: ALIGN 
     if (align): 
       
+      # APPROACH 1: 
+      # FRONT LASER IS NOT WELL PLACED !!!!
       
-      # Obtén las medidas desde la función parse_right_laser
-      #medidas = list(parse_right_laser())
-
-      # Inicializa la suma de tangentes
-      #suma_tangentes = 0
-
-      # Calcula la diferencia entre ángulos adyacentes y acumula las tangentes
-      #for i in range(len(parse_right_laser) - 1):
-      #  delta_theta = parse_right_laser[i + 1][1] - parse_right_laser[i][1]
-      #  suma_tangentes += math.tan(delta_theta)
-
-      # Calcula la pendiente como la tangente promedio
-      #pendiente = suma_tangentes / (len(parse_right_laser) - 1)
-
-      #print("La pendiente de la recta formada por los rayos del láser es:", pendiente)
+      #is_turned_front = get_front_straight(parse_front_laser)
+      #is_turned_back = get_back_straight(parse_back_laser)
+      #m_left, m_right = get_right_straight_means(parse_right_laser,80, 100)
       
+      # APPROACH 2:
       
-      is_turned_front = get_front_straight(parse_front_laser)
-      is_turned_back = get_back_straight(parse_back_laser)
+      for dist, angle in parse_right_laser:
+        
+        x = math.cos(angle)*dist
+        
+        y = math.sin(angle)*dist
       
-      print("is turned front " + str(is_turned_front))
-      print("is turned back " + str(is_turned_back))
         
-      """
-      print(HAL.getPose3d().yaw)
-      #HAL.setW(0.5)
-      value_left = 0 
-      count_left = 0
-      value_right = 0 
-      count_right = 0 
-      
-      for dist , angle in parse_right_laser:
         
-        if(angle == math.radians(80)):
-          print("La distancia del angulo 80 grados es: " + str(dist))
-        
-        if(angle == math.pi/2):
-          print("La distancia del angulo 90 grados es: " + str(dist))
-        
-        if(angle == math.radians(100)):
-          print("La distancia del angulo 100 grados es: " + str(dist))
-
-
-    
-        
-        # left
-        if(math.radians(80) < angle < math.pi/2): 
-         # print(dist)
-          value_left += dist
-          count_left += 1
-        
-        # right 
-        if(math.pi/2 < angle < math.radians(100)):
-          value_right += dist
-          count_right += 1
-      
-      #print(value)
-      #print(count)
-      print("LEFT: " + str(value_left/count_left))
-      print("RIGHT " + str(value_right/count_right))
-      # calculate mean 
-    
-    """
-    
      # STATE 2: FIND SPACE
     if (find):
       align = False
