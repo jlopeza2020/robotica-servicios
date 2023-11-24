@@ -4,33 +4,34 @@ import math
 import time
 import numpy as np
 
-
-def get_right_straight_means(parse_right_laser,init_degree, end_degree):
+def get_std_ranges(right_laser,init_range, end_range):
   
-  value_left = 0 
-  count_left = 0
-  value_right = 0 
-  count_right = 0 
+  left_values = []
+  right_values = []
+      #all_values = []
       
-  for dist , angle in parse_right_laser:
+  for dist , angle in right_laser:
         
-    # left
-    if(math.radians(init_degree) < angle < math.pi/2): 
+        # left
+    if(math.radians(init_range) < angle < math.pi/2): 
 
-      value_left += dist
-      count_left += 1
+      right_values.append(math.sin(angle) * dist)
+          #all_values.append(math.sin(angle) * dist)
+          #count_left += 1
         
-    # right 
-    if(math.pi/2 < angle < math.radians(end_degree)):
-      value_right += dist
-      count_right += 1
+        # right 
+    if(math.pi/2 < angle < math.radians(end_range)):
+          #value_right += math.sin(angle) * dist
+      left_values.append(math.sin(angle) * dist)
+          #all_values.append(math.sin(angle) * dist)
+          #count_right += 1
       
 
       
-  mean_left = value_left/count_left
-  mean_right = value_right/count_right
-  
-  return mean_left, mean_right
+  std_left = np.std(left_values)
+  std_right = np.std(right_values)
+      #std_all = np.std(all_values)
+  return std_left, std_right
   
 
 def get_back_straight(back_laser):
@@ -43,9 +44,7 @@ def get_back_straight(back_laser):
       if(dist != 100): 
         is_turned = True
         break
-          #else: 
-            
-      #print("value front"+ str(no_cien))
+
   return is_turned
 
 
@@ -56,14 +55,11 @@ def get_front_straight(front_laser):
   for dist , angle in front_laser:
     
     if (angle >= math.pi/2):
-      #print(angle, dist)
       
       if(dist != 100): 
         is_turned = True
         break
-          #else: 
-            
-      #print("value front"+ str(no_cien))
+
   return is_turned
   
       
@@ -99,15 +95,6 @@ ocuppied = False
 align = True
 find = False 
 
-
-#init_degree_detection  = 60
-#end_degree_detection = 120
-
-#convert degrees into radian
-#init_radian_detection = math.radians(init_degree_detection)
-#end_radian_detection = math.radians(end_degree_detection)
-#m_left, m_right = get_right_straight_means(parse_right_laser,80, 100)
-
 y = 7
 x = 5 
 betha = get_betha(x,y)
@@ -127,56 +114,26 @@ while True:
     # STATE 1: ALIGN 
     if (align): 
       
-      # APPROACH 1: 
-      
+
       is_turned_front = get_front_straight(parse_front_laser)
       is_turned_back = get_back_straight(parse_back_laser)
-      #m_left, m_right = get_right_straight_means(parse_right_laser,80, 100)
+ 
+      std_left, std_right = get_std_ranges(parse_right_laser, 70, 110)
+      #std_all = np.std(all_values)
       
       
-      #print(is_turned_front)
-      #print(is_turned_back)
-      #print(m_left, m_right)
-      
-      # APPROACH 2:
-      
-      #value_left = 0 
-      #count_left = 0
-      #value_right = 0 
-      #count_right = 0 
-      
-      left_values = []
-      right_values = []
-      all_values = []
-      
-      for dist , angle in parse_right_laser:
-        
-        # left
-        if(math.radians(70) < angle < math.pi/2): 
-
-          right_values.append(math.sin(angle) * dist)
-          all_values.append(math.sin(angle) * dist)
-          #count_left += 1
-        
-        # right 
-        if(math.pi/2 < angle < math.radians(110)):
-          #value_right += math.sin(angle) * dist
-          left_values.append(math.sin(angle) * dist)
-          all_values.append(math.sin(angle) * dist)
-          #count_right += 1
-      
-
-      
-      std_left = np.std(left_values)
-      std_right = np.std(right_values)
-      std_all = np.std(all_values)
       
       # check if it is align
       if(is_turned_back == False and is_turned_front == False):
         if(std_left < 0.3 or std_right  < 0.3):
           print("Estoy alineado")
+          # find = True
+          # find and align at the same time 
           # go ahead and find space
       
+      
+      # need to robust movement and set threshold 
+      # start moving until threshold 
       if(is_turned_back):
         HAL.setW(-0.25)
         
@@ -185,20 +142,8 @@ while True:
         
         
         
-      print(std_left, std_right, std_all)
+      print(std_left, std_right)
 
-      #coordenadas = []
-
-      #for dist, angle in parse_right_laser:
-      #  x = math.cos(angle) * dist
-      #  y = math.sin(angle) * dist
-      #  coordenadas.append((angle, x, y))
-
-      #coordenadas_array = np.array(coordenadas)
-
-      # values distances to the others cars
-      #y_values = coordenadas_array[:, 2]
-      
         
      # STATE 2: FIND SPACE
     if (find):
