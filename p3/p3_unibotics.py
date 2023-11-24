@@ -128,21 +128,77 @@ while True:
     if (align): 
       
       # APPROACH 1: 
-      # FRONT LASER IS NOT WELL PLACED !!!!
       
-      #is_turned_front = get_front_straight(parse_front_laser)
-      #is_turned_back = get_back_straight(parse_back_laser)
+      is_turned_front = get_front_straight(parse_front_laser)
+      is_turned_back = get_back_straight(parse_back_laser)
       #m_left, m_right = get_right_straight_means(parse_right_laser,80, 100)
+      
+      
+      #print(is_turned_front)
+      #print(is_turned_back)
+      #print(m_left, m_right)
       
       # APPROACH 2:
       
-      for dist, angle in parse_right_laser:
-        
-        x = math.cos(angle)*dist
-        
-        y = math.sin(angle)*dist
+      #value_left = 0 
+      #count_left = 0
+      #value_right = 0 
+      #count_right = 0 
       
+      left_values = []
+      right_values = []
+      all_values = []
+      
+      for dist , angle in parse_right_laser:
         
+        # left
+        if(math.radians(70) < angle < math.pi/2): 
+
+          right_values.append(math.sin(angle) * dist)
+          all_values.append(math.sin(angle) * dist)
+          #count_left += 1
+        
+        # right 
+        if(math.pi/2 < angle < math.radians(110)):
+          #value_right += math.sin(angle) * dist
+          left_values.append(math.sin(angle) * dist)
+          all_values.append(math.sin(angle) * dist)
+          #count_right += 1
+      
+
+      
+      std_left = np.std(left_values)
+      std_right = np.std(right_values)
+      std_all = np.std(all_values)
+      
+      # check if it is align
+      if(is_turned_back == False and is_turned_front == False):
+        if(std_left < 0.3 or std_right  < 0.3):
+          print("Estoy alineado")
+          # go ahead and find space
+      
+      if(is_turned_back):
+        HAL.setW(-0.25)
+        
+      #if(is_turned_front):
+      #  HAL.setW(0.25)
+        
+        
+        
+      print(std_left, std_right, std_all)
+
+      #coordenadas = []
+
+      #for dist, angle in parse_right_laser:
+      #  x = math.cos(angle) * dist
+      #  y = math.sin(angle) * dist
+      #  coordenadas.append((angle, x, y))
+
+      #coordenadas_array = np.array(coordenadas)
+
+      # values distances to the others cars
+      #y_values = coordenadas_array[:, 2]
+      
         
      # STATE 2: FIND SPACE
     if (find):
