@@ -4,33 +4,26 @@ import math
 import time
 import numpy as np
 
+# if std is low: small differences between measures
+# if std is high: big differences between measures
 def get_std_ranges(right_laser,init_range, end_range):
   
   left_values = []
   right_values = []
-      #all_values = []
       
   for dist , angle in right_laser:
         
-        # left
+    # left
     if(math.radians(init_range) < angle < math.pi/2): 
-
       right_values.append(math.sin(angle) * dist)
-          #all_values.append(math.sin(angle) * dist)
-          #count_left += 1
-        
-        # right 
-    if(math.pi/2 < angle < math.radians(end_range)):
-          #value_right += math.sin(angle) * dist
-      left_values.append(math.sin(angle) * dist)
-          #all_values.append(math.sin(angle) * dist)
-          #count_right += 1
-      
 
-      
+    # right 
+    if(math.pi/2 < angle < math.radians(end_range)):
+      left_values.append(math.sin(angle) * dist)
+
   std_left = np.std(left_values)
   std_right = np.std(right_values)
-      #std_all = np.std(all_values)
+  
   return std_left, std_right
   
 
@@ -119,26 +112,39 @@ while True:
       is_turned_back = get_back_straight(parse_back_laser)
  
       std_left, std_right = get_std_ranges(parse_right_laser, 70, 110)
-      #std_all = np.std(all_values)
-      
-      
+
       
       # check if it is align
       if(is_turned_back == False and is_turned_front == False):
-        if(std_left < 0.3 or std_right  < 0.3):
+        if(std_left <= 0.3 or std_right  <= 0.3):
           print("Estoy alineado")
-          # find = True
+          #HAL.setW(0.0)
+          find = True
           # find and align at the same time 
           # go ahead and find space
-      
+        if (std_left > 0.3 and std_right > 0.3):
+          
+          if(std_left >= std_right):
+            print("left bigger")
+            HAL.setW(-0.25)
+            
+          else:
+            print("right bigger")
+            HAL.setW(0.25)
+          
+          
+
+          
       
       # need to robust movement and set threshold 
       # start moving until threshold 
-      if(is_turned_back):
+      if(is_turned_back and is_turned_front == False):
+        print("is turn back")
         HAL.setW(-0.25)
         
-      #if(is_turned_front):
-      #  HAL.setW(0.25)
+      if(is_turned_front and is_turned_back == False):
+        print("is turn front")
+        HAL.setW(0.25)
         
         
         
