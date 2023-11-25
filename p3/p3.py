@@ -9,10 +9,10 @@ def calcular_pendiente(puntos):
     pendiente = np.diff(y) / np.diff(x)
 
     # Devolver la pendiente promedio si hay más de un punto
-    return np.std(pendiente)
+    return np.mean(pendiente)
 
 # Ejemplo de puntos bidimensionales
-puntos_ejemplo = [(1, 2), (2, 2), (3, 2), (4,2)]
+puntos_ejemplo = [(-1,2), (1, 2), (3, 3)]
 
 # Calcular la pendiente
 pendiente_calculada = calcular_pendiente(puntos_ejemplo)
