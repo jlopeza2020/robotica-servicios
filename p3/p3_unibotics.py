@@ -5,6 +5,28 @@ import time
 import numpy as np
 
 
+def calcular_dispersion(right_laser):
+  
+  values = []
+  
+  for dist , angle in right_laser:
+        
+    #x = math.cos(angle) * dist
+    y = math.sin(angle) * dist
+   
+    #if(math.radians(0) < angle < math.radians(180)):
+    values.append(y)
+
+  #x_values = np.array([p[0] for p in values])
+  #y_values = np.array([p[1] for p in values])
+  
+  #pendiente = np.diff(y_values) / np.diff(x_values)
+
+ 
+  return np.std(values)
+
+
+
 def calcular_pendiente(right_laser):
   
   values = []
@@ -14,7 +36,7 @@ def calcular_pendiente(right_laser):
     x = math.cos(angle) * dist
     y = math.sin(angle) * dist
    
-    if(math.radians(80) < angle < math.radians(100)):
+    if(math.radians(0) < angle < math.radians(180)):
       values.append((x,y))
 
   x_values = np.array([p[0] for p in values])
@@ -25,7 +47,7 @@ def calcular_pendiente(right_laser):
  
   return np.mean(pendiente)
 
-
+"""
 def get_back_straight(back_laser):
   
   is_turned = False
@@ -48,7 +70,8 @@ def get_back_straight(back_laser):
 
   return is_turned , times
 
-
+"""
+"""
 def get_front_straight(front_laser):
   
   is_turned = False
@@ -70,7 +93,7 @@ def get_front_straight(front_laser):
 
   return is_turned , times
   
-      
+"""   
 def get_betha(a, b):
   
   h = math.sqrt(pow(a/2, 2) + pow(b,2))
@@ -128,18 +151,21 @@ while True:
     if (align): 
       
 
-      is_turned_front, amount_fl_af = get_front_straight(parse_front_laser)
-      is_turned_back, amount_bl_af = get_back_straight(parse_back_laser)
+      #is_turned_front, amount_fl_af = get_front_straight(parse_front_laser)
+      #is_turned_back, amount_bl_af = get_back_straight(parse_back_laser)
       
       pte = calcular_pendiente(parse_right_laser)
       
-
+      dis = calcular_dispersion(parse_right_laser)
+      
       if first_iter:
 
         init_pte = calcular_pendiente(parse_right_laser) 
+        init_dis = calcular_dispersion(parse_right_laser)
+      
         first_iter = False  
       
-      if (init_pte -0.1 < pte < init_pte + 0.1):
+      if (init_pte -0.05 < pte < init_pte + 0.05):
         print("alineado")
         HAL.setW(0.0)
         #align = False
@@ -152,18 +178,27 @@ while True:
         #HAL.setW(-0.25)
         
         
-      diff_pte = pte - init_pte
-      print(init_pte, pte, diff_pte, HAL.getPose3d().yaw)
+      #diff_pte = pte - init_pte
+      #print(init_pte, pte, diff_pte, HAL.getPose3d().yaw)
+      print(init_pte, pte, HAL.getPose3d().yaw, init_dis, dis)
+      
+      # if yaw es positiva y si dispersión disminuye: está girada hacia la izq 
+      
+      
+      # si yaw es negativa está girada a la derecha 
+      
+      
+      
       
       # need to robust movement and set threshold 
       # start moving until threshold 
-      if(is_turned_back and is_turned_front == False):
-        print("is turn back and amount " + str(amount_bl_af))
-        HAL.setW(-0.5)
+      #if(is_turned_back and is_turned_front == False):
+      #  print("is turn back and amount " + str(amount_bl_af))
+      #  HAL.setW(-0.25)
         
-      if(is_turned_front and is_turned_back == False):
-        print("is turn front and amount "+ str(amount_fl_af))
-        HAL.setW(0.5)
+      #if(is_turned_front and is_turned_back == False):
+      #  print("is turn front and amount "+ str(amount_fl_af))
+      #  HAL.setW(0.25)
         
         
      # STATE 2: FIND SPACE
