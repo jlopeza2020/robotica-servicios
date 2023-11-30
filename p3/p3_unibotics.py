@@ -8,64 +8,30 @@ import numpy as np
 def get_distances_to_car(laser):
 
   values = []
-  #counter = 0
   for dist , angle in laser:
         
     y = math.sin(angle) * dist
     values.append(y)
-    #counter += 1
-    
-    
-  #if (counter >= 45):
+
   return values
  
         
 
 def compare_sides(values):
 
-  #values = []
-  
-  #for dist , angle in laser:
-        
-    #y = math.sin(angle) * dist
-    #values.append(y)
-    
   half = len(values) // 2
   side_left = values[:half]
   side_right = values[half:]
 
-    # Calcular la suma de las medidas para cada lado
+  # calculate sum of the measures of both sides
   sum_side_left = sum(side_left)
   sum_side_right = sum(side_right)
   
   diff = sum_side_left - sum_side_right
   
-  
   return diff
-  #print(suma_lado_izquierdo, suma_lado_derecho)
-  """
-  if(abs(diff) < 15):
-    return "Alineado."
-  else: 
-    
-    if diff < 0:
-     return "girado hacia la izquierda."
-     
-    else:
-      return "girado hacia la derecha"
 
-  """
-
-def calcular_dispersion(values):
-  
-  #values = []
-  
-  #for dist , angle in right_laser:
-        
-  #  y = math.sin(angle) * dist
-   
-    #values.append(y)
-
+def calculate_std(values):
   return np.std(values)
 
 
@@ -107,7 +73,6 @@ betha = get_betha(x,y)
 
 
 first_iter = True
-#init_pte = None
 
 aligned_start_time = None
 aligned_duration_threshold = 5.0  # Ajusta este valor según tus necesidades
@@ -130,27 +95,25 @@ while True:
     if (align): 
       
 
-      # Tu código existente
-      dis = calcular_dispersion(distances_cars)
+      dis = calculate_std(distances_cars)
       difference = compare_sides(distances_cars)
       print(difference, dis)  
 
       if abs(difference) < 15 and (0.20 < dis < 0.45):
         if aligned_start_time is None:
-          # Marca de tiempo inicial cuando el vehículo se considera alineado
+
+          # Initial timestamp 
           aligned_start_time = time.time()
           print("Alineado.")
           HAL.setW(0.0)
           HAL.setV(0.0)
         else:
-        # Verificar si ha permanecido alineado durante el tiempo requerido
+          # check if it has been align in specific time
           elapsed_time = time.time() - aligned_start_time
           if elapsed_time >= aligned_duration_threshold:
             print(f"Permaneció alineado durante {aligned_duration_threshold} segundos. Pasar al siguiente estado.")
-            # Aquí puedes pasar al siguiente estado o realizar otras acciones necesarias.
             align = False
             find = True
-            
             
           else:
             print(f"Permaneciendo alineado ({elapsed_time:.2f} segundos).")
@@ -163,18 +126,13 @@ while True:
           print("Girado hacia la izquierda.")
           HAL.setW(-1.0)
           HAL.setV(0.5)
+          aligned_start_time = None
         else:
           print("Girado hacia la derecha.")
           HAL.setW(1.0)
           HAL.setV(0.5)
+          aligned_start_time = None
 
-      
-      
-      # if yaw es positiva: está girada hacia la izq 
-      # si yaw es negativa está girada a la derecha 
-      
-      
-      
       
         
      # STATE 2: FIND SPACE
