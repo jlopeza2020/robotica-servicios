@@ -109,6 +109,10 @@ betha = get_betha(x,y)
 first_iter = True
 #init_pte = None
 
+aligned_start_time = None
+aligned_duration_threshold = 5.0  # Ajusta este valor según tus necesidades
+
+
 while True:
     
     #front_laser = HAL.getFrontLaserData()
@@ -126,25 +130,44 @@ while True:
     if (align): 
       
 
+      # Tu código existente
       dis = calcular_dispersion(distances_cars)
-      
-
       difference = compare_sides(distances_cars)
       print(difference, dis)  
-      
-      
-      if(abs(difference) < 15 and (0.20 < dis < 0.4)):
-        print("Alineado.")
-      else: 
-    
+
+      if abs(difference) < 15 and (0.20 < dis < 0.45):
+        if aligned_start_time is None:
+          # Marca de tiempo inicial cuando el vehículo se considera alineado
+          aligned_start_time = time.time()
+          print("Alineado.")
+          HAL.setW(0.0)
+          HAL.setV(0.0)
+        else:
+        # Verificar si ha permanecido alineado durante el tiempo requerido
+          elapsed_time = time.time() - aligned_start_time
+          if elapsed_time >= aligned_duration_threshold:
+            print(f"Permaneció alineado durante {aligned_duration_threshold} segundos. Pasar al siguiente estado.")
+            # Aquí puedes pasar al siguiente estado o realizar otras acciones necesarias.
+            align = False
+            find = True
+            
+            
+          else:
+            print(f"Permaneciendo alineado ({elapsed_time:.2f} segundos).")
+
+      else:
+       # No está alineado, reiniciar la marca de tiempo
+        aligned_start_time = None
+
         if difference < 0:
-          print("girado hacia la izquierda.")
-          
+          print("Girado hacia la izquierda.")
           HAL.setW(-1.0)
           HAL.setV(0.5)
-     
         else:
-          print("girado hacia la derecha")
+          print("Girado hacia la derecha.")
+          HAL.setW(1.0)
+          HAL.setV(0.5)
+
       
       
       # if yaw es positiva: está girada hacia la izq 
