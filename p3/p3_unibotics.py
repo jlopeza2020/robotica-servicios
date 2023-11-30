@@ -6,19 +6,20 @@ import numpy as np
 
 
 def get_distances_to_car(laser):
-  
+
   values = []
-  counter = 0
+  #counter = 0
   for dist , angle in laser:
         
     y = math.sin(angle) * dist
     values.append(y)
-    counter += 1
+    #counter += 1
     
     
-  if (counter >= 45):
-    return values
-    
+  #if (counter >= 45):
+  return values
+ 
+        
 
 def compare_sides(values):
 
@@ -29,18 +30,20 @@ def compare_sides(values):
     #y = math.sin(angle) * dist
     #values.append(y)
     
-  mitad = len(values) // 2
-  lado_izquierdo = values[:mitad]
-  lado_derecho = values[mitad:]
+  half = len(values) // 2
+  side_left = values[:half]
+  side_right = values[half:]
 
     # Calcular la suma de las medidas para cada lado
-  suma_lado_izquierdo = sum(lado_izquierdo)
-  suma_lado_derecho = sum(lado_derecho)
+  sum_side_left = sum(side_left)
+  sum_side_right = sum(side_right)
   
-  diff = suma_lado_izquierdo - suma_lado_derecho
+  diff = sum_side_left - sum_side_right
   
-  print(suma_lado_izquierdo, suma_lado_derecho)
   
+  return diff
+  #print(suma_lado_izquierdo, suma_lado_derecho)
+  """
   if(abs(diff) < 15):
     return "Alineado."
   else: 
@@ -50,16 +53,8 @@ def compare_sides(values):
      
     else:
       return "girado hacia la derecha"
-  
 
-  # Comparar las sumas de las medidas para determinar cuál lado es más corto
-  #if suma_lado_izquierdo < suma_lado_derecho:
-  #  return "girado hacia la izquierda."
-  #elif suma_lado_izquierdo > suma_lado_derecho:
-  #  return "girado hacia la derecha"
-  #else:
-  #  return "Alineado."
-
+  """
 
 def calcular_dispersion(values):
   
@@ -130,27 +125,28 @@ while True:
     # STATE 1: ALIGN 
     if (align): 
       
+
       dis = calcular_dispersion(distances_cars)
       
-      #if first_iter:
-      #  init_dis = calcular_dispersion(distances_cars)
-      #  first_iter = False  
+
+      difference = compare_sides(distances_cars)
+      print(difference, dis)  
       
       
-      # solo tener en cuenta si hay un mínimo de 40 medidas 
-      #counter = 0
-      #for d_actual, angle in parse_right_laser:
-      #  counter += 1
-      
-      #print(counter)
-      #if(counter >= 40):
-      resultado = compare_sides(distances_cars)
-      print(resultado)  
-      
-      #print(HAL.getPose3d().yaw, init_dis, dis)
-      #print(init_pte, pte, HAL.getPose3d().yaw, init_dis, dis)
+      if(abs(difference) < 15 and (0.20 < dis < 0.4)):
+        print("Alineado.")
+      else: 
+    
+        if difference < 0:
+          print("girado hacia la izquierda.")
+          
+          HAL.setW(-1.0)
+          HAL.setV(0.5)
      
-     
+        else:
+          print("girado hacia la derecha")
+      
+      
       # if yaw es positiva: está girada hacia la izq 
       # si yaw es negativa está girada a la derecha 
       
