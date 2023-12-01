@@ -25,9 +25,41 @@ def move_ahead(init_y_pose, distance):
   else: 
     reached = True
     
-  
   return reached
     
+    
+    
+def find_space(laser, betha):
+  
+  reached = False
+  ocuppied = False 
+  
+  for d_actual, angle in parse_right_laser:
+    # values from the upper part of the rectangle
+    if(betha < angle < math.pi - betha):
+      d_objective = y / math.sin(angle)
+    else: 
+      d_objective = (x/2) / math.cos(angle)
+        
+    # means that there is an obstacle in the rectangle
+    if d_actual < d_objective:
+      ocuppied = True
+      break
+        
+  if (ocuppied):
+    HAL.setV(0.75)
+    HAL.setW(0.0)
+    ocuppied = False
+      
+  else:
+
+    print("Hueco encontrado")
+    reached = True
+    #find = False
+    #park_move_0 = True
+    
+  return reached
+
         
 def get_distances_to_car(laser):
 
@@ -83,7 +115,7 @@ def parse_laser_data(laser_data):
    
 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-ocuppied = False 
+#ocuppied = False 
 
 align = True
 find = False
@@ -162,6 +194,9 @@ while True:
      # STATE 2: FIND SPACE
     if (find):
       
+      park_move_0 = find_space(parse_right_laser, betha)
+      
+      """
       for d_actual, angle in parse_right_laser:
       # values from the upper part of the rectangle
         if(betha < angle < math.pi - betha):
@@ -185,36 +220,19 @@ while True:
         find = False
         park_move_0 = True
         
-        
+      """  
         
     # STATE 3: MOVE 6 METERS AHEAD
     if(park_move_0):
       
-      #re = move_six_meters_y(first_iter_pos)
-       
-      #print(re)
-    
+      find = False
+      
       if(first_iter_pos): 
         init_y_pose = HAL.getPose3d().y
         first_iter_pos = False
         
       park_move_1 = move_ahead(init_y_pose, 6)
       
-      #print(re)
-      
-      """
-      actual_y_pose = HAL.getPose3d().y
-      
-      diff_y_pose = actual_y_pose - init_y_pose
-      # go ahead 6 meters 
-      if(abs(diff_y_pose) <= 6.0):
-
-        HAL.setV(0.75)
-        HAL.setW(0.0)
-      else: 
-        park_move_0 = False
-        park_move_1 = True
-      """
     # STATE 4: TURN 45 METERS 
     if(park_move_1):
       
