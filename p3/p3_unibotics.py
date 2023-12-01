@@ -14,8 +14,6 @@ def get_distances_to_car(laser):
     values.append(y)
 
   return values
- 
-        
 
 def compare_sides(values):
 
@@ -65,6 +63,7 @@ ocuppied = False
 
 align = True
 find = False
+park = False
 
 # cuadrado para encontrar hueco 
 y = 7
@@ -97,8 +96,11 @@ while True:
 
       dis = calculate_std(distances_cars)
       difference = compare_sides(distances_cars)
+      
+      #do_align_move(difference, dis, aligned_start_time, find)
       print(difference, dis)  
-
+      
+      
       if abs(difference) < 15 and (0.20 < dis < 0.45):
         if aligned_start_time is None:
 
@@ -126,15 +128,12 @@ while True:
           print("Girado hacia la izquierda.")
           HAL.setW(-1.0)
           HAL.setV(0.5)
-          aligned_start_time = None
+
         else:
           print("Girado hacia la derecha.")
           HAL.setW(1.0)
           HAL.setV(0.5)
-          aligned_start_time = None
 
-      
-        
      # STATE 2: FIND SPACE
     if (find):
       
@@ -145,7 +144,7 @@ while True:
         else: 
           d_objective = (x/2) / math.cos(angle)
         
-      # meanss that there is an obstacle in the rectangle
+      # means that there is an obstacle in the rectangle
         if d_actual < d_objective:
           ocuppied = True
           break
@@ -154,11 +153,17 @@ while True:
         HAL.setV(0.75)
         ocuppied = False
       
-      else: 
-        print("HAY HUECO")
+      else:
+        #find = False
+        #print("HAY HUECO")
         HAL.setV(0.0)
         HAL.setW(0.0)
+        find = False
+        park = True
+        
+    if(park):
       
+      print(HAL.getPose3d())
       
       
       
