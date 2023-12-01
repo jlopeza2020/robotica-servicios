@@ -5,6 +5,30 @@ import time
 import numpy as np
 
 
+def move_ahead(init_y_pose, distance):
+  
+  reached = False
+  
+  #if(first_iter_pos): 
+  #  init_y_pose = HAL.getPose3d().y
+  #  first_iter_pos = False
+        
+  actual_y_pose = HAL.getPose3d().y
+      
+  diff_y_pose = actual_y_pose - init_y_pose
+  # go ahead 6 meters 
+  if(abs(diff_y_pose) <= 6.0):
+
+    HAL.setV(0.75)
+    HAL.setW(0.0)
+    
+  else: 
+    reached = True
+    
+  
+  return reached
+    
+        
 def get_distances_to_car(laser):
 
   values = []
@@ -72,7 +96,8 @@ x = 5
 betha = get_betha(x,y)
 
 
-first_iter = True
+first_iter_pos = True
+first_iter_turn = True
 
 aligned_start_time = None
 aligned_duration_threshold = 5.0  # Ajusta este valor según tus necesidades
@@ -98,9 +123,7 @@ while True:
       dis = calculate_std(distances_cars)
       difference = compare_sides(distances_cars)
       
-      #do_align_move(difference, dis, aligned_start_time, find)
       print(difference, dis)  
-      
       
       if abs(difference) < 15 and (0.20 < dis < 0.45):
         if aligned_start_time is None:
@@ -135,6 +158,7 @@ while True:
           HAL.setW(1.0)
           HAL.setV(0.5)
 
+
      # STATE 2: FIND SPACE
     if (find):
       
@@ -156,37 +180,45 @@ while True:
         ocuppied = False
       
       else:
-        #find = False
+
         print("Hueco encontrado")
-        #HAL.setV(0.0)
-        #HAL.setW(0.0)
         find = False
         park_move_0 = True
         
+        
+        
+    # STATE 3: MOVE 6 METERS AHEAD
     if(park_move_0):
       
-      #print(HAL.getPose3d().x)
-      #print(HAL.getPose3d().y)
-      
-      if(first_iter): 
+      #re = move_six_meters_y(first_iter_pos)
+       
+      #print(re)
+    
+      if(first_iter_pos): 
         init_y_pose = HAL.getPose3d().y
-        first_iter = False
+        first_iter_pos = False
         
+      park_move_1 = move_ahead(init_y_pose, 6)
+      
+      #print(re)
+      
+      """
       actual_y_pose = HAL.getPose3d().y
       
       diff_y_pose = actual_y_pose - init_y_pose
       # go ahead 6 meters 
       if(abs(diff_y_pose) <= 6.0):
-        #HAL.setV(0.75)
+
         HAL.setV(0.75)
         HAL.setW(0.0)
       else: 
-        #HAL.setV(0.0)
-        #HAL.setW(0.0)
         park_move_0 = False
         park_move_1 = True
-        
+      """
+    # STATE 4: TURN 45 METERS 
     if(park_move_1):
+      
+      park_move_0 = False
       
       print(HAL.getPose3d().yaw)
       HAL.setV(0.0)
