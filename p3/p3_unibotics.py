@@ -63,7 +63,8 @@ ocuppied = False
 
 align = True
 find = False
-park = False
+park_move_0 = False
+park_move_1 = False
 
 # cuadrado para encontrar hueco 
 y = 7
@@ -151,21 +152,45 @@ while True:
         
       if (ocuppied):
         HAL.setV(0.75)
+        HAL.setW(0.0)
         ocuppied = False
       
       else:
         #find = False
-        #print("HAY HUECO")
-        HAL.setV(0.0)
-        HAL.setW(0.0)
+        print("Hueco encontrado")
+        #HAL.setV(0.0)
+        #HAL.setW(0.0)
         find = False
-        park = True
+        park_move_0 = True
         
-    if(park):
+    if(park_move_0):
       
-      print(HAL.getPose3d())
+      #print(HAL.getPose3d().x)
+      #print(HAL.getPose3d().y)
       
+      if(first_iter): 
+        init_y_pose = HAL.getPose3d().y
+        first_iter = False
+        
+      actual_y_pose = HAL.getPose3d().y
       
+      diff_y_pose = actual_y_pose - init_y_pose
+      # go ahead 6 meters 
+      if(abs(diff_y_pose) <= 6.0):
+        #HAL.setV(0.75)
+        HAL.setV(0.75)
+        HAL.setW(0.0)
+      else: 
+        #HAL.setV(0.0)
+        #HAL.setW(0.0)
+        park_move_0 = False
+        park_move_1 = True
+        
+    if(park_move_1):
+      
+      print(HAL.getPose3d().yaw)
+      HAL.setV(0.0)
+      HAL.setW(0.0)
       
       
     
