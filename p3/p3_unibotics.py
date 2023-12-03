@@ -9,6 +9,20 @@ import numpy as np
 def move_forward_turn(back_distances, front_distances, goal_yaw):
 
   reached = False
+  close_back = False
+  close_front = False
+  
+  for i in back_distances:
+    if(i < 0.75): 
+      close_back = True
+      break
+        
+        
+  for i in front_distances:
+    if(i < 0.75): 
+      close_front = True
+      break
+        
   #close_front = False
   
   #for i in front_distances:
@@ -20,21 +34,24 @@ def move_forward_turn(back_distances, front_distances, goal_yaw):
    
   actual_yaw = HAL.getPose3d().yaw
   
-  print("AAActual_yaw: ", actual_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
+  #print("AAActual_yaw: ", actual_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
       
-  #diff_y_yaw = actual_yaw - goal_yaw
+  diff_yaw = actual_yaw - goal_yaw
+  
+  print("AAAdiff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
   
   #if(abs(actual_yaw) >= goal_yaw and not close_front):
-  if(abs(actual_yaw) >= goal_yaw and np.mean(front_distances) > 1.0):
+  if(abs(diff_yaw) >= 0.1 and np.mean(front_distances) > 1.0):
 
-
-    HAL.setW(-0.5)
-    HAL.setV(0.5)
+    HAL.setW(-0.25)
+    HAL.setV(1.0)
     
   else: 
     reached = True
     
   return reached
+  
+  
   
   
 def move_back_turn(back_distances, front_distances, goal_yaw):
@@ -43,7 +60,7 @@ def move_back_turn(back_distances, front_distances, goal_yaw):
   close_back = False
   
   for i in back_distances:
-    if(i < 1.0): 
+    if(i < 0.75): 
       close_back = True
       break
         
@@ -51,16 +68,18 @@ def move_back_turn(back_distances, front_distances, goal_yaw):
    
   actual_yaw = HAL.getPose3d().yaw
   
-  print("actual_yaw: ", actual_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
+  #print("actual_yaw: ", actual_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
       
-  #diff_y_yaw = actual_yaw - goal_yaw
+  diff_yaw = actual_yaw - goal_yaw
   
-  #if(abs(actual_yaw) >= goal_yaw and not close_back):
-  if(abs(actual_yaw) >= goal_yaw and np.mean(back_distances) > 1.0):
+  print("diff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
+  
+  if(abs(diff_yaw) >= 0.1 and not close_back):
+  #if(abs(actual_yaw) >= goal_yaw and np.mean(back_distances) > 1.0):
 
 
-    HAL.setW(-3.0)
-    HAL.setV(-3.0)
+    HAL.setW(-0.5)
+    HAL.setV(-2.0)
     
   else: 
     reached = True
