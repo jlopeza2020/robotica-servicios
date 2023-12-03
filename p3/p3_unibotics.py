@@ -39,12 +39,13 @@ def move_forward_turn(back_distances, front_distances, goal_yaw):
   diff_yaw = actual_yaw - goal_yaw
   
   print("AAAdiff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
+  print(close_back, close_front)
   
   #if(abs(actual_yaw) >= goal_yaw and not close_front):
   if(abs(diff_yaw) >= 0.1 and np.mean(front_distances) > 1.0):
 
-    HAL.setW(-0.25)
-    HAL.setV(1.0)
+    HAL.setW(-2.0)
+    HAL.setV(0.5)
     
   else: 
     reached = True
@@ -74,12 +75,12 @@ def move_back_turn(back_distances, front_distances, goal_yaw):
   
   print("diff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
   
-  if(abs(diff_yaw) >= 0.1 and not close_back):
+  if(abs(diff_yaw) >= 0.1 and np.mean(back_distances) > 1.20):
   #if(abs(actual_yaw) >= goal_yaw and np.mean(back_distances) > 1.0):
 
 
-    HAL.setW(-0.5)
-    HAL.setV(-2.0)
+    HAL.setW(-5.0)
+    HAL.setV(-0.75)
     
   else: 
     reached = True
@@ -308,7 +309,7 @@ while True:
     back_laser = HAL.getBackLaserData()
     parse_back_laser = parse_laser_data(back_laser)
     
-    distances_back_cars = get_distances_to_car(parse_back_laser, 0, math.pi/2)
+    distances_back_cars = get_distances_to_car(parse_back_laser, 0, math.pi)
     
     # STATE 1: ALIGN 
     if (align): 
@@ -370,6 +371,9 @@ while True:
       park_move_3 = False
       
       stop = move_forward_turn(distances_back_cars, distances_front_cars, 0.0)
+      
+      #HAL.setV(0.0)
+      #HAL.setW(0.0)
       
     if(stop):
       park_move_4 = False
