@@ -5,6 +5,50 @@ import time
 import numpy as np
 
 
+def align_car(difference, dis, aligned_start_time):
+  
+  aligned_duration_threshold = 5.0  # Ajusta este valor según tus necesidades
+  reached = False
+  #aligned_start_time = None
+  
+  if abs(difference) < 15 and (0.20 < dis < 0.45):
+        
+    if aligned_start_time is None:
+      # Initial timestamp 
+      aligned_start_time = time.time()
+      print("Alineado.")
+      HAL.setW(0.0)
+      HAL.setV(0.0)
+      
+    else:
+          # check if it has been align in specific time
+      elapsed_time = time.time() - aligned_start_time
+      if elapsed_time >= aligned_duration_threshold:
+        print(f"Permaneció alineado durante {aligned_duration_threshold} segundos. Pasar al siguiente estado.")
+        #align = False
+        #find = True
+        reached = True
+            
+      else:
+        print(f"Permaneciendo alineado ({elapsed_time:.2f} segundos).")
+
+  else:
+       # No está alineado, reiniciar la marca de tiempo
+    aligned_start_time = None
+
+    if difference < 0:
+      print("Girado hacia la izquierda.")
+      HAL.setW(-1.0)
+      HAL.setV(0.5)
+
+    else:
+      print("Girado hacia la derecha.")
+      HAL.setW(1.0)
+      HAL.setV(0.5)
+  
+  return reached, aligned_start_time
+  
+
 def move_ahead(init_y_pose, distance):
   
   reached = False
@@ -157,6 +201,8 @@ while True:
       
       print(difference, dis)  
       
+      find, aligned_start_time = align_car(difference, dis, aligned_start_time)
+      """
       if abs(difference) < 15 and (0.20 < dis < 0.45):
         if aligned_start_time is None:
 
@@ -189,39 +235,15 @@ while True:
           print("Girado hacia la derecha.")
           HAL.setW(1.0)
           HAL.setV(0.5)
-
-
+        
+      """
      # STATE 2: FIND SPACE
     if (find):
       
+      align = False
       park_move_0 = find_space(parse_right_laser, betha)
       
-      """
-      for d_actual, angle in parse_right_laser:
-      # values from the upper part of the rectangle
-        if(betha < angle < math.pi - betha):
-          d_objective = y / math.sin(angle)
-        else: 
-          d_objective = (x/2) / math.cos(angle)
-        
-      # means that there is an obstacle in the rectangle
-        if d_actual < d_objective:
-          ocuppied = True
-          break
-        
-      if (ocuppied):
-        HAL.setV(0.75)
-        HAL.setW(0.0)
-        ocuppied = False
-      
-      else:
 
-        print("Hueco encontrado")
-        find = False
-        park_move_0 = True
-        
-      """  
-        
     # STATE 3: MOVE 6 METERS AHEAD
     if(park_move_0):
       
