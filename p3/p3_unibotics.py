@@ -26,6 +26,28 @@ def move_back(distance_laser,init_x_pose, distance):
   return reached
 """
 
+def move_back_turn(laser_distances, goal_yaw):
+
+  reached = False
+
+
+  print(np.mean(laser_distances))
+   
+  actual_yaw = HAL.getPose3d().yaw
+      
+  #diff_y_yaw = actual_yaw - goal_yaw
+  
+  if(abs(actual_yaw) >=  goal_yaw):
+
+    HAL.setW(-0.5)
+    
+    HAL.setV(1.0)
+    
+  else: 
+    reached = True
+    
+  return reached
+  
 
 def move_back(laser_distances, init_x_pose, distance):
     reached = False
@@ -52,16 +74,16 @@ def move_back(laser_distances, init_x_pose, distance):
 
     return reached
 
-def turn(init_y_yaw, angle):
+def turn(init_yaw, angle):
 
   reached = False
 
 
-  actual_y_yaw = HAL.getPose3d().yaw
+  actual_yaw = HAL.getPose3d().yaw
       
-  diff_y_yaw = actual_y_yaw - init_y_yaw
+  diff_yaw = actual_yaw - init_yaw
   
-  if(abs(diff_y_yaw) <= angle):
+  if(abs(diff_yaw) <= angle):
 
     HAL.setW(1.0)
     HAL.setV(0.75)
@@ -307,7 +329,8 @@ while True:
       
       park_move_2 = False
       
-      park_move_4 = move_back_turn()
+      park_move_4 = move_back_turn(distances_back_cars, 0.0)
+
 
       
     if(park_move_4):
