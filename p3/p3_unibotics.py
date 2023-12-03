@@ -5,63 +5,38 @@ import time
 import numpy as np
 
 
-def align_car(difference, dis, aligned_start_time):
-  
-  aligned_duration_threshold = 5.0  # Ajusta este valor según tus necesidades
+
+
+def turn(init_y_yaw, angle):
+
   reached = False
-  #aligned_start_time = None
-  
-  if abs(difference) < 15 and (0.20 < dis < 0.45):
-        
-    if aligned_start_time is None:
-      # Initial timestamp 
-      aligned_start_time = time.time()
-      print("Alineado.")
-      HAL.setW(0.0)
-      HAL.setV(0.0)
+
+
+  actual_y_yaw = HAL.getPose3d().yaw
       
-    else:
-          # check if it has been align in specific time
-      elapsed_time = time.time() - aligned_start_time
-      if elapsed_time >= aligned_duration_threshold:
-        print(f"Permaneció alineado durante {aligned_duration_threshold} segundos. Pasar al siguiente estado.")
-        #align = False
-        #find = True
-        reached = True
-            
-      else:
-        print(f"Permaneciendo alineado ({elapsed_time:.2f} segundos).")
+  diff_y_yaw = actual_y_yaw - init_y_yaw
+  # go ahead 6 meters 
+  if(abs(diff_y_yaw) <= angle):
 
-  else:
-       # No está alineado, reiniciar la marca de tiempo
-    aligned_start_time = None
-
-    if difference < 0:
-      print("Girado hacia la izquierda.")
-      HAL.setW(-1.0)
-      HAL.setV(0.5)
-
-    else:
-      print("Girado hacia la derecha.")
-      HAL.setW(1.0)
-      HAL.setV(0.5)
-  
-  return reached, aligned_start_time
-  
-
+    #HAL.setV(0.75)
+    #HAL.setW(0.0)
+    HAL.setW(1.0)
+    HAL.setV(0.5)
+    
+  else: 
+    reached = True
+    
+  return reached
+    
 def move_ahead(init_y_pose, distance):
   
   reached = False
   
-  #if(first_iter_pos): 
-  #  init_y_pose = HAL.getPose3d().y
-  #  first_iter_pos = False
-        
   actual_y_pose = HAL.getPose3d().y
       
   diff_y_pose = actual_y_pose - init_y_pose
-  # go ahead 6 meters 
-  if(abs(diff_y_pose) <= 6.0):
+ 
+  if(abs(diff_y_pose) <= distance):
 
     HAL.setV(0.75)
     HAL.setW(0.0)
@@ -104,6 +79,48 @@ def find_space(laser, betha):
     
   return reached
 
+def align_car(difference, dis, aligned_start_time):
+  
+  aligned_duration_threshold = 5.0  # Ajusta este valor según tus necesidades
+  reached = False
+  #aligned_start_time = None
+  
+  if abs(difference) < 15 and (0.20 < dis < 0.45):
+        
+    if aligned_start_time is None:
+      # Initial timestamp 
+      aligned_start_time = time.time()
+      print("Alineado.")
+      HAL.setW(0.0)
+      HAL.setV(0.0)
+      
+    else:
+          # check if it has been align in specific time
+      elapsed_time = time.time() - aligned_start_time
+      if elapsed_time >= aligned_duration_threshold:
+        print(f"Permaneció alineado durante {aligned_duration_threshold} segundos. Pasar al siguiente estado.")
+        #align = False
+        #find = True
+        reached = True
+            
+      else:
+        print(f"Permaneciendo alineado ({elapsed_time:.2f} segundos).")
+
+  else:
+       # No está alineado, reiniciar la marca de tiempo
+    aligned_start_time = None
+
+    if difference < 0:
+      print("Girado hacia la izquierda.")
+      HAL.setW(-1.0)
+      HAL.setV(0.5)
+
+    else:
+      print("Girado hacia la derecha.")
+      HAL.setW(1.0)
+      HAL.setV(0.5)
+  
+  return reached, aligned_start_time
         
 def get_distances_to_car(laser):
 
@@ -159,14 +176,14 @@ def parse_laser_data(laser_data):
    
 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-#ocuppied = False 
-
 align = True
 find = False
 park_move_0 = False
 park_move_1 = False
+park_move_2 = False
 
-# cuadrado para encontrar hueco 
+
+# square defined to find space
 y = 7
 x = 5 
 betha = get_betha(x,y)
@@ -176,7 +193,6 @@ first_iter_pos = True
 first_iter_turn = True
 
 aligned_start_time = None
-aligned_duration_threshold = 5.0  # Ajusta este valor según tus necesidades
 
 
 while True:
@@ -199,45 +215,11 @@ while True:
       dis = calculate_std(distances_cars)
       difference = compare_sides(distances_cars)
       
-      print(difference, dis)  
+      #print(difference, dis)  
       
       find, aligned_start_time = align_car(difference, dis, aligned_start_time)
-      """
-      if abs(difference) < 15 and (0.20 < dis < 0.45):
-        if aligned_start_time is None:
-
-          # Initial timestamp 
-          aligned_start_time = time.time()
-          print("Alineado.")
-          HAL.setW(0.0)
-          HAL.setV(0.0)
-        else:
-          # check if it has been align in specific time
-          elapsed_time = time.time() - aligned_start_time
-          if elapsed_time >= aligned_duration_threshold:
-            print(f"Permaneció alineado durante {aligned_duration_threshold} segundos. Pasar al siguiente estado.")
-            align = False
-            find = True
-            
-          else:
-            print(f"Permaneciendo alineado ({elapsed_time:.2f} segundos).")
-
-      else:
-       # No está alineado, reiniciar la marca de tiempo
-        aligned_start_time = None
-
-        if difference < 0:
-          print("Girado hacia la izquierda.")
-          HAL.setW(-1.0)
-          HAL.setV(0.5)
-
-        else:
-          print("Girado hacia la derecha.")
-          HAL.setW(1.0)
-          HAL.setV(0.5)
-        
-      """
-     # STATE 2: FIND SPACE
+     
+    # STATE 2: FIND SPACE
     if (find):
       
       align = False
@@ -253,16 +235,29 @@ while True:
         init_y_pose = HAL.getPose3d().y
         first_iter_pos = False
         
-      park_move_1 = move_ahead(init_y_pose, 6)
+      park_move_1 = move_ahead(init_y_pose, 6.0)
       
     # STATE 4: TURN 45 METERS 
     if(park_move_1):
-      
       park_move_0 = False
       
-      print(HAL.getPose3d().yaw)
+      if(first_iter_turn): 
+        init_y_yaw = HAL.getPose3d().yaw
+        first_iter_turn = False
+      
+      park_move_2 = turn(init_y_yaw, 0.45)
+      #print(HAL.getPose3d().yaw)
+      #HAL.setV(0.0)
+      #HAL.setW(0.0)
+      
+      
+    # STATE 5: GO BACK UNTIL DETECT CAR OR ODOMETRY 
+    if(park_move_2):
+      
+      park_move_1 = False
+      
+
       HAL.setV(0.0)
       HAL.setW(0.0)
-      
       
     
