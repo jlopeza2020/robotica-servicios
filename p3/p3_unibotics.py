@@ -9,43 +9,23 @@ import numpy as np
 def move_forward_turn(back_distances, front_distances, goal_yaw):
 
   reached = False
-  close_back = False
   close_front = False
   
-  for i in back_distances:
-    if(i < 0.75): 
-      close_back = True
-      break
-        
-        
   for i in front_distances:
-    if(i < 0.75): 
+    if(i < 0.3): 
       close_front = True
       break
         
-  #close_front = False
-  
-  #for i in front_distances:
-  #  if(i < 1.0): 
-  #    close_front = True
-  #    break
-        
-  #print(np.mean(back_distances), np.mean(front_distances))
-   
   actual_yaw = HAL.getPose3d().yaw
   
-  #print("AAActual_yaw: ", actual_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
-      
   diff_yaw = actual_yaw - goal_yaw
   
-  print("AAAdiff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
-  print(close_back, close_front)
+  print("AAAdiff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances), close_front, min(front_distances))
   
-  #if(abs(actual_yaw) >= goal_yaw and not close_front):
-  if(abs(diff_yaw) >= 0.1 and np.mean(front_distances) > 1.0):
-
-    HAL.setW(-2.0)
-    HAL.setV(0.5)
+  if(abs(actual_yaw) >= goal_yaw and not close_front):
+    
+    HAL.setW(-5.0)
+    HAL.setV(1.0)
     
   else: 
     reached = True
@@ -61,7 +41,7 @@ def move_back_turn(back_distances, front_distances, goal_yaw):
   close_back = False
   
   for i in back_distances:
-    if(i < 0.75): 
+    if(i < 0.3): 
       close_back = True
       break
         
@@ -73,14 +53,13 @@ def move_back_turn(back_distances, front_distances, goal_yaw):
       
   diff_yaw = actual_yaw - goal_yaw
   
-  print("diff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
+  print("diff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", min(back_distances), close_back)
   
-  if(abs(diff_yaw) >= 0.1 and np.mean(back_distances) > 1.20):
+  if(abs(diff_yaw) >= 0.1 and not close_back):
   #if(abs(actual_yaw) >= goal_yaw and np.mean(back_distances) > 1.0):
 
-
     HAL.setW(-5.0)
-    HAL.setV(-0.75)
+    HAL.setV(-2.0)
     
   else: 
     reached = True
@@ -97,7 +76,7 @@ def move_back(laser_distances, init_x_pose, distance):
 
     if(np.mean(laser_distances) >= 1.0 and abs(diff_x_pose) <= distance):
 
-        HAL.setV(-0.75)
+        HAL.setV(-1.0)
         HAL.setW(0.0)
     else:
         reached = True
@@ -276,7 +255,10 @@ find = False
 park_move_0 = False
 park_move_1 = False
 park_move_2 = False
-park_move_3 = False
+
+park_move_3_4 = False
+
+park_move_3 = True
 park_move_4 = False
 stop = False
 
@@ -293,6 +275,8 @@ aligned_start_time = None
 distance_ahead = 5.0
 angle_turn = 0.6
 distance_back = 5.0 
+
+estado = 3
 
 while True:
     
@@ -356,29 +340,53 @@ while True:
         init_x_pose = HAL.getPose3d().x
         first_iter_pos_x = False
         
-      park_move_3 = move_back(distances_back_cars, init_x_pose, distance_back)
+      park_move_3_4 = move_back(distances_back_cars, init_x_pose, distance_back)
       
+      
+  
+    if park_move_3_4: 
+      park_move_2 = False  
+      actual_yaw = HAL.getPose3d().yaw
+      diff_yaw = actual_yaw - 0.0
+    
+      if diff_yaw >= 0.1:
+        
+        print(estado)
+        if(estado == 3):
+          #print("estoy en el 3")
+          if(move_back_turn(distances_back_cars, distances_front_cars, 0.0)):
+            HAL.setV(0.0)
+            HAL.setW(0.0)
+            estado = 4
+        else:    
+        #if(estado == 4):
+        #  print("estoy en el 4")
+          if(move_forward_turn(distances_back_cars, distances_front_cars, 0.0)):
+        #    print("he pasado el if")
+            HAL.setV(0.0)
+            HAL.setW(0.0)
+            estado = 3
+        
+        #if park_move_3:
+            #park_move_4 = False
+            #park_move_4 = move_back_turn(distances_back_cars, distances_front_cars, 0.0)
 
-    if(park_move_3):
+            #if park_move_4:
+            #    park_move_3 = False
       
-      park_move_2 = False
-      
-      park_move_4 = move_back_turn(distances_back_cars,distances_front_cars, 0.0)
+        #if park_move_4:
+        #    print("estoy estado 4")
+        #    park_move_3 = False
+        #    park_move_3 = move_forward_turn(distances_back_cars, distances_front_cars, 0.0)
+            
+        #    if park_move_3:
+        #        park_move_4 = False
 
+      else:
+        # Si la diferencia de orientación es menor a 0.1, detener el movimiento
+        park_move_3_4 = False
+        HAL.setV(0.0)
+        HAL.setW(0.0)
 
-      
-    if(park_move_4):
-      park_move_3 = False
-      
-      stop = move_forward_turn(distances_back_cars, distances_front_cars, 0.0)
-      
-      #HAL.setV(0.0)
-      #HAL.setW(0.0)
-      
-    if(stop):
-      park_move_4 = False
-      
-      HAL.setV(0.0)
-      HAL.setW(0.0)
-      
+  
     
