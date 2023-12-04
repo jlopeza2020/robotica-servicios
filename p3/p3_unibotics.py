@@ -4,11 +4,7 @@ import math
 import time
 import numpy as np
 
-
-
-#def move_forward_turn(back_distances, front_distances, goal_yaw):
-
-def move_forward_turn(front_distances, goal_yaw):
+def move_forward_turn(front_distances):
 
   reached = False
   close_front = False
@@ -18,14 +14,8 @@ def move_forward_turn(front_distances, goal_yaw):
       close_front = True
       break
         
-  actual_yaw = HAL.getPose3d().yaw
-  
-  diff_yaw = actual_yaw - goal_yaw
-  
-  #print("AAAdiff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances), close_front, min(front_distances))
-  
-  if(abs(actual_yaw) >= goal_yaw and not close_front):
-    
+  if(not close_front):
+
     HAL.setW(-5.0)
     HAL.setV(1.0)
     
@@ -35,10 +25,7 @@ def move_forward_turn(front_distances, goal_yaw):
   return reached
   
   
-  
-#def move_back_turn(back_distances, front_distances, goal_yaw):
-
-def move_back_turn(back_distances, goal_yaw):
+def move_back_turn(back_distances):
 
   reached = False
   close_back = False
@@ -48,18 +35,7 @@ def move_back_turn(back_distances, goal_yaw):
       close_back = True
       break
         
-  #print(np.mean(back_distances), np.mean(front_distances))
-   
-  actual_yaw = HAL.getPose3d().yaw
-  
-  #print("actual_yaw: ", actual_yaw,"back: ", np.mean(back_distances), "front: ", np.mean(front_distances))
-      
-  diff_yaw = actual_yaw - goal_yaw
-  
-  #print("diff_yaw: ", diff_yaw,"back: ", np.mean(back_distances), "front: ", min(back_distances), close_back)
-  
-  if(abs(diff_yaw) >= 0.1 and not close_back):
-  #if(abs(actual_yaw) >= goal_yaw and np.mean(back_distances) > 1.0):
+  if(not close_back):
 
     HAL.setW(-5.0)
     HAL.setV(-2.0)
@@ -91,9 +67,7 @@ def turn(init_yaw, angle):
 
   reached = False
 
-
   actual_yaw = HAL.getPose3d().yaw
-      
   diff_yaw = actual_yaw - init_yaw
   
   if(abs(diff_yaw) <= angle):
@@ -105,6 +79,7 @@ def turn(init_yaw, angle):
     reached = True
     
   return reached
+    
     
 def move_ahead(init_y_pose, distance):
   
@@ -149,11 +124,11 @@ def find_space(laser, betha):
       
   else:
 
-    print("Hueco encontrado")
+    print("Space found")
     reached = True
 
-    
   return reached
+
 
 def align_car(difference, dis, aligned_start_time):
   
@@ -165,40 +140,41 @@ def align_car(difference, dis, aligned_start_time):
     if aligned_start_time is None:
       # Initial timestamp 
       aligned_start_time = time.time()
-      print("Alineado.")
+      print("Aligned.")
       
     else:
       # check if it has been align in specific time
       elapsed_time = time.time() - aligned_start_time
       if elapsed_time >= aligned_duration_threshold:
-        print(f"Permaneció alineado durante {aligned_duration_threshold} segundos. Pasar al siguiente estado.")
+        print(f"Stayed aligned along {aligned_duration_threshold} secs. Go to next step.")
 
         reached = True
             
       else:
-        print(f"Permaneciendo alineado ({elapsed_time:.2f} segundos).")
+        print(f"Stay align ({elapsed_time:.2f} secs).")
     
     HAL.setW(0.0)
     HAL.setV(0.0)
-    #reached = True
+
   else:
-    # No está alineado, reiniciar la marca de tiempo
+    # if not align, restart timestamp
     aligned_start_time = None
 
     if difference < 0:
-      print("Girado hacia la izquierda.")
+      print("Turned to the left.")
       HAL.setW(-1.0)
       HAL.setV(0.5)
 
     else:
-      print("Girado hacia la derecha.")
+      print("Turned to the right.")
       HAL.setW(1.0)
       HAL.setV(0.5)
   
   return reached, aligned_start_time
-        
+  
+      
 def get_distances_to_car(laser, init_angle, end_angle):
-
+  
   values = []
   for dist , angle in laser:
         
@@ -207,6 +183,7 @@ def get_distances_to_car(laser, init_angle, end_angle):
       values.append(y)
 
   return values
+
 
 def compare_sides(values):
 
@@ -221,6 +198,7 @@ def compare_sides(values):
   diff = sum_side_left - sum_side_right
   
   return diff
+
 
 def calculate_std(values):
   return np.std(values)
@@ -250,6 +228,7 @@ def parse_laser_data(laser_data):
           
     return laser
    
+
 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
 # states
@@ -280,6 +259,7 @@ angle_turn = 0.6
 distance_back = 5.0 
 
 estado = 3
+goal_yaw = 0.0
 
 while True:
     
@@ -345,32 +325,31 @@ while True:
         
       park_move_3_4 = move_back(distances_back_cars, init_x_pose, distance_back)
       
-      
-  
+    # STATE 6 AND 7: MOVES TO PARK
     if park_move_3_4: 
+      
       park_move_2 = False  
       actual_yaw = HAL.getPose3d().yaw
-      diff_yaw = actual_yaw - 0.0
+      diff_yaw = actual_yaw - goal_yaw
     
-      if diff_yaw >= 0.1:
+      if diff_yaw >= 0.05:
         
-        #print(estado)
         if(estado == 3):
 
-          if(move_back_turn(distances_back_cars, 0.0)):
+          if(move_back_turn(distances_back_cars)):
             HAL.setV(0.0)
             HAL.setW(0.0)
             estado = 4
         else:    
-
-          if(move_forward_turn(distances_front_cars, 0.0)):
+          
+          if(move_forward_turn(distances_front_cars)):
 
             HAL.setV(0.0)
             HAL.setW(0.0)
             estado = 3
             
       else:
-        # Si la diferencia de orientación es menor a 0.1, detener el movimiento
+        
         park_move_3_4 = False
         HAL.setV(0.0)
         HAL.setW(0.0)
