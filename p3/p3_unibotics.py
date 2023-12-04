@@ -47,20 +47,20 @@ def move_back_turn(back_distances):
   
 
 def move_back(laser_distances, init_x_pose, distance):
-    reached = False
-    close = False
+  reached = False
+  close = False
 
-    actual_x_pose = HAL.getPose3d().x
-    diff_x_pose = actual_x_pose - init_x_pose
+  actual_x_pose = HAL.getPose3d().x
+  diff_x_pose = actual_x_pose - init_x_pose
 
-    if(np.mean(laser_distances) >= 1.0 and abs(diff_x_pose) <= distance):
+  if(np.mean(laser_distances) >= 1.0 and abs(diff_x_pose) <= distance):
 
-        HAL.setV(-1.0)
-        HAL.setW(0.0)
-    else:
-        reached = True
+    HAL.setV(-1.0)
+    HAL.setW(0.0)
+  else:
+    reached = True
   
-    return reached
+  return reached
 
 
 def turn(init_yaw, angle):
@@ -214,19 +214,18 @@ def get_betha(a, b):
 
 def parse_laser_data(laser_data):
   
-    laser = []
-    len_laser = len(laser_data.values)
+  laser = []
 
-    # store values if length is different from 0
-    if(laser_data.values):
-      for i in range(180):
+  # store values if length is different from 0
+  if(laser_data.values):
+    for i in range(180):
         # if value is inside of the minimum and maximun 
-        if(laser_data.minRange < laser_data.values[i] and laser_data.values[i] < laser_data.maxRange):
-          dist = laser_data.values[i]
-          angle = math.radians(i)
-          laser += [(dist, angle)]
+      if(laser_data.minRange < laser_data.values[i] and laser_data.values[i] < laser_data.maxRange):
+        dist = laser_data.values[i]
+        angle = math.radians(i)
+        laser += [(dist, angle)]
           
-    return laser
+  return laser
    
 
 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
@@ -237,12 +236,7 @@ find = False
 park_move_0 = False
 park_move_1 = False
 park_move_2 = False
-
 park_move_3_4 = False
-
-park_move_3 = True
-park_move_4 = False
-stop = False
 
 # square defined to find space
 y = 7
@@ -284,7 +278,6 @@ while True:
       dis = calculate_std(distances_right_cars)
       difference = compare_sides(distances_right_cars)
       
-      print(dis, difference)
       find, aligned_start_time = align_car(difference, dis, aligned_start_time)
      
     # STATE 2: FIND SPACE
@@ -353,5 +346,6 @@ while True:
         park_move_3_4 = False
         HAL.setV(0.0)
         HAL.setW(0.0)
+
 
   
