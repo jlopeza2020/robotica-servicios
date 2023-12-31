@@ -87,16 +87,29 @@ def plan():
 #  ax.axis(xmin=dimensions[0], xmax=dimensions[2], ymin=dimensions[1], ymax=dimensions[3])
 #  ax.add_patch(plt.Circle((obstacle[0], obstacle[1]), radius=obstacle[2]))
 
-  plt.show()
+  #plt.show()
 
 #if __name__ == "__main__":
-dimensions = [0, 0, 10, 10] 
-obstacle = [5.5, 5.5, 1]   # [x, y, radius] # obtienen del mapa
-plan()
+#dimensions = [0, 0, 10, 10] 
+#obstacle = [5.5, 5.5, 1]   # [x, y, radius] # obtienen del mapa
+#plan()
   
 
-#rgba_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
+rgba_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
+height, width, channels = rgba_image.shape
 
+map_x_min, map_y_min = 0, 0
+map_x_max, map_y_max = width, height
+
+state_space = ob.RealVectorStateSpace(2)
+bounds = ob.RealVectorBounds(2)
+bounds.setLow(0, map_x_min)
+bounds.setLow(1, map_y_min)
+bounds.setHigh(0, map_x_max)
+bounds.setHigh(1, map_y_max)
+state_space.setBounds(bounds)
+
+#print("Width:", width, "Height:", height, "Channels:", channels)
 # modificaciones ppm...
 # el mapa se va actualizando por si solo y no deja sacar la regresión lineal
 # hacer la regesión lineal  (de 3d a 2 d y viceversa)
