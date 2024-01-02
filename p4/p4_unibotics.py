@@ -10,6 +10,20 @@ from math import sqrt
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def extract_obstacles(image): 
+  
+  obstacles = []
+  
+  for i in range(0, height-1):
+    for j in range(0, width-1):
+    
+      if(image[i][j][0] < 0.5 and image[i][j][1] < 0.5 and image[i][j][2] < 0.5):
+    
+        obstacles.append([i,j])
+        
+  return obstacles
+  
 # from meter to pixel 
 def rw2map(x_rw, y_rw):
   x_map = 139.5 - 20.515*x_rw
@@ -17,7 +31,7 @@ def rw2map(x_rw, y_rw):
   
   return (round(y_map),round(x_map))
 
-"""
+
 def isStateValid(state):
   
   x = state.getX()
@@ -88,7 +102,7 @@ def create_numpy_path(states):
         array[i][0] = float(lines[i].split(" ")[0])
         array[i][1] = float(lines[i].split(" ")[1])
     return array
-"""
+
 
 # GET IMAGE
 rgb_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
@@ -96,23 +110,28 @@ kernel = np.ones((5, 5), np.uint8)
 # thick obstacles
 rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
-# height = 279, width = 415
+# height map = 279, width  mao = 415
 height, width, channels = rgb_image.shape
 
-# define obstacles
-obstacles = []
-counter = 0
-for i in range(0, height-1):
-  for j in range(0, width-1):
+
+dimensions = [0, 0, 279, 415] 
+obstacles = extract_obstacles(rgb_image)
+plan()
+
+# iterate over the image and set pixels like [0.0,0.0,0.0] (black)  as obstacles 
+#for i in range(0, height-1):
+  #for j in range(0, width-1):
     
+  #  if(rgb_image[i][j][0] < 0.5 and rgb_image[i][j][1] < 0.5 and rgb_image[i][j][2] < 0.5):
     
-    if(rgb_image[i][j][0] < 0.5 and rgb_image[i][j][1] < 0.5 and rgb_image[i][j][2] < 0.5):
-    
-      obstacles.append([i,j])
-      counter += 1
+  #    obstacles.append([i,j])
       
-print(counter)
-print(obstacles)      # Define the top-left and bottom-right corners of the 
+# SET DIMENSION IN PIXELS
+#dimensions = [0, 0, 279, 415] 
+
+      
+#print(counter)
+#print(obstacles)      # Define the top-left and bottom-right corners of the 
       #guardas las coordenadas 
       
 
