@@ -11,87 +11,102 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def invert_array(array):
+  
+    length = len(array)
+    inverted_array = np.zeros((length, 2))
+    #array = np.zeros((length, 2))
+    for i in range(length):
+        inverted_array[i][0] = array[i][1]
+        inverted_array[i][1] = array[i][0]
+    
+    return inverted_array   
+
 def extract_obstacles(image): 
-  
-  obstacles = []
-  
-  for i in range(0, height-1):
-    for j in range(0, width-1):
-    
-      if(image[i][j][0] < 0.5 and image[i][j][1] < 0.5 and image[i][j][2] < 0.5):
-    
-        obstacles.append([i,j])
-        
-  return obstacles
-  
+    obstacles = []
+    height, width, _ = image.shape  # Get image dimensions
+    for i in range(0, height-1):
+        for j in range(0, width-1):
+            if image[i][j][0] < 0.5 and image[i][j][1] < 0.5 and image[i][j][2] < 0.5:
+                obstacles.append([i, j])
+    return obstacles
+
 # from meter to pixel 
 def rw2map(x_rw, y_rw):
-  x_map = 139.5 - 20.515*x_rw
-  y_map = 207.5 -20.16*y_rw
-  
-  return (round(y_map),round(x_map))
-
+    x_map = 139.5 - 20.515 * x_rw
+    y_map = 207.5 - 20.16 * y_rw
+    return (round(y_map), round(x_map))
 
 def isStateValid(state):
-  
-  x = state.getX()
-  y = state.getY()
-  
-  # if distance actual to objective is slower than 0.5 is invalid state 
-  if sqrt(pow(x - obstacle[0], 2) + pow(y - obstacle[1], 2)) - obstacle[2] <= 0.5:
-    return False
-  return True
-  
+    x = state.getX()
+    y = state.getY()
+
+    # Check if the state is inside any obstacle
+    for obstacle in obstacles:
+        obstacle_x, obstacle_y = rw2map(*obstacle)
+        distance = sqrt(pow(x - obstacle_x, 2) + pow(y - obstacle_y, 2))
+
+        if distance < 0.5:  # Adjust this threshold as needed
+            return False
+    return True
+
 def plan():
-  # Construct the robot state space in which we're planning. We're
-  # planning in [0,1]x[0,1], a subset of R^2.
-  space = ob.SE2StateSpace()
+    # Construct the robot state space in which we're planning.
+    space = ob.SE2StateSpace()
 
-  # set state space's lower and upper bounds
-  bounds = ob.RealVectorBounds(2)
-  bounds.setLow(0, dimensions[0])
-  bounds.setLow(1, dimensions[1])
-  bounds.setHigh(0, dimensions[2])
-  bounds.setHigh(1, dimensions[3])
-  space.setBounds(bounds)
+    # Set state space's lower and upper bounds
+    bounds = ob.RealVectorBounds(2)
+    bounds.setLow(0, dimensions[0])
+    bounds.setLow(1, dimensions[1])
+    bounds.setHigh(0, dimensions[2])
+    bounds.setHigh(1, dimensions[3])
+    space.setBounds(bounds)
 
-  # construct a space information instance for this state space
-  si = ob.SpaceInformation(space)
-  # set state validity checking for this space
-  si.setStateValidityChecker(ob.StateValidityCheckerFn(isStateValid))
+    # Construct a space information instance for this state space
+    si = ob.SpaceInformation(space)
+    # Set state validity checking for this space
+    si.setStateValidityChecker(ob.StateValidityCheckerFn(isStateValid))
 
-  # Set our robot's starting and goal state
-  start = ob.State(space)
-  start().setX(0)
-  start().setY(0)
-  start().setYaw(math.pi / 4)
-  goal = ob.State(space)
-  goal().setX(10)
-  goal().setY(10)
-  goal().setYaw(math.pi / 4)
+    y_init, x_init = rw2map(0,0) 
+    y_objective, x_objective = rw2map(3.728,0.579)
+    
+    # Set our robot's starting and goal state
+    start = ob.State(space)
+    start().setX(x_init)
+    start().setY(y_init)
+    start().setYaw(math.pi / 4)
+    goal = ob.State(space)
+    goal().setX(x_objective)
+    goal().setY(y_objective)
+    goal().setYaw(math.pi / 4)
 
-  # create a problem instance
-  pdef = ob.ProblemDefinition(si)
+    # Create a problem instance
+    pdef = ob.ProblemDefinition(si)
 
-  # set the start and goal states
-  pdef.setStartAndGoalStates(start, goal)
+    # Set the start and goal states
+    pdef.setStartAndGoalStates(start, goal)
 
-  # create a planner for the defined space
-  planner = og.RRTConnect(si)
+    # Create a planner for the defined space
+    planner = og.RRTConnect(si)
 
-  # set the problem we are trying to solve for the planner
-  planner.setProblemDefinition(pdef)
+    # Set the problem we are trying to solve for the planner
+    planner.setProblemDefinition(pdef)
 
-  # perform setup steps for the planner
-  planner.setup()
+    # Perform setup steps for the planner
+    planner.setup()
 
-  # solve the problem and print the solution if exists
-  solved = planner.solve(1.0)
-  if solved:
-    print(pdef.getSolutionPath())
-    #plot_path(pdef.getSolutionPath(), dimensions)
-    matrix = solution_path.printAsMatrix()
-    path = create_numpy_path(matrix)
+    # Solve the problem and print the solution if it exists
+    solved = planner.solve(1.0)
+    if solved:
+        solution_path = pdef.getSolutionPath()
+        matrix = solution_path.printAsMatrix()
+        path = create_numpy_path(matrix)
+        print(path)
+        return path
+    else: 
+        print("NO SOLUTION FOUND")
+        
+    #return path 
 
 def create_numpy_path(states):
     lines = states.splitlines()
@@ -103,20 +118,23 @@ def create_numpy_path(states):
         array[i][1] = float(lines[i].split(" ")[1])
     return array
 
-
 # GET IMAGE
 rgb_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
+
 kernel = np.ones((5, 5), np.uint8) 
-# thick obstacles
+# Thick obstacles
 rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
-# height map = 279, width  mao = 415
+# Image dimensions
 height, width, channels = rgb_image.shape
 
-
+# Set dimensions in pixels
 dimensions = [0, 0, 279, 415] 
+# Extract obstacles from the image
 obstacles = extract_obstacles(rgb_image)
-plan()
+# Plan the path
+solution_path = plan()
+
 
 # iterate over the image and set pixels like [0.0,0.0,0.0] (black)  as obstacles 
 #for i in range(0, height-1):
@@ -175,12 +193,33 @@ plan()
 y_init, x_init = rw2map(0,0) 
 y_objective, x_objective = rw2map(3.728,0.579)
 
-print(y_init, x_init)   
-print(y_objective, x_objective)
+#print(y_init, x_init)   
+#print(y_objective, x_objective)
 
 #array = [[206,140], [196,90], [197,62]]
-array = [[y_init, x_init], [y_objective, x_objective]]
-GUI.showPath(array)
+#array = [[y_init, x_init], [y_objective, x_objective]]
+
+# = np.transpose(solution_path).tolist()
+
+#print("soy invertido  " + str(inverted_array))
+
+#aux_Array = []
+
+#print(len(solution_path))
+"""
+length = len(solution_path)
+inverted_array = np.zeros((length, 2))
+array = np.zeros((length, 2))
+for i in range(length):
+        inverted_array[i][0] = solution_path[i][1]
+        inverted_array[i][1] = solution_path[i][0]
+    
+print(inverted_array)   
+"""
+inverted_solution = invert_array(solution_path)
+print(inverted_solution)
+
+GUI.showPath(inverted_solution)
 
 # 
 while True:
