@@ -15,7 +15,7 @@ def invert_array(array):
   
     length = len(array)
     inverted_array = np.zeros((length, 2))
-    #array = np.zeros((length, 2))
+
     for i in range(length):
         inverted_array[i][0] = array[i][1]
         inverted_array[i][1] = array[i][0]
@@ -25,9 +25,10 @@ def invert_array(array):
 def extract_obstacles(image): 
     obstacles = []
     height, width, _ = image.shape  # Get image dimensions
-    for i in range(0, height-1):
-        for j in range(0, width-1):
-            if image[i][j][0] < 0.5 and image[i][j][1] < 0.5 and image[i][j][2] < 0.5:
+    for i in range(height):
+        for j in range(width):
+      
+            if image[i][j][0] < 0.5 and image[i][j][1] < 0.5  and image[i][j][2] < 0.5:
                 obstacles.append([i, j])
     return obstacles
 
@@ -38,15 +39,20 @@ def rw2map(x_rw, y_rw):
     return (round(y_map), round(x_map))
 
 def isStateValid(state):
+  
+    #print(state)
     x = state.getX()
+    #print(x)
     y = state.getY()
+    #print(y)
 
     # Check if the state is inside any obstacle
     for obstacle in obstacles:
+        #print(rw2map(*obstacle))
         obstacle_x, obstacle_y = rw2map(*obstacle)
         distance = sqrt(pow(x - obstacle_x, 2) + pow(y - obstacle_y, 2))
 
-        if distance < 0.5:  # Adjust this threshold as needed
+        if distance < 0.8:  
             return False
     return True
 
@@ -61,7 +67,7 @@ def plan():
     bounds.setHigh(0, dimensions[2])
     bounds.setHigh(1, dimensions[3])
     space.setBounds(bounds)
-
+    
     # Construct a space information instance for this state space
     si = ob.SpaceInformation(space)
     # Set state validity checking for this space
@@ -87,7 +93,32 @@ def plan():
     pdef.setStartAndGoalStates(start, goal)
 
     # Create a planner for the defined space
-    planner = og.RRTConnect(si)
+    # tiene muchos que se quedan en los obstáculos 
+    #planner = og.RRTConnect(si)
+    # solo da el punto de entrada y salida
+    #planner = og.PRM(si)
+    # no todos los puntos llegan al objetivo
+    ##planner = og.EST(si)
+    # MALLL 
+    #planner = og.KPIECE1(si)
+    # NO CAMBIA SOLO PRINCIPIO Y FIN
+    #planner = og.LazyPRM(si)
+    # MUCHOS PUNTOS Y CAMINO MUY ENREVESADO
+    #planner = og.SBL(si)
+    # NO VALID SOLUTION FOUND 
+    #planner = og.FMT(si)
+    # PUNTO DE INICIO Y FINAL
+    #planner = og.ABITstar(si)
+    #planner = og.PRMstar(si)
+    # NO LLEGA AL OBJETIVO
+    #planner = og.InformedRRTstar(si)
+    
+
+
+
+
+
+
 
     # Set the problem we are trying to solve for the planner
     planner.setProblemDefinition(pdef)
@@ -101,12 +132,11 @@ def plan():
         solution_path = pdef.getSolutionPath()
         matrix = solution_path.printAsMatrix()
         path = create_numpy_path(matrix)
-        print(path)
+        #print(path)
         return path
     else: 
         print("NO SOLUTION FOUND")
         
-    #return path 
 
 def create_numpy_path(states):
     lines = states.splitlines()
@@ -118,110 +148,65 @@ def create_numpy_path(states):
         array[i][1] = float(lines[i].split(" ")[1])
     return array
 
-# GET IMAGE
+# get image
 rgb_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
 
-kernel = np.ones((5, 5), np.uint8) 
-# Thick obstacles
-rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
-# Image dimensions
-height, width, channels = rgb_image.shape
+#kernel = np.ones((5, 5), np.uint8) 
+# Thick obstacles
+#rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
 # Set dimensions in pixels
 dimensions = [0, 0, 279, 415] 
 # Extract obstacles from the image
 obstacles = extract_obstacles(rgb_image)
 # Plan the path
+"""
 solution_path = plan()
 
 
-# iterate over the image and set pixels like [0.0,0.0,0.0] (black)  as obstacles 
-#for i in range(0, height-1):
-  #for j in range(0, width-1):
-    
-  #  if(rgb_image[i][j][0] < 0.5 and rgb_image[i][j][1] < 0.5 and rgb_image[i][j][2] < 0.5):
-    
-  #    obstacles.append([i,j])
-      
-# SET DIMENSION IN PIXELS
-#dimensions = [0, 0, 279, 415] 
-
-      
-#print(counter)
-#print(obstacles)      # Define the top-left and bottom-right corners of the 
-      #guardas las coordenadas 
-      
-
-#map_x_min, map_y_min = 0, 0
-#map_x_max, map_y_max = width, height
-
-#state_space = ob.RealVectorStateSpace(2)
-#bounds = ob.RealVectorBounds(2)
-#bounds.setLow(0, map_x_min)
-#bounds.setLow(1, map_y_min)
-#bounds.setHigh(0, map_x_max)
-#bounds.setHigh(1, map_y_max)
-#state_space.setBounds(bounds)
-
-
-# para x_map e y_map hay que hacer round
 # expected path to obtain
 # init point: [206,140] -> [0,0]
 # intermediate point : [196,90]
 # goal point: [197,62] -> [3.728, 0.579]
 
-  # Iterate through the image and draw rectangles
- # for i in range(0, width):
-#    for j in range(0, height):
-      # Define the top-left and bottom-right corners of the 
-      #guardas las coordenadas 
-      
-# trabaja en metros y lo pasa a pixeles para el path          
-          
-# obtener el path 
-# moverse 
-
-# real world dimensions 
-#dimensions = [0, 0, 20.62, 13.6] 
-#obstacle = [5.5, 5.5, 1]   # [x, y, radius] # poner los obstáculos 
-
-
 #print(HAL.getPose3d().x,HAL.getPose3d().y)
 
-# init point
 y_init, x_init = rw2map(0,0) 
 y_objective, x_objective = rw2map(3.728,0.579)
 
-#print(y_init, x_init)   
-#print(y_objective, x_objective)
-
-#array = [[206,140], [196,90], [197,62]]
-#array = [[y_init, x_init], [y_objective, x_objective]]
-
-# = np.transpose(solution_path).tolist()
-
-#print("soy invertido  " + str(inverted_array))
-
-#aux_Array = []
-
-#print(len(solution_path))
-"""
-length = len(solution_path)
-inverted_array = np.zeros((length, 2))
-array = np.zeros((length, 2))
-for i in range(length):
-        inverted_array[i][0] = solution_path[i][1]
-        inverted_array[i][1] = solution_path[i][0]
-    
-print(inverted_array)   
-"""
 inverted_solution = invert_array(solution_path)
 print(inverted_solution)
 
 GUI.showPath(inverted_solution)
+"""
 
-# 
 while True:
     #HAL.setV(3)
     #print(HAL.getPose3d().x,HAL.getPose3d().y)
+    
+    #obstacles = extract_obstacles(rgb_image)
+    # Plan the path
+    solution_path = plan()
+
+
+    # expected path to obtain
+    # init point: [206,140] -> [0,0]
+    # intermediate point : [196,90]
+    # goal point: [197,62] -> [3.728, 0.579]
+
+    #print(HAL.getPose3d().x,HAL.getPose3d().y)
+
+    #y_init, x_init = rw2map(0,0) 
+    #y_objective, x_objective = rw2map(3.728,0.579)
+    if solution_path is not None:
+        inverted_solution = invert_array(solution_path)
+        print(inverted_solution)
+        GUI.showPath(inverted_solution)
+    else:
+      print("No valid solution found.")
+    
+    #inverted_solution = invert_array(solution_path)
+    #print(inverted_solution)
+    
+    #GUI.showPath(inverted_solution)
