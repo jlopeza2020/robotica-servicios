@@ -18,6 +18,29 @@ SH4Y = -4.827
 SH5Y = -6.781
 SH6Y = -8.665
 
+def add_intermediate_points(path):
+    # Add intermediate points to the path
+    num_points = len(path)
+    intermediate_points = []
+
+    for i in range(num_points - 1):
+        # Add the original point
+        intermediate_points.append(path[i])
+
+        # Calculate and add intermediate points
+        delta_x = (path[i + 1][0] - path[i][0]) / 10.0  
+        delta_y = (path[i + 1][1] - path[i][1]) / 10.0
+
+        for j in range(1, 10):  # Add 9 intermediate points between each pair of original points
+            intermediate_x = path[i][0] + j * delta_x
+            intermediate_y = path[i][1] + j * delta_y
+            intermediate_points.append([intermediate_x, intermediate_y])
+
+    # Add the last point in the original path
+    intermediate_points.append(path[-1])
+
+    return np.array(intermediate_points)
+    
 def invert_array(array):
   
     length = len(array)
@@ -147,7 +170,7 @@ dimensions = [0, 0, 279, 415]
 # Extract obstacles from the image
 obstacles = extract_obstacles(rgb_image)
 
-
+"""
 solution_path = None
 while solution_path is None: 
   solution_path = plan()
@@ -158,10 +181,37 @@ while solution_path is None:
     GUI.showPath(inverted_solution)
   else:
     print("No valid solution found.")
+"""
+solution_path = None
+while solution_path is None: 
+    solution_path = plan()
 
-
-
+    if solution_path is not None:
+        inverted_solution = invert_array(solution_path)
+        #print(inverted_solution)
+        intermediate_solution = add_intermediate_points(inverted_solution)
+        #print("intermediate"+ str(intermediate_solution))
+        GUI.showPath(intermediate_solution)
+    else:
+        print("No valid solution found.")
+        
+go_to_pallet = True
+path_pos = 0
 while True:
+  
+    current_3d_x = HAL.getPose3d().x 
+    current_3d_y = HAL.getPose3d().y
+    
+    if (go_to_pallet): 
+    
+      if(path_pos < len(intermediate_solution)):
+      
+      # añadir lógica de movimiento
+    
+      else: 
+        go_to_pallet = False
+      
+    
     """
     solution_path = plan()
 
