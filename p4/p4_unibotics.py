@@ -178,18 +178,6 @@ dimensions = [0, 0, 279, 415]
 # Extract obstacles from the image
 obstacles = extract_obstacles(rgb_image)
 
-"""
-solution_path = None
-while solution_path is None: 
-  solution_path = plan()
-
-  if solution_path is not None:
-    inverted_solution = invert_array(solution_path)
-    print(inverted_solution)
-    GUI.showPath(inverted_solution)
-  else:
-    print("No valid solution found.")
-"""
 solution_path = None
 while solution_path is None: 
     solution_path = plan()
@@ -198,7 +186,6 @@ while solution_path is None:
         inverted_solution = invert_array(solution_path)
         print(inverted_solution)
         complete_path_map = add_intermediate_points(inverted_solution)
-        #print("intermediate"+ str(intermediate_solution))
         print(complete_path_map)
         GUI.showPath(complete_path_map)
     else:
@@ -206,11 +193,12 @@ while solution_path is None:
 
 # structure [x_rw, y_rw] 
 complete_path_rw = convert_path_to_rw(complete_path_map) 
-print(complete_path_rw)
+#print(complete_path_rw)
 
-Kp = 1.5
-pospos_move_coords = 1
+Kp = 0.5
+pos_move_coords = 1
 phase_go_sh = True
+has_reached = False
 while True:
   
     current_3d_x = HAL.getPose3d().x 
@@ -230,6 +218,11 @@ while True:
       objective_angle = math.atan2(diff_y, diff_x)
     
       angle_diff = current_angle - objective_angle
+      
+
+      print("current x: " + str(current_3d_x), "objective x:" + str(complete_path_rw[pos_move_coords][0]), "diff_x" + str(diff_x))
+
+      print("current Angle " + str(current_angle), "objective angle: " + str(objective_angle),  "diff_angle :" + str(angle_diff))
     
         # Navigation logic 
       if (angle_diff > math.pi):
@@ -238,15 +231,15 @@ while True:
         angle_diff +=2*math.pi
      
       if(angle_diff > 0):
-        HAL.setW(0.5 + Kp*angle_diff)
+        HAL.setW(0.25 + Kp*angle_diff)
       else: 
-        HAL.setW(-0.5 - Kp*angle_diff)
+        HAL.setW(-0.25 - Kp*angle_diff)
       
         # means that it is so close that it goes forward 
       if abs(angle_diff) < 0.1:
-        HAL.setV(1.0)
+        HAL.setV(0.25)
       else:
-        HAL.setV(0.0)
+        HAL.setV(0.05)
       
       if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
         has_reached = True
@@ -258,6 +251,8 @@ while True:
           pos_move_coords = pos_move_coords + 1
           has_reached = False
         else:
+          HAL.setW(0.0)
+          HAL.setV(0.0)
           phase_go_sh = False
       
       
