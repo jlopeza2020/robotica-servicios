@@ -143,7 +143,7 @@ def plan():
     planner.setup()
     
     # Solve the problem and print the solution if it exists
-    solved = planner.solve(1.0)
+    solved = planner.solve(2.0)
     if solved:
       solution_path = pdef.getSolutionPath()
       if solution_path:
@@ -169,7 +169,7 @@ def create_numpy_path(states):
 # get image
 rgb_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
 
-kernel = np.ones((6, 6), np.uint8) 
+kernel = np.ones((7, 7), np.uint8) 
 # Thick obstacles
 rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
@@ -184,19 +184,20 @@ while solution_path is None:
 
     if solution_path is not None:
         inverted_solution = invert_array(solution_path)
-        print(inverted_solution)
+        #print(inverted_solution)
         complete_path_map = add_intermediate_points(inverted_solution)
-        print(complete_path_map)
+        #print(complete_path_map)
         GUI.showPath(complete_path_map)
     else:
         print("No valid solution found.")
 
 # structure [x_rw, y_rw] 
 complete_path_rw = convert_path_to_rw(complete_path_map) 
+
 #print(complete_path_rw)
 
 Kp = 0.5
-pos_move_coords = 1
+pos_move_coords = 0
 phase_go_sh = True
 has_reached = False
 while True:
@@ -219,55 +220,39 @@ while True:
     
       angle_diff = current_angle - objective_angle
       
-
-      print("current x: " + str(current_3d_x), "objective x:" + str(complete_path_rw[pos_move_coords][0]), "diff_x" + str(diff_x))
-
-      print("current Angle " + str(current_angle), "objective angle: " + str(objective_angle),  "diff_angle :" + str(angle_diff))
-    
-        # Navigation logic 
+      # Navigation logic 
       if (angle_diff > math.pi):
         angle_diff -= 2*math.pi
       elif(angle_diff < -math.pi):
         angle_diff +=2*math.pi
      
       if(angle_diff > 0):
-        HAL.setW(0.25 + Kp*angle_diff)
+        HAL.setW(0.2 + Kp*angle_diff)
       else: 
-        HAL.setW(-0.25 - Kp*angle_diff)
+        HAL.setW(-0.2 - Kp*angle_diff)
       
         # means that it is so close that it goes forward 
       if abs(angle_diff) < 0.1:
-        HAL.setV(0.25)
+        HAL.setV(0.20)
       else:
-        HAL.setV(0.05)
+        HAL.setV(0.02)
       
       if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
         has_reached = True
    
       if(has_reached): 
       
-        if(pos_move_coords < len(complete_path_rw)):
+        if(pos_move_coords < (len(complete_path_rw)-1)):
         
           pos_move_coords = pos_move_coords + 1
           has_reached = False
+
         else:
           HAL.setW(0.0)
           HAL.setV(0.0)
           phase_go_sh = False
-      
-      
-      
-    #if
-    """
-    solution_path = plan()
-
-    if solution_path is not None:
-        inverted_solution = invert_array(solution_path)
-        print(inverted_solution)
-        GUI.showPath(inverted_solution)
-    else:
-      print("No valid solution found.")
-    """
+          
+  
     ## vaya al objetivo 
     ## coja la estantería 
     ## vaya la destino (ya cambia su dimensión) 
