@@ -18,6 +18,9 @@ SH4Y = -4.827
 SH5Y = -6.781
 SH6Y = -8.665
 
+ORIGIN_X = 0.0
+ORIGIN_Y = 0.0
+
 
 def stop():
   HAL.setW(0.0)
@@ -48,7 +51,7 @@ def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current
       
     # means that it is so close that it goes forward 
     if abs(angle_diff) < 0.1:
-      HAL.setV(0.20)
+      HAL.setV(0.10)
     else:
       HAL.setV(0.02)
       
@@ -108,7 +111,7 @@ def extract_obstacles(image):
       
             if image[i][j][0] < 0.5 and image[i][j][1] < 0.5  and image[i][j][2] < 0.5:
                 # x, y ,radius 
-                obstacles.append([i, j, 1])
+                obstacles.append([i, j, 2])
     return obstacles
 
 # from meter to pixel 
@@ -122,6 +125,23 @@ def map2rw(x_map, y_map):
     y_rw =  10.310 -0.05* y_map
     return (y_rw, x_rw)
 
+
+def isStateValid(state):
+    x = state.getX()
+    y = state.getY()
+
+    # Check if the state is inside any obstacle or collides with the robot
+    for obstacle in obstacles:
+        obstacle_x, obstacle_y, obstacle_radius = obstacle
+        if (
+            sqrt(pow(x - obstacle_x, 2) + pow(y - obstacle_y, 2)) - obstacle_radius <= 0
+            or abs(x - robot_width / 2) < 0 or abs(x - dimensions[2] + robot_width / 2) < 0
+            or abs(y - robot_length / 2) < 0 or abs(y - dimensions[3] + robot_length / 2) < 0
+        ):
+            return False
+    return True
+    
+"""
 def isStateValid(state):
   
     x = state.getX()
@@ -133,26 +153,39 @@ def isStateValid(state):
         if sqrt(pow(x - obstacle[0], 2) + pow(y - obstacle[1], 2)) - obstacle[2] <= 0:
           return False
     return True
-
-def plan():
+"""
+# añadir las dimension del robot 
+def plan(origin_x, origin_y, destination_x, destination_y, r_w, r_l):
     # Construct the robot state space in which we're planning.
     space = ob.SE2StateSpace()
 
     # Set state space's lower and upper bounds
+    """
     bounds = ob.RealVectorBounds(2)
     bounds.setLow(0, dimensions[0])
     bounds.setLow(1, dimensions[1])
     bounds.setHigh(0, dimensions[2])
     bounds.setHigh(1, dimensions[3])
+    """
+    
+    bounds = ob.RealVectorBounds(2)
+    # Set state space's lower and upper bounds
+    bounds.setLow(0, dimensions[0] + r_w / 2)  # Adjust for robot width
+    bounds.setLow(1, dimensions[1] + r_l / 2)  # Adjust for robot length
+    bounds.setHigh(0, dimensions[2] - r_w / 2)  # Adjust for robot width
+    bounds.setHigh(1, dimensions[3] - r_l / 2)  # Adjust for robot length
+
     space.setBounds(bounds)
+    
+    
     
     # Construct a space information instance for this state space
     si = ob.SpaceInformation(space)
     # Set state validity checking for this space
     si.setStateValidityChecker(ob.StateValidityCheckerFn(isStateValid))
 
-    y_init, x_init = rw2map(0,0) 
-    y_objective, x_objective = rw2map(SHX,SH1Y)
+    y_init, x_init = rw2map(origin_x,origin_y) 
+    y_objective, x_objective = rw2map(destination_x,destination_y)
     
     # Set our robot's starting and goal state
     start = ob.State(space)
@@ -208,26 +241,28 @@ def create_numpy_path(states):
 # get image
 rgb_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
 
-kernel = np.ones((8, 8), np.uint8) 
+kernel = np.ones((7, 7), np.uint8) 
 # Thick obstacles
 rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
 # Set dimensions in pixels
 dimensions = [0, 0, 279, 415] 
+# set robot dimensions 
+robot_width = 1.0  # meters
+robot_length = 1.0  # meters
+
 # Extract obstacles from the image
 obstacles = extract_obstacles(rgb_image)
 
 solution_path = None
 while solution_path is None: 
     #solution_path = plan(op_x, op_y, obp_x, obp_y)
-    solution_path = plan()
+    solution_path = plan(0,0, SHX, SH2Y, robot_width, robot_length)
 
 
     if solution_path is not None:
         inverted_solution = invert_array(solution_path)
-        #print(inverted_solution)
         complete_path_map = add_intermediate_points(inverted_solution)
-        #print(complete_path_map)
         GUI.showPath(complete_path_map)
     else:
         print("No valid solution found.")
@@ -235,51 +270,25 @@ while solution_path is None:
 # structure [x_rw, y_rw] 
 complete_path_rw = convert_path_to_rw(complete_path_map) 
 
-#print(complete_path_rw)
 
-#Kp = 0.5
 pos_move_coords = 0
 phase_go_sh = True
-has_reached = False
+phase_lift = False 
 while True:
   
     cu_3d_x = HAL.getPose3d().x 
     cu_3d_y = HAL.getPose3d().y
     cu_angle = HAL.getPose3d().yaw
     
+    #print(cu_3d_x, cu_3d_y)
+    
+    
     if(phase_go_sh): 
       
       ob_3d_x =  complete_path_rw[pos_move_coords][0]
       ob_3d_y =  complete_path_rw[pos_move_coords][1]
-      """
-      # go to each point
-      diff_x = complete_path_rw[pos_move_coords][0] - current_3d_x
-      diff_y = complete_path_rw[pos_move_coords][1] - current_3d_y
-    
-      objective_angle = math.atan2(diff_y, diff_x)
-    
-      angle_diff = current_angle - objective_angle
-      
-      # Navigation logic 
-      if (angle_diff > math.pi):
-        angle_diff -= 2*math.pi
-      elif(angle_diff < -math.pi):
-        angle_diff +=2*math.pi
-     
-      if(angle_diff > 0):
-        HAL.setW(0.2 + Kp*angle_diff)
-      else: 
-        HAL.setW(-0.2 - Kp*angle_diff)
-      
-      # means that it is so close that it goes forward 
-      if abs(angle_diff) < 0.1:
-        HAL.setV(0.20)
-      else:
-        HAL.setV(0.02)
-      
-      if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
-        has_reached = True
-     """
+
+      # navigate from current point to objective 
       has_reached = navigate(cu_3d_x, cu_3d_y, ob_3d_x, ob_3d_y, cu_angle)
       
       if(has_reached): 
@@ -291,14 +300,12 @@ while True:
 
         else:
           stop()
-          #HAL.setW(0.0)
-          #HAL.setV(0.0)
           phase_go_sh = False
+          phase_lift = True
           
-  
-    ## vaya al objetivo 
-    ## coja la estantería 
-    ## vaya la destino (ya cambia su dimensión) 
-    ##  deje la estantería 
+    if(phase_lift): 
+      HAL.lift()
+      phase_lift = False
+      
     
     
