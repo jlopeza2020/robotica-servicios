@@ -18,6 +18,45 @@ SH4Y = -4.827
 SH5Y = -6.781
 SH6Y = -8.665
 
+
+def stop():
+  HAL.setW(0.0)
+  HAL.setV(0.0)
+  
+def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current_angle):
+    
+    has_reached = False 
+    Kp = 0.5
+    # go to each point
+    diff_x = objective_3d_x - current_3d_x
+    diff_y = objective_3d_y - current_3d_y
+    
+    objective_angle = math.atan2(diff_y, diff_x)
+    
+    angle_diff = current_angle - objective_angle
+      
+    # Navigation logic 
+    if (angle_diff > math.pi):
+      angle_diff -= 2*math.pi
+    elif(angle_diff < -math.pi):
+      angle_diff +=2*math.pi
+     
+    if(angle_diff > 0):
+      HAL.setW(0.2 + Kp*angle_diff)
+    else: 
+      HAL.setW(-0.2 - Kp*angle_diff)
+      
+    # means that it is so close that it goes forward 
+    if abs(angle_diff) < 0.1:
+      HAL.setV(0.20)
+    else:
+      HAL.setV(0.02)
+      
+    if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
+      has_reached = True
+    
+    return has_reached
+  
 # Function to convert all coordinates from map to real-world
 def convert_path_to_rw(path_map):
     path_rw = []
@@ -169,7 +208,7 @@ def create_numpy_path(states):
 # get image
 rgb_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
 
-kernel = np.ones((7, 7), np.uint8) 
+kernel = np.ones((8, 8), np.uint8) 
 # Thick obstacles
 rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
@@ -180,7 +219,9 @@ obstacles = extract_obstacles(rgb_image)
 
 solution_path = None
 while solution_path is None: 
+    #solution_path = plan(op_x, op_y, obp_x, obp_y)
     solution_path = plan()
+
 
     if solution_path is not None:
         inverted_solution = invert_array(solution_path)
@@ -196,23 +237,22 @@ complete_path_rw = convert_path_to_rw(complete_path_map)
 
 #print(complete_path_rw)
 
-Kp = 0.5
+#Kp = 0.5
 pos_move_coords = 0
 phase_go_sh = True
 has_reached = False
 while True:
   
-    current_3d_x = HAL.getPose3d().x 
-    current_3d_y = HAL.getPose3d().y
-    current_angle = HAL.getPose3d().yaw
+    cu_3d_x = HAL.getPose3d().x 
+    cu_3d_y = HAL.getPose3d().y
+    cu_angle = HAL.getPose3d().yaw
     
     if(phase_go_sh): 
       
-      #if(goal_array_pos < len(complete_path_rw)):
-        
-        # go to each point
-        
-
+      ob_3d_x =  complete_path_rw[pos_move_coords][0]
+      ob_3d_y =  complete_path_rw[pos_move_coords][1]
+      """
+      # go to each point
       diff_x = complete_path_rw[pos_move_coords][0] - current_3d_x
       diff_y = complete_path_rw[pos_move_coords][1] - current_3d_y
     
@@ -231,7 +271,7 @@ while True:
       else: 
         HAL.setW(-0.2 - Kp*angle_diff)
       
-        # means that it is so close that it goes forward 
+      # means that it is so close that it goes forward 
       if abs(angle_diff) < 0.1:
         HAL.setV(0.20)
       else:
@@ -239,7 +279,9 @@ while True:
       
       if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
         has_reached = True
-   
+     """
+      has_reached = navigate(cu_3d_x, cu_3d_y, ob_3d_x, ob_3d_y, cu_angle)
+      
       if(has_reached): 
       
         if(pos_move_coords < (len(complete_path_rw)-1)):
@@ -248,8 +290,9 @@ while True:
           has_reached = False
 
         else:
-          HAL.setW(0.0)
-          HAL.setV(0.0)
+          stop()
+          #HAL.setW(0.0)
+          #HAL.setV(0.0)
           phase_go_sh = False
           
   
