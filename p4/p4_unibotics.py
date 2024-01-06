@@ -44,31 +44,21 @@ def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current
     elif(angle_diff < -math.pi):
       angle_diff +=2*math.pi
     
-    """ 
-    if(angle_diff > 0.0):
-      #HAL.setW(0.2)
-
-      HAL.setW(0.10 + Kp*angle_diff)
-    else: 
-      HAL.setW(-0.10 - Kp*angle_diff)
-      #HAL.setW(-0.2)
-    """  
+    print(angle_diff)
+    
     # means that it is so close that it goes forward 
-    if abs(angle_diff) < 0.3:
-      HAL.setV(0.20)
+    if abs(angle_diff) < 0.5:
+      HAL.setV(0.15)
       HAL.setW(0.0)
     else:
       
       HAL.setV(0.01)
       if(angle_diff > 0.0):
-      #  HAL.setW(0.2)
-      #else: 
-        #HAL.setW(-0.2)
-        HAL.setW(0.10 + Kp*angle_diff)
-      else: 
-        HAL.setW(-0.10 - Kp*angle_diff)
-      #  HAL.setW(-0.2)
       
+        HAL.setW(0.10 - Kp*angle_diff)
+      else: 
+        HAL.setW(-0.10 + Kp*angle_diff)
+
     if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
       has_reached = True
     
