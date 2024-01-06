@@ -29,7 +29,7 @@ def stop():
 def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current_angle):
     
     has_reached = False 
-    Kp = 0.5
+    Kp = 0.25
     # go to each point
     diff_x = objective_3d_x - current_3d_x
     diff_y = objective_3d_y - current_3d_y
@@ -43,17 +43,31 @@ def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current
       angle_diff -= 2*math.pi
     elif(angle_diff < -math.pi):
       angle_diff +=2*math.pi
-     
-    if(angle_diff > 0):
-      HAL.setW(0.2 + Kp*angle_diff)
+    
+    """ 
+    if(angle_diff > 0.0):
+      #HAL.setW(0.2)
+
+      HAL.setW(0.10 + Kp*angle_diff)
     else: 
-      HAL.setW(-0.2 - Kp*angle_diff)
-      
+      HAL.setW(-0.10 - Kp*angle_diff)
+      #HAL.setW(-0.2)
+    """  
     # means that it is so close that it goes forward 
-    if abs(angle_diff) < 0.1:
-      HAL.setV(0.10)
+    if abs(angle_diff) < 0.3:
+      HAL.setV(0.20)
+      HAL.setW(0.0)
     else:
-      HAL.setV(0.02)
+      
+      HAL.setV(0.01)
+      if(angle_diff > 0.0):
+      #  HAL.setW(0.2)
+      #else: 
+        #HAL.setW(-0.2)
+        HAL.setW(0.10 + Kp*angle_diff)
+      else: 
+        HAL.setW(-0.10 - Kp*angle_diff)
+      #  HAL.setW(-0.2)
       
     if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
       has_reached = True
@@ -109,7 +123,7 @@ def extract_obstacles(image):
     for i in range(height):
         for j in range(width):
       
-            if image[i][j][0] < 0.5 and image[i][j][1] < 0.5  and image[i][j][2] < 0.5:
+            if image[i][j][0] < 0.7 and image[i][j][1] < 0.7  and image[i][j][2] < 0.7:
                 # x, y ,radius 
                 obstacles.append([i, j, 2])
     return obstacles
@@ -126,7 +140,7 @@ def map2rw(x_map, y_map):
     return (y_rw, x_rw)
 
 
-def isStateValid(state):
+def isStateValid(state, robot_width, robot_length):
     x = state.getX()
     y = state.getY()
 
@@ -182,7 +196,9 @@ def plan(origin_x, origin_y, destination_x, destination_y, r_w, r_l):
     # Construct a space information instance for this state space
     si = ob.SpaceInformation(space)
     # Set state validity checking for this space
-    si.setStateValidityChecker(ob.StateValidityCheckerFn(isStateValid))
+    #si.setStateValidityChecker(ob.StateValidityCheckerFn(isStateValid(r_w, r_l)))
+    si.setStateValidityChecker(ob.StateValidityCheckerFn(lambda state: isStateValid(state, r_w, r_l)))
+
 
     y_init, x_init = rw2map(origin_x,origin_y) 
     y_objective, x_objective = rw2map(destination_x,destination_y)
@@ -215,7 +231,7 @@ def plan(origin_x, origin_y, destination_x, destination_y, r_w, r_l):
     planner.setup()
     
     # Solve the problem and print the solution if it exists
-    solved = planner.solve(2.0)
+    solved = planner.solve(1.0)
     if solved:
       solution_path = pdef.getSolutionPath()
       if solution_path:
@@ -241,41 +257,77 @@ def create_numpy_path(states):
 # get image
 rgb_image = GUI.getMap('/RoboticsAcademy/exercises/static/exercises/amazon_warehouse_newmanager/resources/images/map.png')
 
-kernel = np.ones((7, 7), np.uint8) 
+kernel = np.ones((10, 10), np.uint8) 
 # Thick obstacles
 rgb_image = cv2.erode(rgb_image, kernel, iterations=1)
 
 # Set dimensions in pixels
 dimensions = [0, 0, 279, 415] 
-# set robot dimensions 
-robot_width = 1.0  # meters
-robot_length = 1.0  # meters
 
 # Extract obstacles from the image
 obstacles = extract_obstacles(rgb_image)
 
+
+# create path de ida 
+
+# set robot dimensions: is a point
+robot_width = 0  # meters
+robot_length = 0  # meters
+
 solution_path = None
 while solution_path is None: 
+  
+    
     #solution_path = plan(op_x, op_y, obp_x, obp_y)
-    solution_path = plan(0,0, SHX, SH2Y, robot_width, robot_length)
+    solution_path = plan(0,0, SHX, SH1Y, robot_width, robot_length)
 
 
     if solution_path is not None:
         inverted_solution = invert_array(solution_path)
         complete_path_map = add_intermediate_points(inverted_solution)
-        GUI.showPath(complete_path_map)
+        #GUI.showPath(complete_path_map)
     else:
-        print("No valid solution found.")
+        print("No valid solution found")
 
 # structure [x_rw, y_rw] 
 complete_path_rw = convert_path_to_rw(complete_path_map) 
 
 
+# create path de vuelta 
+
+# set robot dimensions 
+robot_width_2 = 2.5  # meters
+robot_length_2 = 4.0  # meters
+
+solution_path_2 = None
+while solution_path_2 is None: 
+  
+    
+    #solution_path = plan(op_x, op_y, obp_x, obp_y)
+    solution_path_2 = plan(SHX, SH1Y, 0, 0, robot_width_2, robot_length_2)
+
+
+    if solution_path_2 is not None:
+        inverted_solution_2 = invert_array(solution_path_2)
+        complete_path_map_2 = add_intermediate_points(inverted_solution_2)
+        #GUI.showPath(complete_path_map_2)
+    else:
+        print("No valid  back solution found")
+
+# structure [x_rw, y_rw] 
+complete_path_rw_2 = convert_path_to_rw(complete_path_map_2) 
+
+
+
+
 pos_move_coords = 0
 phase_go_sh = True
 phase_lift = False 
+phase_go_back = False
+phase_put_down = False 
 while True:
   
+    
     cu_3d_x = HAL.getPose3d().x 
     cu_3d_y = HAL.getPose3d().y
     cu_angle = HAL.getPose3d().yaw
@@ -285,6 +337,9 @@ while True:
     
     if(phase_go_sh): 
       
+      
+      GUI.showPath(complete_path_map)
+
       ob_3d_x =  complete_path_rw[pos_move_coords][0]
       ob_3d_y =  complete_path_rw[pos_move_coords][1]
 
@@ -302,10 +357,38 @@ while True:
           stop()
           phase_go_sh = False
           phase_lift = True
+          pos_move_coords = 0 
           
     if(phase_lift): 
       HAL.lift()
       phase_lift = False
+      phase_go_back = True
       
+      
+    if(phase_go_back): 
+      
+      GUI.showPath(complete_path_map_2)
+
+      ob_3d_x =  complete_path_rw_2[pos_move_coords][0]
+      ob_3d_y =  complete_path_rw_2[pos_move_coords][1]
+
+      # navigate from current point to objective 
+      has_reached = navigate(cu_3d_x, cu_3d_y, ob_3d_x, ob_3d_y, cu_angle)
+      
+      if(has_reached): 
+      
+        if(pos_move_coords < (len(complete_path_rw)-1)):
+        
+          pos_move_coords = pos_move_coords + 1
+          has_reached = False
+
+        else:
+          stop()
+          phase_go_back = False
+          phase_put_dowm = True
+      
+    if(phase_put_down): 
+      HAL.putdown()
+      phase_put_dowm = False
     
     
