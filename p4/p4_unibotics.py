@@ -29,7 +29,7 @@ def stop():
 def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current_angle):
     
     has_reached = False 
-    Kp = 0.25
+    #Kp = 0.25
     # go to each point
     diff_x = objective_3d_x - current_3d_x
     diff_y = objective_3d_y - current_3d_y
@@ -55,9 +55,11 @@ def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current
       HAL.setV(0.01)
       if(angle_diff > 0.0):
       
-        HAL.setW(0.10 - Kp*angle_diff)
+        HAL.setW(-0.10)
+        #HAL.setW(0.10 + Kp*angle_diff)
       else: 
-        HAL.setW(-0.10 + Kp*angle_diff)
+        HAL.setW(0.10)
+        #HAL.setW(-0.10 + Kp*angle_diff)
 
     if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
       has_reached = True
