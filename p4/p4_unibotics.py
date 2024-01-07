@@ -29,7 +29,7 @@ def stop():
 def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current_angle):
     
     has_reached = False 
-    #Kp = 0.25
+    
     # go to each point
     diff_x = objective_3d_x - current_3d_x
     diff_y = objective_3d_y - current_3d_y
@@ -44,11 +44,9 @@ def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current
     elif(angle_diff < -math.pi):
       angle_diff +=2*math.pi
     
-    print(angle_diff)
-    
     # means that it is so close that it goes forward 
-    if abs(angle_diff) < 0.5:
-      HAL.setV(0.15)
+    if abs(angle_diff) < 0.4:
+      HAL.setV(0.1)
       HAL.setW(0.0)
     else:
       
@@ -56,11 +54,10 @@ def navigate(current_3d_x, current_3d_y, objective_3d_x, objective_3d_y, current
       if(angle_diff > 0.0):
       
         HAL.setW(-0.10)
-        #HAL.setW(0.10 + Kp*angle_diff)
       else: 
         HAL.setW(0.10)
-        #HAL.setW(-0.10 + Kp*angle_diff)
 
+    # has reached to the objective
     if (abs(diff_x) <= 0.1 and abs(diff_y) <= 0.1):
       has_reached = True
     
@@ -146,34 +143,12 @@ def isStateValid(state, robot_width, robot_length):
         ):
             return False
     return True
-    
-"""
-def isStateValid(state):
-  
-    x = state.getX()
-    y = state.getY()
 
-    # Check if the state is inside any obstacle
-    for obstacle in obstacles:
-        
-        if sqrt(pow(x - obstacle[0], 2) + pow(y - obstacle[1], 2)) - obstacle[2] <= 0:
-          return False
-    return True
-"""
-# añadir las dimension del robot 
+
 def plan(origin_x, origin_y, destination_x, destination_y, r_w, r_l):
     # Construct the robot state space in which we're planning.
     space = ob.SE2StateSpace()
 
-    # Set state space's lower and upper bounds
-    """
-    bounds = ob.RealVectorBounds(2)
-    bounds.setLow(0, dimensions[0])
-    bounds.setLow(1, dimensions[1])
-    bounds.setHigh(0, dimensions[2])
-    bounds.setHigh(1, dimensions[3])
-    """
-    
     bounds = ob.RealVectorBounds(2)
     # Set state space's lower and upper bounds
     bounds.setLow(0, dimensions[0] + r_w / 2)  # Adjust for robot width
@@ -188,9 +163,7 @@ def plan(origin_x, origin_y, destination_x, destination_y, r_w, r_l):
     # Construct a space information instance for this state space
     si = ob.SpaceInformation(space)
     # Set state validity checking for this space
-    #si.setStateValidityChecker(ob.StateValidityCheckerFn(isStateValid(r_w, r_l)))
     si.setStateValidityChecker(ob.StateValidityCheckerFn(lambda state: isStateValid(state, r_w, r_l)))
-
 
     y_init, x_init = rw2map(origin_x,origin_y) 
     y_objective, x_objective = rw2map(destination_x,destination_y)
@@ -260,24 +233,19 @@ dimensions = [0, 0, 279, 415]
 obstacles = extract_obstacles(rgb_image)
 
 
-# create path de ida 
-
+# create init-end point path 
 # set robot dimensions: is a point
-robot_width = 0  # meters
-robot_length = 0  # meters
+robot_width = 0  # metres
+robot_length = 0  # metres
 
 solution_path = None
 while solution_path is None: 
   
-    
-    #solution_path = plan(op_x, op_y, obp_x, obp_y)
     solution_path = plan(0,0, SHX, SH1Y, robot_width, robot_length)
-
 
     if solution_path is not None:
         inverted_solution = invert_array(solution_path)
         complete_path_map = add_intermediate_points(inverted_solution)
-        #GUI.showPath(complete_path_map)
     else:
         print("No valid solution found")
 
@@ -285,7 +253,7 @@ while solution_path is None:
 complete_path_rw = convert_path_to_rw(complete_path_map) 
 
 
-# create path de vuelta 
+# create end-init point path 
 
 # set robot dimensions 
 robot_width_2 = 2.5  # meters
@@ -294,23 +262,17 @@ robot_length_2 = 4.0  # meters
 solution_path_2 = None
 while solution_path_2 is None: 
   
-    
-    #solution_path = plan(op_x, op_y, obp_x, obp_y)
     solution_path_2 = plan(SHX, SH1Y, 0, 0, robot_width_2, robot_length_2)
-
 
     if solution_path_2 is not None:
         inverted_solution_2 = invert_array(solution_path_2)
         complete_path_map_2 = add_intermediate_points(inverted_solution_2)
-        #GUI.showPath(complete_path_map_2)
+      
     else:
         print("No valid  back solution found")
 
 # structure [x_rw, y_rw] 
 complete_path_rw_2 = convert_path_to_rw(complete_path_map_2) 
-
-
-
 
 pos_move_coords = 0
 phase_go_sh = True
@@ -319,13 +281,9 @@ phase_go_back = False
 phase_put_down = False 
 while True:
   
-    
     cu_3d_x = HAL.getPose3d().x 
     cu_3d_y = HAL.getPose3d().y
     cu_angle = HAL.getPose3d().yaw
-    
-    #print(cu_3d_x, cu_3d_y)
-    
     
     if(phase_go_sh): 
       
@@ -377,10 +335,8 @@ while True:
         else:
           stop()
           phase_go_back = False
-          phase_put_dowm = True
+          phase_put_down = True
       
     if(phase_put_down): 
       HAL.putdown()
-      phase_put_dowm = False
-    
-    
+      phase_put_down = False
