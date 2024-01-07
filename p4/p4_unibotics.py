@@ -21,7 +21,6 @@ SH6Y = -8.665
 ORIGIN_X = 0.0
 ORIGIN_Y = 0.0
 
-
 def stop():
   HAL.setW(0.0)
   HAL.setV(0.0)
@@ -120,14 +119,13 @@ def extract_obstacles(image):
 # from meter to pixel 
 def rw2map(x_rw, y_rw):
     x_map = 139.5 - 20.515 * x_rw
-    y_map = 207.5 - 20.16 * y_rw
+    y_map = 207.5 - 20.126 * y_rw
     return (round(y_map), round(x_map))
  
 def map2rw(x_map, y_map):
     x_rw =  6.8 -0.049* x_map
     y_rw =  10.310 -0.05* y_map
     return (y_rw, x_rw)
-
 
 def isStateValid(state, robot_width, robot_length):
     x = state.getX()
@@ -144,21 +142,18 @@ def isStateValid(state, robot_width, robot_length):
             return False
     return True
 
-
 def plan(origin_x, origin_y, destination_x, destination_y, r_w, r_l):
     # Construct the robot state space in which we're planning.
     space = ob.SE2StateSpace()
 
     bounds = ob.RealVectorBounds(2)
     # Set state space's lower and upper bounds
-    bounds.setLow(0, dimensions[0] + r_w / 2)  # Adjust for robot width
-    bounds.setLow(1, dimensions[1] + r_l / 2)  # Adjust for robot length
-    bounds.setHigh(0, dimensions[2] - r_w / 2)  # Adjust for robot width
-    bounds.setHigh(1, dimensions[3] - r_l / 2)  # Adjust for robot length
+    bounds.setLow(0, dimensions[0] + r_w / 2) 
+    bounds.setLow(1, dimensions[1] + r_l / 2) 
+    bounds.setHigh(0, dimensions[2] - r_w / 2) 
+    bounds.setHigh(1, dimensions[3] - r_l / 2)  
 
     space.setBounds(bounds)
-    
-    
     
     # Construct a space information instance for this state space
     si = ob.SpaceInformation(space)
@@ -232,11 +227,10 @@ dimensions = [0, 0, 279, 415]
 # Extract obstacles from the image
 obstacles = extract_obstacles(rgb_image)
 
-
 # create init-end point path 
 # set robot dimensions: is a point
-robot_width = 0  # metres
-robot_length = 0  # metres
+robot_width = 0  
+robot_length = 0  
 
 solution_path = None
 while solution_path is None: 
@@ -252,12 +246,10 @@ while solution_path is None:
 # structure [x_rw, y_rw] 
 complete_path_rw = convert_path_to_rw(complete_path_map) 
 
-
 # create end-init point path 
-
-# set robot dimensions 
-robot_width_2 = 2.5  # meters
-robot_length_2 = 4.0  # meters
+# set robot dimensions: must be in pixels
+robot_width_2 = 50  
+robot_length_2 = 80
 
 solution_path_2 = None
 while solution_path_2 is None: 
@@ -287,7 +279,6 @@ while True:
     
     if(phase_go_sh): 
       
-      
       GUI.showPath(complete_path_map)
 
       ob_3d_x =  complete_path_rw[pos_move_coords][0]
@@ -313,7 +304,6 @@ while True:
       HAL.lift()
       phase_lift = False
       phase_go_back = True
-      
       
     if(phase_go_back): 
       
